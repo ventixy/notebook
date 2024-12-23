@@ -2,16 +2,16 @@
 home: true
 icon: home
 title: Home
-heroImage: /assets/image/tool.jpg
+heroImage: /image/tool.jpg
 heroText: Develop Note
 tagline:  Development record of a full-stack engineer and introduction to some develop tool.
 actions:
-- text: Interview Question 💡
-  link: /interview/
+- text: Blog 📝
+  link: /blog
   type: primary
 
-- text: setup a website
-  link: /tool/website
+- text: Question⚡
+  link: /interview/
 
 features:
 - title: 常用工具和软件
@@ -50,17 +50,17 @@ features:
   link: /tool/Gradle
 
 - title: 部署和运维
-  icon: application
+  icon: k8s
   details: 项目部署和运维，了解并学会CI/CD相关工具
   link: /tool/usual/
   
 - title: 计算机网络
-  icon: web
+  icon: net
   details: 网络基础知识，如常用的网络协议，IP地址等相关内容
   link: /tool/usual/
 
 - title: 数据结构与算法
-  icon: web-design
+  icon: stream
   details: 常用数据结构及算法
   link: https://www.hello-algo.com/chapter_hello_algo/
 

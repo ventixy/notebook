@@ -7,7 +7,7 @@ export default defineUserConfig({
   locales: {
     "/": {
       lang: "en-US",
-      title: "Notebook",
+      title: "NoteBook",
       description: "A docs for develop note",
     },
     // "/zh/": {

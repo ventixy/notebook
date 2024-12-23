@@ -1,7 +1,7 @@
 ---
 title: Python and artificial intelligence
 index: false
-icon: python
+icon: project
 category:
   - Python
   - AI

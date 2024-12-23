@@ -4,18 +4,26 @@ export const enSidebar = sidebar({
   "/": [
     "",
   ],
-  "/cpp/": [
+  "/posts/": [
     {
-      text: "C++",
-      icon: "code",
-      link: "/cpp/",
+      text: "My Blog",
+      icon: "es6",
+      link: "/blog",
+      children: "structure",
+    },
+  ],
+  "/project/": [
+    {
+      text: "Project",
+      icon: "project",
+      link: "/project/",
       children: "structure",
     },
   ],
   "/java/": [
     {
       text: "Java Programming",
-      icon: "code",
+      icon: "java",
       link: "/java/",
       children: "structure",
     },
@@ -31,7 +39,7 @@ export const enSidebar = sidebar({
   "/tool/": [
     {
       text: "常用软件和开发工具",
-      icon: "application",
+      icon: "tools",
       link: "/tool/",
       children: "structure",
     },
@@ -39,7 +47,7 @@ export const enSidebar = sidebar({
   "/web/": [
     {
       text: "前端开发知识体系",
-      icon: "application",
+      icon: "es6",
       link: "/web/",
       children: "structure",
     },

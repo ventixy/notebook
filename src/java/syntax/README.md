@@ -5,6 +5,6 @@ dir:
     collapsible: false
 index: false
 title: Java基础及核心特性
-icon: syntax
+icon: app
 
 ---

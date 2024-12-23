@@ -144,6 +144,6 @@ Details container
 
 ### Tex&Chart
 
-Tex: https://theme-hope.vuejs.press/guide/markdown/grammar/tex.html
+Tex: https://theme-hope.vuejs.press/guide/markdown/grammar/math.html#syntax
 
 Chart: https://theme-hope.vuejs.press/guide/markdown/chart/chartjs.html

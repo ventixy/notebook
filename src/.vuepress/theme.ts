@@ -10,9 +10,9 @@ export default hopeTheme({
     url: "https://www.ventix.top",
   },
 
-  iconAssets: "//at.alicdn.com/t/c/font_4502504_cyky5apwb.css",
+  iconAssets: "//at.alicdn.com/t/c/font_3708474_xz3raccsv.css",
 
-  logo: "note",
+  logo: "logo.svg",
 
   repo: "vuepress-theme-hope/vuepress-theme-hope",
 
@@ -75,6 +75,12 @@ export default hopeTheme({
 
     components: {
       components: ["Badge", "VPCard"],
+    },
+
+    blog: {
+      filter: ({ frontmatter, filePathRelative }) => 
+        frontmatter.article === true && Boolean(filePathRelative) && !frontmatter.home,
+      
     },
 
     // All features are enabled for demo, only preserve features you need here
@@ -204,5 +210,30 @@ export default hopeTheme({
     //     ],
     //   },
     // },
+  },
+
+  blog: {
+    name: "ventix",
+    avatar: "avatar.svg",
+    description: "A java programmer",
+    // intro: "/intro.html",
+    intro: "/blog.html",
+    medias: {
+      // BiliBili: "https://example.com",
+      Email: "mailto:info@example.com",
+      Gitee: "https://example.com",
+      GitHub: "https://example.com",
+      Gitlab: "https://example.com",
+      Gmail: "mailto:info@example.com",
+      QQ: "https://example.com",
+      // Weibo: "https://example.com",
+      // Whatsapp: "https://example.com",
+      // Youtube: "https://example.com",
+      // Zhihu: "https://example.com",
+      // VuePressThemeHope: {
+      //   icon: "https://theme-hope-assets.vuejs.press/logo.svg",
+      //   link: "https://theme-hope.vuejs.press",
+      // },
+    },
   },
 });

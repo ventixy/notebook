@@ -1,5 +1,5 @@
 ---
-title: CPP
+title: Project
 index: false
 icon: tool
 ---
