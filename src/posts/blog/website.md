@@ -1,22 +1,15 @@
 ---
-
-order: 20
-title: Setup a website for ...
+article: true
+date: 2022-08-09
+category:
+  - website
+tag:
+  - website
+  - favicon
 shortTitle: Setup a website
-icon: web
-
+title: Setup a website for ...
+order: 20
 ---
-
-
-
-## 服务器
-
-
-
-
-
-
-
 
 
 
@@ -47,8 +40,19 @@ https://www.namesilo.com/
 
 
 
+## 基本信息
+
+###  Favicon 
+
+ Favicon Generator: https://favicon.io/
+
+ Convert: https://image.online-convert.com/convert-to-ico
+
 
 
 ## CDN
 
 Cloudflare
+
+
+## 服务器

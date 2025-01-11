@@ -11,7 +11,7 @@ export default hopeTheme({
   repo: "ventixy/notebook",
 
   logo: "logo.svg",
-  favicon: "snow.ico",
+  favicon: "jav.ico",
 
   iconAssets: "//at.alicdn.com/t/c/font_3708474_z1p3kxj9i5c.css",
 
