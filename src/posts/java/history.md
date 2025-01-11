@@ -1,10 +1,15 @@
 ---
-
+article: true
+date: 2019-11-09
+category:
+  - java
+tag:
+  - java
+shortTitle: Java简介及发展史
+title: Java发展史及核心特性简介
 order: 5
-
 ---
 
-# Java简介及历史
 
 ## 一 Java的起源和发展史
 

@@ -6,9 +6,9 @@ category:
   - Computer and science
 tag:
   - CS
+shortTitle: 数制和码制
+title: 数制和码制：源码，反码和补码
 ---
-
-# 数制和码制
 
 
 ##  一 机器数和真值

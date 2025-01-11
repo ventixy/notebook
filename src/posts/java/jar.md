@@ -1,10 +1,17 @@
 ---
-
-order: 10
-
+article: true
+date: 2019-11-11
+category:
+  - java
+  - jar
+tag:
+  - java
+  - jar
+shortTitle: Jar包的导入
+title: 普通Java项目如何导入Jar包
+order: 3
 ---
 
-# Jar包的导入
 
 虽然maven导入jar包更简单实用，但也存在需要在普通java项目中导入jar包的需求。
 

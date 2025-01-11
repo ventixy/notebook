@@ -1,8 +1,15 @@
---- 
-
-order: 13
-title: Java环境安装
-
+---
+article: true
+date: 2019-11-10
+category:
+  - java
+  - jdk
+tag:
+  - java
+  - jdk
+shortTitle: Java开发环境
+title: 不同操作系统的Java开发环境搭建
+order: 1
 ---
 
 ## Linux环境
