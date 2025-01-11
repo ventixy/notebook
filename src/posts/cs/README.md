@@ -1,7 +1,7 @@
 --- 
 
 dir:
-    order: 1
+    order: 10
     # collapsible: false
     text: Computer and science
 index: false
