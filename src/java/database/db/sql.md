@@ -1,10 +1,11 @@
 ---
 
-order: 5
-title:  SQL语言基础
+order: 1
+title:  MySQL数据库
 
 ---
 
+MySQL安装和配置：[MySQL](/posts/db/mysql.md)
 
 SQL：Structured Query Language（结构化查询语言），是用来操作关系型数据库的一门语言。
 
@@ -116,14 +117,14 @@ DDL（Data Definition Language），数据定义语言，用来**定义数据库
    );
    ```
 
-   例如，创建一个简单的`Customers`表：
+   例如，创建一个简单的`employees`表：
 
    ```sql
-   CREATE TABLE Customers (
-       CustomerID INT PRIMARY KEY,
-       FirstName VARCHAR(255) NOT NULL,
-       LastName VARCHAR(255) NOT NULL,
-       Email VARCHAR(255) UNIQUE
+   CREATE TABLE employees  (
+      customer_id INT PRIMARY KEY,
+      first_name VARCHAR(255) NOT NULL,
+      last_name VARCHAR(255) NOT NULL,
+      email VARCHAR(255) UNIQUE
    );
    ```
 
@@ -190,7 +191,7 @@ VALUES (value1, value2, ...);
 
 示例：假设有一个名为`Employees`的表，包含`EmployeeID`, `FirstName`, `LastName`, `Email`等字段，可以这样插入一条记录：
 ```sql
-INSERT INTO Employees (EmployeeID, FirstName, LastName, Email)
+insert into employees (customer_id, first_name, last_name, email)
 VALUES (1, 'John', 'Doe', 'john.doe@example.com');
 ```
 
@@ -202,11 +203,9 @@ SET column1 = value1, column2 = value2, ...
 WHERE some_column = some_value;
 ```
 
-示例：将`Employees`表中`EmployeeID`为1的员工的电子邮件地址更改为`new.email@example.com`
+示例：将`employees`表中`employee_id`为1的员工的电子邮件地址更改为`new.email@example.com`
 ```sql
-UPDATE Employees
-SET Email = 'new.email@example.com'
-WHERE EmployeeID = 1;
+update employees set email='new.email@example.com' where  customer_id = 1;
 ```
 
 3. `DELETE`: 用于从表中删除记录。
@@ -695,6 +694,94 @@ WHERE Salary > (SELECT AVG(Salary) FROM Employees);
    ```
 :::
 
+
+
+
+## MySQL数据类型
+
+数据类型选择原则：
+1. **更小的数据类型通常更好**：使用最小且能满足需求的数据类型。
+2. **简单就好**：简单的数据类型操作更快。
+3. **尽量避免NULL**：除非确实需要，否则应该指定列为NOT NULL。
+
+::: info MySQL常用数据类型
+#### 数字类型
+- **整数类型**：
+  - `TINYINT`：1字节，有符号范围为-128到127，无符号范围为0到255。
+  - `SMALLINT`：2字节，有符号范围为-32,768到32,767，无符号范围为0到65,535。
+  - `MEDIUMINT`：3字节，有符号范围为-8,388,608到8,388,607，无符号范围为0到16,777,215。
+  - `INT` (或`INTEGER`)：4字节，有符号范围为-2,147,483,648到2,147,483,647，无符号范围为0到4,294,967,295。
+  - `BIGINT`：8字节，有符号范围为-9,223,372,036,854,775,808到9,223,372,036,854,775,807，无符号范围为0到18,446,744,073,709,551,615。
+
+- **实数类型**：
+  - `FLOAT`：4字节，单精度浮点数。
+  - `DOUBLE` (或`DOUBLE PRECISION`)：8字节，双精度浮点数。
+  - `DECIMAL` (或`NUMERIC`)：用于存储精确的小数值。在MySQL 5.0及以上版本中支持精确计算。指定格式如`DECIMAL(M,D)`，其中`M`是总位数，`D`是小数点后的位数。
+
+在处理财务数据等需要精确度的情况下，应考虑使用`DECIMAL`而不是浮点类型。
+
+#### 字符串类型
+- `CHAR`：固定长度字符串，定义时指定最大长度，不足部分用空格填充。
+- `VARCHAR`：可变长度字符串，节省空间，但需要额外的字节来存储长度信息。
+- `TEXT`：大文本数据，分为`TINYTEXT`、`TEXT`、`MEDIUMTEXT`和`LONGTEXT`，根据不同的大小限制。
+- `BLOB`：二进制大对象，用于存储大量二进制数据，同样分为`TINYBLOB`、`BLOB`、`MEDIUMBLOB`和`LONGBLOB`。
+
+对于非常短的列，`CHAR`可能比`VARCHAR`更有效率，因为`VARCHAR`需要额外的空间来存储长度信息。
+
+#### 时间和日期类型
+- `DATE`：仅日期，格式为`YYYY-MM-DD`。
+- `TIME`：仅时间，格式为`HH:MM:SS`。
+- `DATETIME`：日期和时间，格式为`YYYY-MM-DD HH:MM:SS`，占用8个字节。
+- `TIMESTAMP`：类似于`DATETIME`，但是值的范围较小（从'1970-01-01 00:00:01' UTC到'2038-01-19 03:14:07' UTC），占用4个字节，并且可以自动更新为当前时间戳。
+
+`TIMESTAMP`和`DATETIME`都可用于存储日期和时间，但`TIMESTAMP`会受时区影响并具有特殊的行为。
+
+#### 枚举和集合类型
+- `ENUM`：枚举类型，列只能有一个枚举列表中的值。
+- `SET`：集合类型，列可以有零个或多个SET成员。当插入一组值时，这些值被转换为一个整数，并以二进制格式存储。
+:::
+
+
+下面是一个使用枚举（`ENUM`）和集合（`SET`）示例：
+
+```sql
+CREATE TABLE users (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    username VARCHAR(50) NOT NULL,
+    password CHAR(64) NOT NULL,  -- 假设密码经过哈希处理后长度为64字符
+    email VARCHAR(100),
+    gender ENUM('M', 'F', 'O') DEFAULT 'O',  -- 性别：男(M)，女(F)，其他(O)
+    hobbies SET('Reading', 'Sports', 'Music', 'Travel', 'Cooking')  -- 兴趣爱好
+);
+```
+
+- `gender` 字段是一个枚举类型，只能取三个预定义值之一：'M' (男性), 'F' (女性), 或 'O' (其他)。默认值设置为 'O'。
+- `hobbies` 字段是一个集合类型，可以包含多个预定义的兴趣爱好选项。例如，如果一个用户喜欢阅读和旅行，那么该字段可以存储为 `'Reading,Travel'`。
+
+```sql
+-- 插入数据示例
+INSERT INTO users (username, password, email, gender, hobbies)
+VALUES ('john_doe', 'hashed_password', 'john@example.com', 'M', 'Sports,Music');
+
+-- 查询所有男性用户的兴趣爱好：
+SELECT username, hobbies FROM users WHERE gender = 'M';
+
+-- 查询对阅读感兴趣的用户：
+SELECT username FROM users WHERE FIND_IN_SET('Reading', hobbies) > 0;
+```
+`FIND_IN_SET` 是 MySQL 中的一个字符串函数，它用于在逗号分隔的字符串列表中查找特定的值。这个函数对于处理存储为集合（`SET`）类型的数据非常有用，因为它可以用来检查某个值是否存在于一个以逗号分隔的字符串列表中。
+
+::: info FIND_IN_SET()函数
+`FIND_IN_SET(str, strlist)`
+
+- `str`：要查找的字符串。
+- `strlist`：由逗号分隔的字符串列表。
+
+返回值：
+- 如果 `str` 存在于 `strlist` 中，则返回 `str` 在 `strlist` 中的位置（从1开始计数）。
+- 如果 `str` 不在 `strlist` 中，则返回0。
+- 如果 `strlist` 或 `str` 为空字符串，或者 `strlist` 不是有效的逗号分隔列表，则返回0。
+:::
 
 
 

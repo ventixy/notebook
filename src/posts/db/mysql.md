@@ -1,14 +1,88 @@
 ---
-
-order: 15
-title:  MySQL数据库
-
+article: true
+date: 2020-05-09
+category:
+  - Database
+  - MySQL
+tag:
+  - Database
+  - MySQL
+shortTitle: MySQL数据库
+title: MySQL数据库 | 起源和分支 | 应用架构演变
 ---
+
+
 
 MySQL5.7文档：https://dev.mysql.com/doc/refman/5.7/en/ 
 
-MySQL8.0文档：https://dev.mysql.com/doc/refman/8.0/en/ 
+MySQL8文档：https://dev.mysql.com/doc/refman/8.4/en/ 
 
+
+
+## MySQL起源和发展
+
+
+MySQL 是最流行的关系型数据库软件之一，由于其体积小、速度快、开源免费、简单易用、维护成本低，在集群架构中易于扩展、高可用，因此深受开发者和企业的欢迎。
+
+
+### MySQL发展历程
+
+| 时间               | 事件                                                                                                                                                                                                 |
+|--------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| 1979年           | 当时瑞典的 Monty Widenius 在 Tcx DataKonsult 公司工作，他开发了一款名为 Unireg 的工具，它是一个面向报表的存储引擎，利用索引顺序来读取数据，这也是 ISAM 存储引擎算法的前身。                                                                 |
+| 1985年           | Monty 和 David Axmart 等几个小伙子成立了一家公司 (MySQL AB 前身)，研发出了 ISAM(Indexed Sequential Access Method) 存储引擎工具。                                                                                           |
+| 1990年           | 客户要求 ISAM 工具能提供 SQL 接口，于是 Monty 找到了 David Hughes(mSQL 的发明人) 商讨合作事宜，后来发现 mSQL 的速度也无法满足需求。于是 Monty 决心自己重写一个 SQL 支持，由此着手 MySQL 设计和研发。                                       |
+| 1996年           | Monty 与 David Axmart 一起协作，开发出 MySQL 第一个版本 1.0。                                                                                                                                        |
+| 1996.10     | MySQL 3.1 发布了，没有 2.x 版本。最开始只提供了 Solaris 下的二进制版本。同年 11 月发布了 Linux 版本。                                                                                                     |
+| 1999-2000      | Monty、Allan 和 David 三人在瑞典创建了 MySQL AB 公司，并且与 Sleepycat 合作开发出引入了 BDB 引擎，MySQL 从此开始支持事务处理了。                                                                                             |
+| 2000年           | MySQL 公布了自己的源代码，并采用 GPL(GNU General Public License) 许可协议正式开源。                                                                                                                     |
+| 2000.04      | MySQL 对旧的存储引擎 ISAM 进行了整理，命名为 MyISAM。                                                                                                                                                  |
+| 2001年           | Heikki Tuuri 向 MySQL 建议集成他的 InnoDB 存储引擎，这个引擎同样支持事务处理，还支持行级锁。MySQL 与 InnoDB 正式结合版本是 4.0。至此 MySQL 已集成了 MyISAM 和 InnoDB 两种大主力引擎。                                           |
+| 2005.10     | MySQL 5.0 版本发布，这是 MySQL 历史上最有里程碑意义的一个版本，在 5.0 版本加入了游标、存储过程和触发器的支持。                                                                                               |
+| 2008.01      | MySQL AB 公司被 Sun 公司以 10 亿美金收购，MySQL 数据库进入 Sun 时代。                                                                                                                                 |
+| 2009.04      | Oracle 公司以 74 亿美元收购 Sun 公司，自此 MySQL 数据库进入 Oracle 时代，而其第三方的存储引擎 InnoDB 早在 2005 年就被 Oracle 公司收购。                                                                                   |
+| 2010.04      | 发布了 MySQL 5.5 版本。Oracle 对 MySQL 版本重新进行了划分，分成了社区版和企业版。默认引擎更换为 InnoDB、增加表分区等。                                                                                       |
+| 2013.02      | MySQL 5.6 首个正式版 5.6.10 发布。MySQL 5.6 对 InnoDB 引擎进行了改造，提供全文索引功能，使 InnoDB 适合各种应用场景。                                                                                         |
+| 2015.10     | MySQL 5.7 首个 GA 正式版 5.7.9 发布。                                                                                                                                                                  |
+| 2016.09      | MySQL 8.0 首个开发版发布，增加了数据字典、账号权限角色表、InnoDB 增强、JSON 增强等等。                                                                                                                   |
+| 2018.04      | MySQL 8.0 首个 GA 正式版 8.0.11 发布。                                                                                                                                                                 |
+
+
+### MySQL主流分支
+
+
+MySQL从最初的1.0、3.1到后来的8.0，发生了各种各样的变化。
+
+![](https://image.ventix.top/img02/20220114231545605.png)
+
+- 被Oracle收购后，MySQL的版本演化出了多个分支，除了需要付费的MySQL企业版本，还有很多MySQL社区版本。
+- 还有一条分支非常流行的开源分支版本叫Percona Server，它是MySQL的技术支持公司Percona推出的，也是在实际工作中经常碰到的。Percona Server在MySQL官方版本的基础上做了一些补丁和优化，同时推出了一些工具。
+- 另外一个非常不错的版本叫MariaDB，它是MySQL的公司被Oracle收购后，MySQL的创始人Monty先生，按原来的思路重新写的一套新数据库，同时也把 InnoDB 引擎作为主要存储引擎，也算 MySQL 的分支。
+
+
+
+### MySQL应用架构演变
+
+- 架构V1.0 - 单机单库
+    - 数据量太大，超出一台服务器承受
+    - 读写操作量太大，超出一台服务器承受
+    - 一台服务器挂了，应用也会挂掉（可用性差）
+
+- 架构V2.0 - 主从架构
+主库抗写压力，通过从库来分担读压力，对于写少读多的应用，V2.0主从架构完全能够胜任。
+    - 数据量太大，超出一台服务器承受
+    - 写操作太大，超出一台M服务器承受
+
+- 架构V3.0 - 分库分表
+
+    - 对于V1.0和V2.0遇到写入瓶颈和存储瓶颈时，可以通过水平拆分来解决，水平拆分和垂直拆分有较大区别，垂直拆分拆完的结果，每一个实例都是拥有全部数据的，而水平拆分之后，任何实例都只有全量的1/n的数据。
+    - 水平拆分后数据如何路由成为一个关键问题， 一般可以采用范围拆分，List拆分、Hash拆分等。如何保持数据的一致性也是个难题。
+    ![](https://image.ventix.top/img02/20220114233526259.png)
+
+- 架构V4.0 - 云数据库
+    对于数据存储的MySQL来说，如何让其成为一个saas（Software as a Service）是关键点。
+    ![](https://image.ventix.top/img02/20220114233547664.png)
+    MySQL作为一个saas服务，服务提供商负责解决可配置性，可扩展性，多用户存储结构设计等问题
 
 ## MySQL安装和配置
 
@@ -244,54 +318,8 @@ mysql> flush   privileges;
 
 @tab Linux平台-RPM
 
-卸载MySQL：
+[CentOS7安装MySQL8](https://blog.csdn.net/weixin_47940024/article/details/130405027)
 
-```shell
-1 删除Mysql
-
-   yum remove  mysql mysql-server mysql-libs mysql-server;
-
-   find / -name mysql 将找到的相关东西delete掉(rm -rf /var/lib/mysql)；
-
-   rpm -qa|grep mysql(查询出来的东东yum remove掉)
-
-   rm /etc/my.cnf
-
- 
-查看是否还有mysql软件：如果存在的话，继续删除即可。
-rpm -qa|grep mysql
-
-
-
-a）查看系统中是否以rpm包安装的mysql：
-
-rpm -qa | grep -i mysql
-
-
-b)卸载mysql
-
-rpm -e MySQL-server-5.6.17-1.el6.i686
-rpm -e MySQL-client-5.6.17-1.el6.i686
-
-
-c)删除mysql服务
-
-chkconfig --list | grep -i mysql
-chkconfig --del mysql
-
-
-d)删除分散mysql文件夹
-
-whereis mysql 或者 find / -name mysql
-
-清空相关mysql的所有目录以及文件
-rm -rf /usr/lib/mysql
-rm -rf /usr/share/mysql
-rm -rf /usr/my.cnf
-
-
-通过以上几步，mysql应该已经完全卸载干净了.
-```
 :::
 
 
@@ -357,16 +385,18 @@ slow_query_log_file = /var/log/mysql/slow-query.log  # 指定慢查询日志文�
 long_query_time = 2  # 慢查询的时间阈值，单位为秒
 
 # 二进制日志
-log_bin = /var/lib/mysql/mysql-bin.log  # 指定二进制日志文件的位置
-expire_logs_days = 7  # 二进制日志保留天数
+log_bin=/var/lib/mysql/mysql-binlog
+binlog-format=ROW
+server-id=1
+expire_logs_days =30
 
 # InnoDB 设置
-innodb_buffer_pool_size = 1G  # InnoDB 缓冲池大小
-innodb_log_file_size = 512M    # InnoDB 日志文件大小
+innodb_buffer_pool_size = 128M  # InnoDB 缓冲池大小
+innodb_log_file_size = 48M    # InnoDB 日志文件大小
 innodb_flush_log_at_trx_commit = 1  # 每个事务提交时刷新日志到磁盘
 
 # 最大连接数
-max_connections = 300
+max_connections = 150
 
 # 字符集
 character-set-server = utf8mb4         # 服务器默认字符集
@@ -375,7 +405,7 @@ collation-server = utf8mb4_unicode_ci  # 服务器默认排序规则
 # 性能优化
 query_cache_size = 0  # 禁用查询缓存
 table_open_cache = 2000  # 表缓存大小
-tmp_table_size = 64M  # 内存临时表的最大大小
+tmp_table_size = 16M  # 内存临时表的大小
 max_heap_table_size = 64M  # 用户创建的内存表的最大大小
 
 # 安全相关
@@ -773,495 +803,318 @@ jdbc:mysql://hostname:3306/db_name?useSSL=false&allowPublicKeyRetrieval=true&ser
 
 
 
-## MySQL理论及应用
-
-
-
-### MySQL日志管理
-
-MySQL 中的日志管理是数据库管理和故障恢复的重要组成部分。包括二进制日志（Binary Log）、重做日志（Redo Log）、回滚日志（Undo Log）等。
-
-- **二进制日志（Binary Log）**：记录所有更改操作，用于数据恢复和主从复制。
-- **重做日志（Redo Log）**：记录事务的更改，用于事务持久性和崩溃恢复。
-- **回滚日志（Undo Log）**：记录事务开始时的数据快照，用于事务回滚和多版本并发控制。
-- **错误日志（Error Log）**：记录服务器的错误和警告信息。
-- **慢查询日志（Slow Query Log）**：记录执行时间超过阈值的查询语句。
-- **查询日志（General Query Log）**：记录所有客户端发送的查询语句。
-
-::: tabs
-
-@tab 二进制日志
-
-二进制日志记录了所有对数据库的更改操作，包括数据修改（如 `INSERT`、`UPDATE`、`DELETE`）和结构修改（如 `CREATE`、`ALTER`）。这些日志以二进制格式存储，主要用于数据恢复、主从复制和审计。
-
-在 MySQL 配置文件（通常是 `my.cnf` 或 `my.ini`）中启用二进制日志：
-
-```ini
-[mysqld]
-log_bin = /path/to/binlog/mysql-bin.log
-server_id = 1
-```
-
-- **查看当前二进制日志文件**：
-  ```sql
-  SHOW MASTER LOGS;
-  ```
-
-- **查看二进制日志内容**：
-  ```sh
-  mysqlbinlog /path/to/binlog/mysql-bin.000001
-  ```
-
-- **清除旧的二进制日志**：
-  ```sql
-  PURGE BINARY LOGS TO 'mysql-bin.000005';
-  PURGE BINARY LOGS BEFORE '2023-10-01 00:00:00';
-  ```
-
-@tab 重做日志
-
-重做日志是 InnoDB 存储引擎特有的日志，用于实现事务的持久性和崩溃恢复。每次事务提交时，InnoDB 会将事务的更改记录到重做日志中。如果数据库发生崩溃，可以通过重做日志恢复未完成的事务。
-
-重做日志的配置参数包括日志文件的数量和大小：
-
-```ini
-[mysqld]
-innodb_log_file_size = 512M
-innodb_log_files_in_group = 2
-```
-
-- **初始化或更改重做日志大小**：需要先关闭 MySQL 服务，删除现有的重做日志文件，然后重新启动 MySQL 服务。
-  ```sh
-  systemctl stop mysql
-  rm -f /var/lib/mysql/ib_logfile*
-  systemctl start mysql
-  ```
-
-@tab:active 回滚日志
-
-回滚日志也是 InnoDB 存储引擎特有的日志，用于实现事务的回滚和多版本并发控制（MVCC）。每个事务开始时，InnoDB 会记录事务开始时的数据快照，以便在事务回滚或读取历史版本数据时使用。
-
-回滚日志的配置参数包括日志段的数量和大小：
-
-```ini
-[mysqld]
-innodb_undo_tablespaces = 2
-innodb_undo_logs = 128
-```
-
-- **回滚日志的空间管理**：长时间运行的事务可能会导致回滚日志空间占用过大，可以通过调整 `innodb_max_undo_log_size` 参数来控制最大回滚日志大小。
-
-
-@tab 错误日志
-
-错误日志记录了 MySQL 服务器的错误信息、警告信息和启动信息。这些信息对于诊断和解决数据库问题非常有用。
-
-在 MySQL 配置文件中启用错误日志：
-
-```ini
-[mysqld]
-log_error = /path/to/error.log
-```
-
-- **查看错误日志**：
-  ```sh
-  cat /path/to/error.log
-  ```
-
-@tab 慢查询日志
-
-慢查询日志记录了执行时间超过指定阈值的查询语句。这些日志有助于识别和优化性能瓶颈。
-
-在 MySQL 配置文件中启用慢查询日志：
-
-```ini
-[mysqld]
-slow_query_log = 1
-slow_query_log_file = /path/to/slow-query.log
-long_query_time = 2
-```
-
-- **查看慢查询日志**：
-  ```sh
-  cat /path/to/slow-query.log
-  ```
-
-- **动态启用或禁用慢查询日志**：
-  ```sql
-  SET GLOBAL slow_query_log = 'ON';
-  SET GLOBAL slow_query_log = 'OFF';
-  ```
-
-@tab 查询日志
-
-查询日志记录了所有客户端发送到服务器的查询语句。这些日志对于调试和审计非常有用。
-
-在 MySQL 配置文件中启用查询日志：
-
-```ini
-[mysqld]
-general_log = 1
-general_log_file = /path/to/general-query.log
-```
-
-- **查看查询日志**：
-  ```sh
-  cat /path/to/general-query.log
-  ```
-
-- **动态启用或禁用查询日志**：
-  ```sql
-  SET GLOBAL general_log = 'ON';
-  SET GLOBAL general_log = 'OFF';
-  ```
-:::
 
 
 
 
 
+## 数据库设计理论
 
-### MVCC机制
+### 数据完整性
+
+数据完整性是数据库制定的了一些规范，是为了防止用户错误的输入（防止数据库出现错误的数据）
+
+::: info 数据完整性
+
+- **数据库的完整性**：保证存放到数据库中的数据是有效的 => 即在创建表时给表中添加约束
 
 
-多版本并发控制（Multi-Version Concurrency Control，简称 MVCC）是现代数据库系统中一种重要的并发控制机制，尤其在事务处理中发挥着关键作用。
+- **实体完整性**：标识每一行数据不重复。确保每个表中的每一行都是唯一的。通常通过设置主键来实现，主键字段不允许为空且必须唯一。
 
-MySQL 的 InnoDB 存储引擎实现了 MVCC，InnoDB 存储引擎在每个数据行中添加了几个隐藏字段，用于支持 MVCC：
+  - 实体：即表中的一行(一条记录)代表一个实体（entity）
 
-- **DB_TRX_ID**：记录最后一次对该行进行插入或更新的事务ID。
-- **DB_ROLL_PTR**：指向该行的回滚段（undo log）的指针，用于找到该行的旧版本。
+  - 约束类型：*主键约束（primary key）*、 *唯一约束 (unique)* 、 *自动增长列 (auto_increment)* 
 
-::: info MVCC机制核心概念
-#### 1. 回滚日志（Undo Log）
+  <br/>
 
-- **插入回滚段**：记录插入操作的旧版本，用于回滚。
-- **更新回滚段**：记录更新操作的旧版本，用于回滚和多版本并发控制。
+- **域完整性**：限制此单元格的数据正确。即确保列中的数据符合预定义的数据类型和约束条件。例如，年龄字段应该只能包含正整数。
 
-#### 2. 读视图（Read View）
+  - 域完整性约束：数据类型 、非空约束（not null）、 默认值约束(default）
 
-读视图是一个事务在开始时创建的一个快照，记录了当前活动事务的ID列表。读视图包含以下几个重要信息：
+  <br/>
 
-- **m_ids**：当前活动事务的ID列表。
-- **min_trx_id**：最小的活动事务ID。
-- **max_trx_id**：最大的活动事务ID。
-- **creator_trx_id**：创建读视图的事务ID。
-
-#### 3. 版本链（Version Chain）
-
-每个数据行都有一个版本链，记录了该行的历史版本。版本链中的每个版本都包含一个事务ID（TXID），表示该版本是由哪个事务创建的。版本链中的每个版本还包含指向下一个版本的指针。
-
-#### 4. 当前事务ID的比较规则
-
-在 `Repeatable Read` 隔离级别下，判断某个版本是否对当前事务可见的规则如下：
-
-1. **版本的事务ID小于读视图的最小事务ID**：版本对当前事务可见。
-2. **版本的事务ID大于读视图的最大事务ID**：版本对当前事务不可见。
-3. **版本的事务ID在读视图的活动事务ID列表中**：版本对当前事务不可见。
+- **引用完整性（参照完整性）**：指外键，外键必须指向另一个表中的主键或唯一键。 
+  - 外键约束：FOREIGN KEY
 
 :::
 
 
-::: details MVCC 机制的工作流程示例
-假设有一个表 `employees`，初始状态如下：
-```
-| id | name  | salary | DB_TRX_ID | DB_ROLL_PTR |
-|----|-------|--------|-----------|-------------|
-| 1  | Alice | 50000  | 0         | NULL        |
+
+常见约束：
+
+| 约束            | 说明                               |
+| --------------- | ---------------------------------- |
+| null / not null | 字段是否可以为空                   |
+| default         | 如果一个字段没有值，则使用默认值   |
+| auto_increment  | 字段值从1开始，每次递增1，不会重复 |
+| primary key     | 定义列为主键                       |
+| unique          | 唯一键：不能重复，但可以为空       |
+| comment         | 注释信息                           |
+
+<br/>
+
+语法示例（以MySQL为例）：
+
+**主键约束（primary key）**：
+
+```SQL
+# 1. 在 CREATE TABLE 语句中，通过 PRIMARY KEY 关键字来指定主键
+<字段名> <数据类型> PRIMARY KEY [默认值]
+
+# 2. 或者是在定义完所有字段之后指定主键：
+[CONSTRAINT <约束名>] PRIMARY KEY [字段名]
+
+# 3. 在创建表时设置联合主键（所谓的联合主键，就是这个主键是由一张表中多个字段组成的）
+PRIMARY KEY [字段1，字段2，…,字段n]
+
+# 4. 在修改表时添加主键约束
+ALTER TABLE <数据表名> ADD PRIMARY KEY(<字段名>);
+
+# 删除主键约束
+ALTER TABLE <数据表名> DROP PRIMARY KEY;
 ```
 
-#### 事务1开始
+<br/>
+
+
+
+**唯一约束 (unique)**：
+
+```SQL
+# 1. 在创建表时设置唯一约束
+<字段名> <数据类型> UNIQUE
+
+# 2. 在修改表时添加唯一约束
+ALTER TABLE <数据表名> ADD CONSTRAINT <唯一约束名> UNIQUE(<列名>);
+
+# 删除唯一约束
+ALTER TABLE <表名> DROP INDEX <唯一约束名>;
+```
+
+<br/>
+
+
+
+**自动增长列 (auto_increment)**：
+
+```SQL
+# 1. 给字段添加 AUTO_INCREMENT 属性来实现主键自增长
+字段名 数据类型 AUTO_INCREMENT
+
+# 2. 指定自增字段初始值
+CREATE TABLE tb_student2 (
+    id INT NOT NULL AUTO_INCREMENT,
+    name VARCHAR(20) NOT NULL,
+    PRIMARY KEY(ID)
+)AUTO_INCREMENT=100;
+```
+
+- 默认情况下，AUTO_INCREMENT 的初始值是 1，每新增一条记录，字段值自动加 1。
+- 一个表中只能有一个字段使用 AUTO_INCREMENT 约束，且该字段必须有唯一索引，以避免序号重复（即为主键或主键的一部分）
+- AUTO_INCREMENT 约束的字段必须具备 NOT NULL 属性。
+- AUTO_INCREMENT 约束的字段只能是整数类型（TINYINT、SMALLINT、INT、BIGINT 等）。
+- AUTO_INCREMENT 约束字段的最大值受该字段的数据类型约束，如果达到上限，AUTO_INCREMENT 就会失效。
+
+<br/>
+
+
+
+**外键约束（foreign key）**: 
+
+```SQL
+[CONSTRAINT <外键名>] FOREIGN KEY 字段名 [，字段名2，…] REFERENCES <主表名> 主键列1 [，主键列2，…]
+-- 例：
+constraint fk_score_sid foreign key(sid) references student(id) );
+
+-- 删除外键约束
+ALTER TABLE <表名> DROP FOREIGN KEY <外键约束名>;
+```
+
+使用外键会影响效率：在插入子行的数据的时候，会去父表中查询。在删除父表中的数据的时候，会去子表中查询数据是否被使用。
+
+在工作中，一般很少使用外键。外键虽然可以保证我们数据的正确性，但是会比较大程度上的影响效率。
+
+
+
+
+
+
+### 三大范式
+
+范式是数据库设计中用来减少数据冗余和提高数据一致性的标准。以下是三个最重要的范式：
+
+1. **第一范式（1NF）**：确保每个表中的每个列都包含原子（不可再分）值。这意味着每个单元格只能包含一个值，不能包含列表或集合。
+2. **第二范式（2NF）**：在满足第一范式的基础上，消除非主键列对部分主键的依赖。也就是说，所有非主键列必须完全依赖于整个主键。
+3. **第三范式（3NF）**：在满足第二范式的基础上，消除非主键列之间的传递依赖。也就是说，非主键列之间不应存在依赖关系。
+
+::: info 三大范式详解
+- **第一范式**：指每一列保持 <span style='color:red;background:yellow;font-size:文字大小;font-family:字体;'>**原子性**</span>（每一列都是不可分割的基本数据，同一列中不能有多个值）每一个属性不可再分
+
+  - 所谓第一范式（1NF)是指在关系模型中，对域添加的一个规范要求，所有的域都应该是原子性的，即数据库表的每一列都是不可分割的原子数据项，而不能是集合，数组，记录等非原子数据项。
+  	
+  - 在任何一个关系型数据库中，第一范式（1NF）是对关系模式的设计基本要求，一般设计时都必须满足第一范式(1NF)。不满足1NF的数据库就不是关系数据库。满足1NF的表必须要有主键且每个属性不可再分
+  
+
+  <br/>
+
+- **第二范式**：确保数据库表中的每一列都和主键相关，而不能只与主键的某一部分相关（主要针对联合主键而言）。即指记录的**唯一性**。要求数据库表中的每个实例或行必须可以被唯一地区分。
+
+  第二范式（2NF）要求数据库表中的每个实例或行必须可以被唯一地区分。为实现区分通常需要为表加上 一个列，以存储各个实例的唯一标识。这个唯一属性列被称为主关键字或主键、主码。 
+
+  <br/>
+
+- **第三范式**：属性不依赖于其它非主属性 [ 消除传递依赖 ]。即**非主键列之间不应存在依赖关系**
+  （注：关系实质上是一张二维表，其中每一行是一个元组，每一列是一个属性 ）
+  - 满足 第三范式（3NF）必须先满足第二范式（2NF）。
+  
+  - 第三范式（3NF）要求一个数据库表中不包含已在其它表中已包含的非主关键字信息。 即指字段不要冗余。
+:::
+
+【示例】不符合第三范式的表结构：
 ```sql
-BEGIN;
-```
-
-#### 事务1更新数据
-```sql
-UPDATE employees SET salary = 60000 WHERE id = 1;
-```
-
-此时，表的状态变为：
-```
-| id | name  | salary | DB_TRX_ID | DB_ROLL_PTR |
-|----|-------|--------|-----------|-------------|
-| 1  | Alice | 60000  | 1         | ptr1        |
-```
-
-- **DB_TRX_ID**：1（事务1的ID）
-- **DB_ROLL_PTR**：ptr1（指向旧版本的指针）
-
-旧版本存储在回滚段中：
-```
-| id | name  | salary | DB_TRX_ID | DB_ROLL_PTR |
-|----|-------|--------|-----------|-------------|
-| 1  | Alice | 50000  | 0         | NULL        |
-```
-
-#### 事务2开始
-```sql
-BEGIN;
-```
-
-#### 事务2查询数据
-```sql
-SELECT * FROM employees WHERE id = 1;
-```
-
-##### 处理流程
-1. **事务2创建读视图**：
-   - **m_ids**：[1] （当前系统中未提交的事务ID列表）
-   - **min_trx_id**：1 （m_ids 列表中的最小值）
-   - **max_trx_id**：1 （m_ids 列表中的最大值）
-   - **creator_trx_id**：2（创建读视图的事务ID）
-
-2. **事务2查找数据行**：
-   - 当前数据行的版本：
-     ```
-     | id | name  | salary | DB_TRX_ID | DB_ROLL_PTR |
-     |----|-------|--------|-----------|-------------|
-     | 1  | Alice | 60000  | 1         | ptr1        |
-     ```
-   - DB_TRX_ID （1）是否小于读视图的最小事务ID（1）：不是。 --> 不可见
-   - DB_TRX_ID （1）是否大于读视图的最大事务ID（1）：不是。
-   - DB_TRX_ID （1）是否在读视图的活动事务ID列表中（[1]）：是。
-   - 因此，当前版本对事务2不可见。
-
-3. **事务2查找旧版本**：
-   - 通过 **DB_ROLL_PTR**（ptr1）找到旧版本：
-     ```
-     | id | name  | salary | DB_TRX_ID | DB_ROLL_PTR |
-     |----|-------|--------|-----------|-------------|
-     | 1  | Alice | 50000  | 0         | NULL        |
-     ```
-   - 检查旧版本的事务ID（0）是否小于等于读视图的最小事务ID（1）：是。
-   - 因此，旧版本对事务2可见。
-
-4. **事务2返回查询结果**：
-   ```
-   | id | name  | salary |
-   |----|-------|--------|
-   | 1  | Alice | 50000  |
-   ```
-:::
-
-
-在 MySQL InnoDB 存储引擎中，`读已提交`（Read Committed，RC）和`可重复读`（Repeatable Read，RR）的本质区别：
-
-- **读已提交（RC）**：==每次查询创建新的读视图==，事务内的多次查询可能会看到不同的数据版本。
-- **可重复读（RR）**：事务开始时创建读视图，事务内的多次查询会看到相同的快照。
-
-因此在MVCC机制中，在可重复读隔离级别下同一个事务内多次查询使用的均是同一个视图，解决了不可重读的问题。
-
-需要注意的是，这里在第二个事务中均是读数据的操作，若要更新数据，是需要对记录加锁的，否则可能会导致数据最终不正确。
-
-
-参照Blog：https://blog.csdn.net/qq_62835094/article/details/136669636
-
-
-### MySQL锁的分类
-
-在 MySQL 中，锁机制是保证数据一致性和并发控制的重要手段。根据不同的角度，MySQL 中的锁可以分为多种类型。
-
-::: info MySQL-Lock
-
-#### 1. 按照锁的粒度分类
-
-- 表级锁（Table-Level Locks）: 锁住整张表，影响范围较大，但开销较小。
-  可以通过 `LOCK TABLES` 和 `UNLOCK TABLES` 显式地对表进行加锁和解锁。
-- 行级锁（Row-Level Locks）: 锁住表中的特定行，影响范围较小，但开销较大。
-  可以通过 `SELECT ... FOR UPDATE` 或 `SELECT ... FOR SHARE` 显式地对行进行加锁。
-    ```sql
-    SELECT * FROM table_name WHERE id = 1 FOR UPDATE;
-    SELECT * FROM table_name WHERE id = 1 FOR SHARE;
-    ```
-- 页面锁（Page-Level Locks）: 锁住表中的特定页面，介于表级锁和行级锁之间。
-  在 BDB 存储引擎中使用页面锁，但现在很少使用 BDB 存储引擎。
-
-#### 2. 按照锁的性质分类
-
-- 共享锁（Shared Locks，S 锁）: 允许多个事务同时持有共享锁
-  可以通过 `SELECT ... FOR SHARE` 显式地获取共享锁。
-    ```sql
-    SELECT * FROM table_name WHERE id = 1 FOR SHARE;
-    ```
-- 排他锁（Exclusive Locks，X 锁）：只允许一个事务持有排他锁，阻止其他事务的任何操作。
-  可以通过 `SELECT ... FOR UPDATE` 显式地获取排他锁。
-    ```sql
-    SELECT * FROM table_name WHERE id = 1 FOR UPDATE;
-    ```
-- 意向锁（Intent Locks）: 表示对表或页面的锁定意图。在 InnoDB 存储引擎中自动使用。
-  - **意向共享锁（IS 锁）**：表示事务打算对表中的某些行获取共享锁。
-  - **意向排他锁（IX 锁）**：表示事务打算对表中的某些行获取排他锁。
-
-
-#### 3. 按照锁的作用范围分类
-
-- 记录锁（Record Locks）: 锁住索引记录。
-- 间隙锁（Gap Locks）: 锁住索引记录之间的间隙。在 InnoDB 存储引擎中自动使用，主要用于防止幻读。
-- 临键锁（记录+间隙锁）（Next-Key Locks）：同时锁住索引记录和其前一个间隙。在 InnoDB 存储引擎中自动使用，主要用于防止幻读。
-:::
-
-在 MySQL InnoDB 存储引擎中，间隙锁（Gap Locks）和临键锁（Next-Key Locks）是用于解决幻读问题的关键机制。
-
-- **间隙锁**：锁住索引记录之间的间隙，而不是具体的记录。防止其他事务在这段间隙中插入新的记录
-  - 锁住的范围：间隙锁锁住的是索引记录之间的空白区域。
-  例：假设有一个索引包含以下记录：1, 4, 7。间隙锁可以锁住以下间隙：
-  `(负无穷, 1)  (1, 4)  (4, 7)  (7, 正无穷)`
-  - 在 `可重复读`（Repeatable Read）隔离级别下，InnoDB 自动使用间隙锁来防止幻读。通常不需要手动使用间隙锁，但可以通过 `SELECT ... FOR UPDATE`间接触发。
-
-- **临键锁**：同时锁住索引记录和其前一个间隙。临键锁是记录锁和间隙锁的组合。
-  - 锁住的范围：临键锁不仅锁住具体的索引记录，还锁住该记录之前的所有间隙。
-    例：假设有一个索引包含以下记录：1, 4, 7。临键锁可以锁住以下范围：
-    ` (负无穷, 1]（包括1） (1, 4]（包括4）(4, 7]（包括7）(7, 正无穷]`
-  - 在 `可重复读`（Repeatable Read）隔离级别下，InnoDB 自动使用临键锁来防止幻读。通常不需要手动使用临键锁，但可以通过 `SELECT ... FOR UPDATE`间接触发。
-
-
-
-
-**如何解决幻读**：在一个事务中，多次执行相同的查询，但结果集却不同。这是因为其他事务在这段时间内插入了新的记录。而间隙锁和临键锁的作用：
-- **防止插入新记录**：通过锁住索引记录之间的间隙，间隙锁和临键锁可以防止其他事务在这段间隙中插入新的记录。
-- **保持事务的一致性**：确保事务内的多次查询结果一致，避免幻读现象。
-
-
-::: details 解决幻读示例
-假设有一个表 `employees`，初始状态如下：
-```
-| id | name  | salary |
-|----|-------|--------|
-| 1  | Alice | 50000  |
-| 4  | Bob   | 60000  |
-| 7  | Carol | 70000  |
-```
-
-1. **事务1开始**
-   ```sql
-   BEGIN;
-   ```
-
-2. **事务1查询数据**
-   ```sql
-   SELECT * FROM employees WHERE id BETWEEN 1 AND 7 FOR SHARE;
-   ```
-   - 事务1获取了临键锁，锁住了 (负无穷, 1]、(1, 4] 和 (4, 7]。
-
-3. **事务2开始**
-   ```sql
-   BEGIN;
-   ```
-
-4. **事务2尝试插入数据**
-   ```sql
-   INSERT INTO employees (id, name, salary) VALUES (5, 'David', 55000);
-   ```
-   - 由于事务1已经锁住了 (4, 7]，事务2会被阻塞，直到事务1提交或回滚。
-
-5. **事务1提交**
-   ```sql
-   COMMIT;
-   ```
-
-6. **事务2再次尝试插入数据**
-   ```sql
-   INSERT INTO employees (id, name, salary) VALUES (5, 'David', 55000);
-   ```
-   - 事务2成功插入数据，因为事务1已经提交，临键锁被释放。
-:::
-
-通过使用临键锁，InnoDB 存储引擎在 `可重复读` 隔离级别下有效地解决了幻读问题。
-
-
-
-
-
-### MySQL数据类型
-
-数据类型选择原则：
-1. **更小的数据类型通常更好**：使用最小且能满足需求的数据类型。
-2. **简单就好**：简单的数据类型操作更快。
-3. **尽量避免NULL**：除非确实需要，否则应该指定列为NOT NULL。
-
-::: info MySQL常用数据类型
-#### 数字类型
-- **整数类型**：
-  - `TINYINT`：1字节，有符号范围为-128到127，无符号范围为0到255。
-  - `SMALLINT`：2字节，有符号范围为-32,768到32,767，无符号范围为0到65,535。
-  - `MEDIUMINT`：3字节，有符号范围为-8,388,608到8,388,607，无符号范围为0到16,777,215。
-  - `INT` (或`INTEGER`)：4字节，有符号范围为-2,147,483,648到2,147,483,647，无符号范围为0到4,294,967,295。
-  - `BIGINT`：8字节，有符号范围为-9,223,372,036,854,775,808到9,223,372,036,854,775,807，无符号范围为0到18,446,744,073,709,551,615。
-
-- **实数类型**：
-  - `FLOAT`：4字节，单精度浮点数。
-  - `DOUBLE` (或`DOUBLE PRECISION`)：8字节，双精度浮点数。
-  - `DECIMAL` (或`NUMERIC`)：用于存储精确的小数值。在MySQL 5.0及以上版本中支持精确计算。指定格式如`DECIMAL(M,D)`，其中`M`是总位数，`D`是小数点后的位数。
-
-在处理财务数据等需要精确度的情况下，应考虑使用`DECIMAL`而不是浮点类型。
-
-#### 字符串类型
-- `CHAR`：固定长度字符串，定义时指定最大长度，不足部分用空格填充。
-- `VARCHAR`：可变长度字符串，节省空间，但需要额外的字节来存储长度信息。
-- `TEXT`：大文本数据，分为`TINYTEXT`、`TEXT`、`MEDIUMTEXT`和`LONGTEXT`，根据不同的大小限制。
-- `BLOB`：二进制大对象，用于存储大量二进制数据，同样分为`TINYBLOB`、`BLOB`、`MEDIUMBLOB`和`LONGBLOB`。
-
-对于非常短的列，`CHAR`可能比`VARCHAR`更有效率，因为`VARCHAR`需要额外的空间来存储长度信息。
-
-#### 时间和日期类型
-- `DATE`：仅日期，格式为`YYYY-MM-DD`。
-- `TIME`：仅时间，格式为`HH:MM:SS`。
-- `DATETIME`：日期和时间，格式为`YYYY-MM-DD HH:MM:SS`，占用8个字节。
-- `TIMESTAMP`：类似于`DATETIME`，但是值的范围较小（从'1970-01-01 00:00:01' UTC到'2038-01-19 03:14:07' UTC），占用4个字节，并且可以自动更新为当前时间戳。
-
-`TIMESTAMP`和`DATETIME`都可用于存储日期和时间，但`TIMESTAMP`会受时区影响并具有特殊的行为。
-
-#### 枚举和集合类型
-- `ENUM`：枚举类型，列只能有一个枚举列表中的值。
-- `SET`：集合类型，列可以有零个或多个SET成员。当插入一组值时，这些值被转换为一个整数，并以二进制格式存储。
-:::
-
-
-下面是一个使用枚举（`ENUM`）和集合（`SET`）示例：
-
-```sql
-CREATE TABLE users (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    username VARCHAR(50) NOT NULL,
-    password CHAR(64) NOT NULL,  -- 假设密码经过哈希处理后长度为64字符
-    email VARCHAR(100),
-    gender ENUM('M', 'F', 'O') DEFAULT 'O',  -- 性别：男(M)，女(F)，其他(O)
-    hobbies SET('Reading', 'Sports', 'Music', 'Travel', 'Cooking')  -- 兴趣爱好
+CREATE TABLE Students (
+    StudentID INT PRIMARY KEY,           -- 学生的唯一标识符（主键）
+    StudentName VARCHAR(100),            -- 学生姓名
+    DepartmentID INT,                    -- 学生所在系的唯一标识符
+    DepartmentName VARCHAR(100)          -- 学生所在系的名称
 );
 ```
+在这个表结构中，DepartmentName 依赖于 DepartmentID，而不是直接依赖于主键 StudentID。这意味着 DepartmentName 的值是由 DepartmentID 决定的，而不是由 StudentID 决定的。这种依赖关系导致了数据冗余和潜在的不一致性。
 
-- `gender` 字段是一个枚举类型，只能取三个预定义值之一：'M' (男性), 'F' (女性), 或 'O' (其他)。默认值设置为 'O'。
-- `hobbies` 字段是一个集合类型，可以包含多个预定义的兴趣爱好选项。例如，如果一个用户喜欢阅读和旅行，那么该字段可以存储为 `'Reading,Travel'`。
+::: tip 在实际的工作中，要不要去冗余字段呢？
+适当的字段冗余可以帮助我们提高查询的效率，但是会影响到增删改的效率。是否冗余字段需要看具体的业务场景，假如在某个业务场景中：
 
-```sql
--- 插入数据示例
-INSERT INTO users (username, password, email, gender, hobbies)
-VALUES ('john_doe', 'hashed_password', 'john@example.com', 'M', 'Sports,Music');
+- 查询的需求远大于增删改的需求，我们可以考虑适当的去冗余数据；
 
--- 查询所有男性用户的兴趣爱好：
-SELECT username, hobbies FROM users WHERE gender = 'M';
+- 假如增删改的需求比查询的需求比重要高，那么这个时候就不应该冗余数据。
 
--- 查询对阅读感兴趣的用户：
-SELECT username FROM users WHERE FIND_IN_SET('Reading', hobbies) > 0;
-```
-`FIND_IN_SET` 是 MySQL 中的一个字符串函数，它用于在逗号分隔的字符串列表中查找特定的值。这个函数对于处理存储为集合（`SET`）类型的数据非常有用，因为它可以用来检查某个值是否存在于一个以逗号分隔的字符串列表中。
-
-::: info FIND_IN_SET()函数
-`FIND_IN_SET(str, strlist)`
-
-- `str`：要查找的字符串。
-- `strlist`：由逗号分隔的字符串列表。
-
-返回值：
-- 如果 `str` 存在于 `strlist` 中，则返回 `str` 在 `strlist` 中的位置（从1开始计数）。
-- 如果 `str` 不在 `strlist` 中，则返回0。
-- 如果 `strlist` 或 `str` 为空字符串，或者 `strlist` 不是有效的逗号分隔列表，则返回0。
+冗余字段的设计：==反范式化设计==
 :::
 
 
 
-### 数据库备份与恢复
 
+### 多表设计原则
+
+多表设计是数据库设计中的一个重要方面，通过合理地拆分数据表来减少数据冗余和提高查询效率。
+
+::: tip 设计原则
+1. **规范化**：遵循范式规则，减少数据冗余，提高数据一致性。
+2. **性能优化**：合理设计索引，优化查询性能。
+3. **安全性**：确保数据的安全性和隐私保护，使用适当的权限控制。
+4. **可扩展性**：设计时考虑未来的扩展需求，确保系统的灵活性和可维护性。
+:::
+
+常见的多表设计模式包括：
+
+1. **一对多关系**：一个表中的记录可以与另一个表中的多个记录相关联。例如，一个订单可以包含多个订单项。
+     ```sql
+     CREATE TABLE Orders (
+         OrderID INT PRIMARY KEY,
+         CustomerID INT,
+         OrderDate DATE
+     );
+
+     CREATE TABLE OrderItems (
+         ItemID INT PRIMARY KEY,
+         OrderID INT,
+         ProductID INT,
+         Quantity INT,
+         FOREIGN KEY (OrderID) REFERENCES Orders(OrderID)
+     );
+     ```
+
+2. **多对多关系**：两个表中的记录可以相互关联。通常通过一个中间表来实现。
+     ```sql
+     CREATE TABLE Students (
+         StudentID INT PRIMARY KEY,
+         Name VARCHAR(100)
+     );
+
+     CREATE TABLE Courses (
+         CourseID INT PRIMARY KEY,
+         CourseName VARCHAR(100)
+     );
+
+     CREATE TABLE Enrollments (
+         EnrollmentID INT PRIMARY KEY,
+         StudentID INT,
+         CourseID INT,
+         FOREIGN KEY (StudentID) REFERENCES Students(StudentID),
+         FOREIGN KEY (CourseID) REFERENCES Courses(CourseID)
+     );
+     ```
+
+3. **一对一关系**：一个表中的记录与另一个表中的一个记录相关联。通常通过共享主键来实现。
+     ```sql
+     CREATE TABLE Employees (
+         EmployeeID INT PRIMARY KEY,
+         FirstName VARCHAR(50),
+         LastName VARCHAR(50)
+     );
+
+     CREATE TABLE Salaries (
+         EmployeeID INT PRIMARY KEY,
+         Salary DECIMAL(10, 2),
+         FOREIGN KEY (EmployeeID) REFERENCES Employees(EmployeeID)
+     );
+     ```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+## MySQL常见问题
+
+
+
+
+### 配置文件权限
+
+在使用Docker安装MySQL的过程中发现配置文件不生效，查看日志`docker logs d71e2aab9816`发现：
+
+```log
+mysqld: [Warning] World-writable config file '/etc/mysql/my.cnf' is ignored.
+```
+为了方便，之前将主系统的挂载目录改成了 777 的权限，MySQL可能觉得不安全... 这里将配置文件权限改为 644 即可：
+```bash
+sudo chmod 644 /path/to/my.cnf
+```
+修改后，重启mysql即可：`docker restart d71e2aab9816`
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+## 数据库备份与恢复
 
 MySQL数据库的备份与恢复是数据库管理中的重要组成部分，它确保了数据的安全性和完整性。下面我将详细介绍如何进行MySQL数据库的备份和恢复。
 
@@ -1390,3 +1243,32 @@ MySQL数据库的备份与恢复是数据库管理中的重要组成部分，它
 
 
 
+
+
+
+
+## xxxxxxxxxxxxx
+
+1. [全面理解MySQL架构](https://note.youdao.com/ynoteshare/index.html?id=b83414b7060c7b4e894bb7de5a419e1c)
+
+2. [深入理解Mysql索引底层数据结构与算法](https://note.youdao.com/ynoteshare/index.html?id=3c878c0f3dd4965d00bcce82b41043b3)
+
+3. [Explain详解与索引优化最佳实践](https://note.youdao.com/s/YoQZCEjl)
+   [Explain笔记补充](https://note.youdao.com/s/FMi8YpR7)
+
+4. [Mysql索引优化实战一](https://note.youdao.com/ynoteshare/index.html?id=d2e8a0ae8c9dc2a45c799b771a5899f6)
+   [索引优化补充](https://note.youdao.com/ynoteshare/index.html?id=2218c2f41c8e2d9f3effdf734ee586af)
+   [Mysql索引优化实战二](https://note.youdao.com/ynoteshare/index.html?id=df15aba3aa76c225090d04d0dc776dd9)
+
+5. [Mysql事务隔离级别与锁机制](https://note.youdao.com/ynoteshare/index.html?id=354ae85f3519bac0581919a458278a59)
+   [事务补充](https://note.youdao.com/ynoteshare/index.html?id=ac14495f09862f59cfa7b143380ffc67)
+
+6. [MVCC与BufferPool缓存机制](https://note.youdao.com/ynoteshare/index.html?id=b36b975188fadf7bfbfd75c0d2d6b834)
+
+7. [Innodb底层原理与Mysql日志机制深入剖析](https://note.youdao.com/ynoteshare/index.html?id=f030268c54f18d2116837f8f3ef045bf)
+
+8. [Mysql全局优化与Mysql 8.0新特性详解](https://note.youdao.com/s/TZVzqihW)
+
+9. [MySQL8.0主从复制原理分析与实战](https://note.youdao.com/ynoteshare/index.html?id=94a5d21f7fcecc42f9660929128fea69)
+
+10. [Mysql8.0高可用集群架构实战]()

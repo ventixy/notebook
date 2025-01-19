@@ -1,6 +1,6 @@
 ---
 
-order: 50
+order: 90
 title:  Redis数据缓存
 
 ---

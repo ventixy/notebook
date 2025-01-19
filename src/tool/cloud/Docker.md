@@ -325,13 +325,18 @@ sudo docker run -d -p 9001:9001 --name portainer_agent --restart=always \
 ```shell
 docker pull mysql:5.7
 
+sudo mkdir -p /docker/mysql/mysql5.7/{log,data,conf,conf/conf.d,conf/mysql.conf.d}
+sudo chmod 644 /docker/mysql/mysql5.7/conf/my.cnf  # 此处配置文件权限不能是777，否则会被忽略
+
 # 创建实例并启动mysql （5.7）
-docker run -p 3306:3306 --name mysql --restart=always --privileged=true \
--v /docker/data/mysql/log:/var/log/mysql \
--v /docker/data/mysql/data:/var/lib/mysql \
--v /docker/data/mysql/conf:/etc/mysql \
--e MYSQL_ROOT_PASSWORD=123456 \
+docker run -p 3307:3306 --name mysql5.7 --restart=always --privileged=true \
+-v /docker/mysql/mysql5.7/log:/var/log/mysql \
+-v /docker/mysql/mysql5.7/data:/var/lib/mysql \
+-v /docker/mysql/mysql5.7/conf:/etc/mysql \
+-e MYSQL_ROOT_PASSWORD=root \
 -d mysql:5.7
+
+docker cp 52361b11faeb:/etc/my.cnf /docker/mysql/mysql5.7/my.cnf
 ```
 
 设置mysql的配置文件
