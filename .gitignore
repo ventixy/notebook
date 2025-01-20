@@ -6,3 +6,6 @@ src/.vuepress/.cache/
 src/.vuepress/.temp/
 src/.vuepress/dist/
 .idea/
+notebook.db
+vx_notebook.json
+**/vx.json
