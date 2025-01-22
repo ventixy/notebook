@@ -1,81 +1,130 @@
 ---
-
-order: 1
-title:  VMware/Linux安装
-shortTitle: Linux安装
-icon: application
-
+article: true
+date: 2022-04-06
+category:
+  - 虚拟机
+  - Linux
+tag:
+  - Virtual Machines
+  - VMware
+  - Xshell
+  - VM
+  - Linux
+  - CentOS
+shortTitle: VM和Linux安装
+title: Virtual Machines | Linux安装  | 终端工具
 ---
 
 
-# VMware/Linux安装
 
-## 一 VMware虚拟机
+## VMware Workstation
 
-### 1. NAT与桥接网络模式
-vmware为我们提供了三种网络工作模式，它们分别是：Bridged(桥接模式)、NAT(网络地址转换模式)、Host-Only(仅主机模式)。
 
-所有的虚拟系统是可以相互通信的，但虚拟系统和真实的网络是被隔离开的。 理解：**VM中**所有虚拟机可相互通信，但真实机器与虚拟机之间不能**相互**访问
+### 虚拟交换机和网卡
 
-#### VMware相关虚拟设备
-
+在VMware`虚拟网络编辑器`中，也有三个 **虚拟交换机** 分别对应不同的网络模式：
+::: info VMware相关网络虚拟设备
 VMnet0：这是VMware用于虚拟 `桥接网络` 下的虚拟交换机;
 
-VMnet1：这是VMware用于虚拟 `Host-Only` 网络下的虚拟交换机;
+VMnet1：这是VMware用于虚拟 `Host-Only` （仅主机）网络下的虚拟交换机;
 
 VMnet8：这是VMware用于虚拟 `NAT网络` 下的虚拟交换机;
+:::
 
+
+![](https://image.ventix.top/img02/20220122173703373.png)
+
+
+在主机的`网络连接`里面可以看到多了两块 **网卡** ：
+```bash
 VMware Network Adapter VMnet1：这是Host用于与Host-Only虚拟网络进行通信的虚拟网卡;
 
 VMware Network Adapter VMnet8：这是Host用于与NAT虚拟网络进行通信的虚拟网卡;
+```
 
-在主机中CMD 命令提示符的情况下，输入ipconfig便可以查询到 `VMware Network Adapter VMnet1`、`VMware Network Adapter VMnet8` 的IP地址，win10系统直接搜索 `网络连接` 即可查看相关网卡信息
+vmware为我们提供了三种网络工作模式，它们分别是：Bridged(桥接模式)、NAT(网络地址转换模式)、Host-Only(仅主机模式)。
 
-<br>
 
-#### 桥接网络模式及设置
+### Bridged(桥接)
 
-在桥接模式下，VMware虚拟出来的操作系统就像是局域网中的一独立的主机，它可以访问该类网段内任何一台机器。
+桥接模式（Bridge Mode）通过将两个或多个局域网连接在一起，形成一个扩展的局域网，使得这些局域网的设备能够互相通信。在桥接模式中，设备之间的数据流量可以直接传输，并且不经过路由器进行转发。
 
-桥接网络环境下需要做到：
+桥接模式下所有虚拟机都和主机在同一网段，可以把它们看成是"平等"的关系
 
-1.为虚拟机系统配置IP地址、子网掩码。
+::: tip Bridged(桥接模式)配置静态IP
+1. 在VM的虚拟机 `设置` --> `网络适配器` 将网络连接模式选择为桥接模式
+    并确保 `编辑` --> `虚拟网络编辑器` 中将桥接 `VMnet0` 桥接至主机中的正确网卡
+    ![](https://image.ventix.top/img02/20220122211601570.png)
+2. 先通过 `ipconfig` 查看宿主机的网络信息（因为桥接模式虚拟机与宿主机在同一网段下）
+    ```bash
+   连接特定的 DNS 后缀 . . . . . . . :
+   IPv4 地址 . . . . . . . . . . . . : 192.168.243.54
+   子网掩码  . . . . . . . . . . . . : 255.255.255.0
+   默认网关. . . . . . . . . . . . . : 192.168.243.158
+    ```
+3. 进入虚拟机修改配置文件，以CentOS7为例：
+```bash
+vi /etc/sysconﬁg/network-scripts/ifcfg-ens33   # 打开ifcfg-ens33⽂件，修改配置
+```
+在桥接模式下，虚拟机IP地址需要与主机在同一网段，如果需要联网，则网关与DNS需要与主机网卡一致: 
+ ```bash
+BOOTPROTO=static                  # 更改为静态 
+ONBOOT=yes                        # 设置开机⾃动启⽤⽹络连接 
+IPADDR=192.168.243.222            # 虚拟机的静态ip，
+NETMASK=255.255.255.0             # 和 主机 的子网掩码一致 
+GATEWAY=192.168.243.158           # 和 主机 的网关IP一致 
+DNS1=192.168.243.158              # 和 主机 的网关IP一致 
+```
+修改完成后重启网络：`service network restart `
 
-2.在桥接的模式下虚拟机必须与物理机处于同一网段，(举个例子,物理机IP:192.168.1.2，虚拟机IP:192.168.1.3)这样虚拟系统才能和真实主机进行通信。
+:::
 
-关于桥接网络的小知识：
+验证联网情况【可以和本机互通、也可以访问互联网】
 
-当你想利用VMware在局域网内新建一个虚拟服务器，为局域网用户提供网络服务，就应该选择桥接模式。可将虚拟机模拟接入主机所在的局域网。桥接网络，相当于，虚拟机与主机同接在一台交换机上，同时上网，虚拟机对物理机网络的直接影响较小~
+::: info 主机防火墙及入站规则配置
+注意在虚拟机内能 ping 通外网，如`www.baidu.com`，但是 ping 主机 IP 没有任何反应，这种情况大概率是主机防火墙阻止了 ICMP，可以添加一条入站规则来解决：
 
-<br>
+打开“Windows Defender 防火墙” -> “高级设置” -> “入站规则”，创建一条允许 ICMPv4 或 ICMPv6 的规则
+:::
 
-#### NAT网络模式及设置
+### NAT模式
+在NAT(网络地址转换模式)中，会使用到VMnet8虚拟交换机，物理机上的 `VMware Network Adapter VMnet8 虚拟网卡` 将会和 `VMnet8交换机`相连接，来实现物理机与虚拟机之间的通信。
 
-在NAT网络中，会使用到VMnet8虚拟交换机，物理机上的 `VMware Network Adapter VMnet8 虚拟网卡` 将会和 `VMnet8交换机`相连接，来实现物理机与虚拟机之间的通信。
+
+
+::: important NAT(网络地址转换模式)设置
+1. 在系统的虚拟机设置中将网络连接模式设置为NAT模式：
+
+2. 通过 VMware的【虚拟网络编辑器】，查看并记住VMnet8 对应的 网关地址、子网掩码等信息
+
+3. 进入虚拟机修改配置文件， 具体操作参照：[虚拟机静态网络IP设置](#虚拟机静态网络ip)
+:::
 
 注意：`VMware Network Adapter VMnet8 虚拟网卡` 仅仅是用于主机和VMnet8网段通信使用，它并不为VMnet8网段提供路由功能，处于虚拟NAT网络下的Guest是使用虚拟的NAT服务器连接的Internet的。
 
-VMware Network Adapter VMnet8虚拟网卡它仅仅是为Host和NAT虚拟网络下的Guest通信提供一个接口，所以，即便去掉这块虚拟网卡，虚拟机仍然是可以上网的，只是物理机将无法再访问VMnet8网段而已。
+VMware Network Adapter VMnet8虚拟网卡它仅仅是为Host和NAT虚拟网络下的Guest通信提供一个接口，所以，即便禁用掉这块虚拟网卡，虚拟机仍然是可以上网的，只是物理机将无法再访问虚拟机了。
 
-**NAT网络环境下需要做到**： 
 
-1.主机需要开启vmdhcp和vmnat服务。(服务的开启，在我的电脑当中右键“管理”可以设置)
 
-2.NAT模式下的虚拟机的TCP/IP配置信息将由VMnet8(NAT)虚拟网络的DHCP服务器自动分配，需要开启DHCP功能。
+### 仅主机模式
 
-**关于NAT网络的小知识**：
+Host-Only(仅主机模式) 可看成是NAT模式去除了虚拟NAT设备，然后使用VMware Network Adapter VMnet1虚拟网卡连接VMnet1虚拟交换机来与虚拟机通信的，Host-Only模式将虚拟机与外网隔开，使得虚拟机成为一个独立的系统，只与主机相互通讯。
 
-使用NAT模式，就是让虚拟系统借助NAT(网络地址转换)功能，通过物理机所在的网络来访问外网。NAT 模式下的网络，相当于说虚拟机是通过接入物理机连接上的网络，等于物理机是个路由器，申请到一个上网名额，带着隐藏在它下面的虚拟机上网。自然所有虚拟机使用的网络总和都限制在实机一个网络通道内。虚拟机会抢占物理机的网络~对物理机上网会有很大的影响!
+网络: **虚拟机是不可访问主机和互联网的，但主机可以访问虚拟机**
 
-<br>
+更多信息参照：[虚拟机网络设置](https://cloud.tencent.com/developer/article/2452065)
 
-### 2. 设置虚拟机静态网络IP
+
+
+### 虚拟机静态网络IP
 
 NAT模式下虚拟机IP可能会变，我们可以通过设置静态 IP ，这样的话 IP 就不会发生改变
 
 VMware 点击 编辑 ——> 虚拟网络编辑器 (如图：)
 
 ![](https://image.ventix.top/img01/202101101724339.png)
+
+注意图中的 NETMASH 有误，应该是 METMASK
 
 ::: code-tabs#shell
 
@@ -96,7 +145,7 @@ sudo netplan apply                               # 应用更改
 ```
 :::
 
-::: details ifcfg-ens33
+::: details CentOS —— ifcfg-ens33
 
 Centos下的网络配置文件内容参考：
 
@@ -117,13 +166,13 @@ UUID=ee4084e5-a3b6-43f0-8b06-80a20d647a10
 DEVICE=ens33
 ONBOOT=yes
 IPADDR=192.168.42.10
-NETMASH=255.255.255.0
+NETMASK=255.255.255.0
 GATEWAY=192.168.42.2
 DNS1=192.168.42.2
 ```
 :::
 
-::: details 00-installer-config.yaml
+::: details Ubuntu —— 00-installer-config.yaml
 
 Ubuntu下网络配置文件参考：
 
@@ -142,15 +191,9 @@ network:
 ```
 :::
 
-::: note 主机连不上虚拟机
-
-注意虚拟机IP和VMnet8需要在同一个网段上，可通过 ping 命令测试
-参考：http://blog.iis7.com/article/33159.html
-:::
-
 <br/>
 
-### 3. Linux虚拟机硬盘扩容
+### Linux虚拟机硬盘扩容
 给VMware下的Linux扩展磁盘空间（以CentOS7为例）
 ::: info 扩容步骤
 一 关闭虚拟机，删除快照，按如下步骤扩容 ：
@@ -214,9 +257,9 @@ xfs_growfs /dev/centos/root
 
 <br/>
 
-### 4. 虚拟机自启动设置
+### 虚拟机自启动设置
 
-#### 创建启动/关闭脚本
+创建启动/关闭脚本: 
 
 ```bash
 # 在系统的某个安静的盘中创建一个vm_start.bat文件，然后使用编辑器打开。写入: 
@@ -231,7 +274,7 @@ xfs_growfs /dev/centos/root
 
 <br/>
 
-#### 添加到自启动任务
+ 添加到自启动任务: 
 
 `Win+ R`  -> `gpedit.msc` -> 用户配置 -> windows设置 -> 鼠标双击脚本(登录/注销) -> 鼠标双击“登录”或“注销”分别添加启动、关闭脚本
 
@@ -239,32 +282,12 @@ xfs_growfs /dev/centos/root
 
 <br>
 
-### 5. Linux防火墙设置
-
-```bash
-firewall-cmd --query-port=9200/tcp                           #查看端口号是否开启,如果是no，就说明没有开放
-
-firewall-cmd --zone=public --add-port=6379/tcp --permanent   #开通6379端口(redis)
-
-firewall-cmd --zone=public --add-port=8848/tcp --permanent   #开通8848端口(nacos)
-
-firewall-cmd --zone=public --add-port=3306/tcp --permanent   #开通3306端口(mysql)
 
 
 
-firewall-cmd --reload                                        #重启防火墙，端口正常开启
+## Oracle VirtualBox
 
-systemctl restart docker                                     #如果是docker容器的化则要重启下docker服务 
-```
-
-<br/>
-
-
-## 二 vagrant安装
-
-### 1. 安装准备
-
-**virtualbox + vagrant 安装**：
+### VirtualBox安装
 
 1. 下载安装 [Virtual box](https://www.virtualbox.org/) 的`主程序`和`拓展包`，安装后修改虚拟机存放位置（需要cpu开启虚拟化）
 
@@ -283,60 +306,40 @@ vagrant version
 <br/>
 
 
-3. 下载虚拟机镜像
+###  下载Vagrant镜像
    使用 Vagrant 创建虚机时，需要指定一个镜像，也就是 box。开始这个 box 不存在，所以 Vagrant 会先从网上（[镜像网站](https://app.vagrantup.com/boxes/search)）下载，然后缓存在本地目录中。但默认下载往往会比较慢，我们可以自己下载镜像文件。常用的两个 Linux 操作系统镜像的下载地址：
 
 - CentOS [官网下载](http://cloud.centos.org/centos/) ，[CentOS-7.box （点击下载）](http://cloud.centos.org/centos/7/vagrant/x86_64/images/CentOS-7.box) 列表中有一个 vagrant 目录，选择其中的 .box 后缀的文件下载即可。
 
 - Ubuntu [官网下载](http://cloud-images.ubuntu.com/) ，[清华大学镜像站下载](https://mirror.tuna.tsinghua.edu.cn/ubuntu-cloud-images/) ，同样选择针对 vagrant 的 .box 文件即可。
 
-  <br/>
-
-
-```shell
-
 添加 box ：接下来我们需要将下载后的 .box 文件添加到 vagrant 中：
 
-```
-
-<br/>
-
 ```shell
-
 # 如果这是第一次运行，此时 VAGRANT_HOME 目录下会自动生成若干的文件和文件夹，其中有一个 boxes 文件夹，
 # 这就是要存放 box 文件的地方。
-
 vagrant box list
 
 #执行 vagrant box add 命令添加 box: (命令后面跟着的是镜像文件的路径，通过 --name centos-7 为这个 box 指定名字)
 vagrant box add E:\Package\VM\VirtualBox\CentOS-7.box --name centos-7
 
 vagrant box list        #再次查询，可以看到有了一个 box
-
 ```
 
 <br/>
 
 
-
-### 2. 安装虚拟机
-
-Vagrant新建虚拟机
-
-```shell
-
-#先进入vagrant工作目录（Vagrantfile所在的目录）再执行命令
+### Vagrant新建虚拟机
+先进入vagrant工作目录（Vagrantfile所在的目录）再执行命令
+```bash
 vagrant init centos-7
 
-#首次执行会先安装再启动，之后就是启动的功能（注意要在Vagrantfile所在的目录执行）
 vagrant up
-
 ```
+首次执行会先安装再启动，之后就是启动的功能（注意要在Vagrantfile所在的目录执行）
 
-<br/>
-
+::: info Vagrant常用命令
 ```shell
-# 常用命令
 vagrant status         #查看虚拟机状态
 vagrant ssh            #以 vagrant 用户直接登入虚拟机中，使用 exit; 退出
 
@@ -346,8 +349,8 @@ vagrant resume         #恢复虚拟机
 vagrant reload         #重载虚拟机(可能会重启失败，需要重启宿主机才能开机虚拟机)
 vagrant destroy        #删除虚拟机
 ```
+:::
 
-<br/>
 
 配置私有网络：
 
@@ -396,11 +399,55 @@ end
 
 
 
-## 三 Ubuntu
+
+
+
+
+
+
+
+## Linux安装和设置
+
+### CentOS
+
+镜像下载：[阿里云镜像](https://mirrors.aliyun.com/centos/7.9.2009/isos/x86_64/) 
+
+
+
+CentOS替代方案：Rocky Linux，AlmaLinux
+
+
+::: tip Windows Terminal 连接 VM 中的虚拟机
+前置条件：VM中的Linux虚拟机需要运行 sshd 服务，且防火墙开放22端口
+
+```bash
+# Windows Terminal 中执行下列命令连接虚拟机
+ssh root@192.168.243.222
+```
+虚拟机的IP地址可通过 `ip addr show` 或者 `ifconfig` 查看
+
+第一次连接时，可能会提示你确认主机的指纹，输入 `yes` 并按回车键继续，输入密码即可
+
+#### 配置 Windows Terminal 快速访问
+在Windows Terminal 中，通过 `设置` --> `添加新配置文件` :
+```bash
+{
+    "name": "CentOS7",
+    "commandline": "ssh root@192.168.243.222",
+    "startingDirectory": "%USERPROFILE%",
+    "icon": "xxx.png"
+}
+```
+:::
+
+
+
+
+### Ubuntu
 
 官网：https://ubuntu.com/
 
-### 1. vm tools
+**1. vm tools**
 [安装 Open VM Tools](https://docs.vmware.com/cn/VMware-Tools/11.3.0/com.vmware.vsphere.vmwaretools.doc/GUID-C48E1F14-240D-4DD1-8D4C-25B6EBE4BB0F.html) 
 
 ```bash
@@ -419,7 +466,7 @@ sudo apt-get install open-vm-tools
 
 <br/>
 
-### 2. 语言和输入法
+**2. 语言和输入法**
 
 
 <br/>
@@ -438,9 +485,9 @@ sudo apt-get install open-vm-tools
 <br/>
 
 
-## 四 Manjaro
+### Manjaro
 
-### 1. vm tools
+**1. vm tools**
 Manjaro原版中的open-vm-tools与VMware不匹配
 
 Github地址：https://github.com/rasa/vmware-tools-patches
@@ -466,7 +513,7 @@ reboot
 
 <br>
 
-### 2. AUR助手
+**2. AUR助手**
 Yay (Yet another Yogurt) 是一个 AUR 助手，它允许用户在 Manjaro 上安装和管理软件包系统。
 在安装过程中，它会自动从 PKGBUIDS 安装软件包。Yay 取代了早已停产的 Aurman 和 Yaourt。
 自发布以来，Yay 已被证明是出色的帮手，并且是原生 Pacman 包管理器的完美替代品。
@@ -491,7 +538,7 @@ yay -S google-chrome                  # 安装Chrome
 
 
 
-### 3. 安装deb包
+**3. 安装deb包**
 
 arch 系列如果要安装 dep 软件包，需要通过 deptap 工具转换后才能安装
 
@@ -526,56 +573,25 @@ sudo pacman -U xxxx.pkg.tar.rst
 <br>
 
 
+### Linux防火墙设置
 
-## 五 常用Linux设置
+```bash
+# 查看端口号是否开启,如果是no，就说明没有开放
+firewall-cmd --query-port=9200/tcp                           
 
+firewall-cmd --zone=public --add-port=6379/tcp --permanent   #开通6379端口(redis)
+firewall-cmd --zone=public --add-port=8848/tcp --permanent   #开通8848端口(nacos)
+firewall-cmd --zone=public --add-port=3306/tcp --permanent   #开通3306端口(mysql)
 
-### 1. 解压安装jdk
-
-[jdk 8u202之前的版本下载地址](https://www.oracle.com/java/technologies/javase/javase8-archive-downloads.html)   &nbsp;  [jdk全版本下载地址](https://www.oracle.com/java/technologies/oracle-java-archive-downloads.html)
-
-- 先检查是否已经安装jdk
-
-```shell
-java -version
-
-rpm -qa|grep openjdk -i   # 检查系统安装的openjdk
-
-rpm -e --nodeps XXX(需要删除的软件名) #如果存在openjdk,就用这个命令逐一删除
+firewall-cmd --reload    # 重启防火墙，端口正常开启
 ```
 
-- 创建jdk安装目录和软件包存储目录，并上传jdk文件。将文件解压剪贴到jdk安装目录后配置环境变量即可。
-
-```shell
-mkdir /usr/java
-mkdir /home/software
-
-tar -zxvf jdk-8u191-linux-x64.tar.gz
-mv jdk1.8.0_191/ /usr/java/
-```
-
-- 配置环境变量，（修改profile文件）
-
-```shell
-vim /etc/profile  #配置环境变量，加入如下信息：(按esc退出插入模式后 :wq 保存退出)
-```
-
-```
-export JAVA_HOME=/usr/java/jdk1.8.0_191
-export CLASSPATH=.:$JAVA_HOME/lib/dt.jar:$JAVA_HOME/lib/tools.jar
-export PATH=$JAVA_HOME/bin:$PATH
-```
-
-- 刷新profile，使其生效
-
-```shell
-source /etc/profile
-```
-<br>
+<br/>
 
 
 
-### 2. http proxy
+
+### http proxy
 
 Windows + Linux虚拟机的 代理设置：
 
@@ -583,12 +599,9 @@ Windows + Linux虚拟机的 代理设置：
 - 虚拟机采用桥接模式（似乎也有不采用桥接模式而成功的例子，但是我没有成功）
 - `clash`开启`allow LAN`，并开启代理
 
-<br>
-
 linux下通过图形界面设置的代理，终端和浏览器一般不使用该代理，需要分别设置
 
 ```bash
-
 # 终端设置(Linux 终端设置 HTTP 代理、注意只对当前终端有效)：
 $ export http_proxy=http://192.168.5.64:7890
 $ export https_proxy=http://192.168.5.64:7890
@@ -608,20 +621,18 @@ $ unset ALL_RPOXY
 
 注意：ping 使用的是 ICMP 协议，不支持代理。可以执行 `curl -vv https://www.google.com ` 看看有没有走代理。
 
-永久代理设置：将代理命令写入配置文件 ~/.profile 或 ~/.bashrc 或 ~/.zshrc 中
+永久代理设置：将代理命令写入配置文件 `~/.profile` 或 `~/.bashrc` 或 `~/.zshrc` 中
 
 <br>
 
+Git 设置代理： 
 ```bash
-
-# Git 设置代理：
 git config --global http.proxy http://192.168.5.79:7890
 git config --global https.proxy http://192.168.5.79:7890
 
 # Git 取消代理设置：
 git config --global --unset http.proxy
 git config --global --unset https.proxy
-
 ```
 
 
@@ -630,9 +641,9 @@ git config --global --unset https.proxy
 
 
 
-### 3. 终端配色方案
+### 终端配色方案
 
-#### 原生Shell配色
+原生Shell配色: 
 
 更改到 centos 的 /etc/bashrc 中即可永久生效： ` vim /etc/bashrc  `         # 填入如下内容
 ```bash
@@ -704,7 +715,7 @@ B为背景颜色，编号为40-47
 <br>
 
 
-### 4. On-my-zsh
+### On-my-zsh
 
 什么是zsh: https://blog.csdn.net/lovedingd/article/details/124128721
 和bash一样，zsh也是终端内的一个命令行解释器，简称：shell。顾名思义就是机器外面的一层壳，用于人机交互。接收用户或其他程序的命令，把这些命令转化成内核能理解的语言。

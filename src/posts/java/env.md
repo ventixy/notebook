@@ -15,6 +15,48 @@ order: 1
 ## Linux环境
 
 
+解压安装jdk: [jdk 8u202之前的版本下载地址](https://www.oracle.com/java/technologies/javase/javase8-archive-downloads.html)   &nbsp;  [jdk全版本下载地址](https://www.oracle.com/java/technologies/oracle-java-archive-downloads.html)
+
+- 先检查是否已经安装jdk
+
+```shell
+java -version
+
+rpm -qa|grep openjdk -i   # 检查系统安装的openjdk
+
+rpm -e --nodeps XXX(需要删除的软件名) #如果存在openjdk,就用这个命令逐一删除
+```
+
+- 创建jdk安装目录和软件包存储目录，并上传jdk文件。将文件解压剪贴到jdk安装目录后配置环境变量即可。
+
+```shell
+mkdir /usr/java
+mkdir /home/software
+
+tar -zxvf jdk-8u191-linux-x64.tar.gz
+mv jdk1.8.0_191/ /usr/java/
+```
+
+- 配置环境变量，（修改profile文件）
+
+```shell
+vim /etc/profile  #配置环境变量，加入如下信息：(按esc退出插入模式后 :wq 保存退出)
+```
+
+```
+export JAVA_HOME=/usr/java/jdk1.8.0_191
+export CLASSPATH=.:$JAVA_HOME/lib/dt.jar:$JAVA_HOME/lib/tools.jar
+export PATH=$JAVA_HOME/bin:$PATH
+```
+
+- 刷新profile，使其生效
+
+```shell
+source /etc/profile
+```
+<br>
+
+
 
 
 

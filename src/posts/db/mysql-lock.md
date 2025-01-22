@@ -467,4 +467,16 @@ select * from users where age >= 22 and age <= 28 for update;
 
 
 
-## MySQL死锁分析
+## MySQL阻塞与死锁
+
+在 MySQL 中，**锁阻塞**（Lock Blocking）是指一个事务（或会话）因为另一个事务持有的锁而无法获取所需的锁，导致该事务必须等待的情况。具体来说，当一个事务试图获取某个资源上的锁，但该资源已经被另一个事务锁定时，前者就会进入等待状态，直到后者释放锁。
+
+ 可根据需要调整 `innodb_lock_wait_timeout` 参数，设置合理的锁等待超时时间。
+
+
+
+
+
+
+
+   - 启用 `innodb_print_all_deadlocks` 参数，记录所有死锁信息，帮助分析和解决问题。
