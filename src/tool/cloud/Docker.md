@@ -17,31 +17,25 @@ docker 官网安装教程：https://docs.docker.com/engine/install/ubuntu/
 
 ::: tabs 
 
-@tab CentOS
+@tab:active CentOS
+
+安装docker之前需要确保已配置可用的yum镜像源，参照：[CentOS的安装](/posts/blog/vm.md#centos)
 
 **Uninstall old versions**：
 
 ```shell
-sudo yum remove docker \
-                  docker-client \
-                  docker-client-latest \
-                  docker-common \
-                  docker-latest \
-                  docker-latest-logrotate \
-                  docker-logrotate \
-                  docker-engine
+yum remove docker docker-client docker-client-latest docker-common docker-latest \
+           docker-latest-logrotate docker-logrotate docker-engine
 ```
 
 **install using the repository** :
 
 ```shell
-
 #Set up the repository
-sudo yum install -y yum-utils
-
-sudo yum-config-manager \
-    --add-repo \
+yum-config-manager --add-repo \
     http://mirrors.aliyun.com/docker-ce/linux/centos/docker-ce.repo
+    
+yum install -y yum-utils
 
 #install
 yum makecache fast && yum install -y docker-ce docker-ce-cli containerd.io && systemctl enable docker
@@ -52,29 +46,26 @@ systemctl restart docker   #重启
 systemctl enable docker    #自启动
 
 docker version
-
-sudo docker run hello-world
-
 ```
 
 #### 安装指定版本docker
-
+找到所有可用docker版本列表
 ```bash
-
-#找到所有可用docker版本列表
 yum list docker-ce --showduplicates | sort -r
-
-# 安装指定版本，用上面的版本号替换<VERSION_STRING>
-sudo yum install docker-ce-<VERSION_STRING>.x86_64 docker-ce-cli-<VERSION_STRING>.x86_64 containerd.io
-
-#例如：
-#yum install docker-ce-3:20.10.5-3.el7.x86_64 docker-ce-cli-3:20.10.5-3.el7.x86_64 containerd.io
-
-#注意加上 .x86_64 大版本号
-
+```
+安装指定版本，用上面的版本号替换`<VERSION_STRING>`
+```
+yum install docker-ce-<VERSION_STRING>.x86_64 docker-ce-cli-<VERSION_STRING>.x86_64 containerd.io
 ```
 
-@tab:active Ubuntu
+例如：
+```bash
+yum install docker-ce-3:20.10.5-3.el7.x86_64 docker-ce-cli-3:20.10.5-3.el7.x86_64 containerd.io
+```
+注意加上 `.x86_64` 大版本号
+
+
+@tab Ubuntu
 参照官网教程
 :::
 
@@ -84,41 +75,42 @@ sudo yum install docker-ce-<VERSION_STRING>.x86_64 docker-ce-cli-<VERSION_STRING
 
 ### 配置镜像加速
 
-1. 配置阿里云镜像加速器: 
+配置镜像加速（越来越难找到能用的了）: 
 
 ```shell
-mkdir -p /etc/docker && tee /etc/docker/daemon.json <<-'EOF'
+mkdir -p /etc/docker 
+
+tee /etc/docker/daemon.json <<-'EOF'
 {
-  "registry-mirrors": ["https://puqyip19.mirror.aliyuncs.com"]
+    "registry-mirrors": [
+        "https://do.nark.eu.org",
+        "https://dc.j8.work",
+        "https://docker.m.daocloud.io",
+        "https://dockerproxy.com",
+        "https://docker.mirrors.ustc.edu.cn",
+        "https://docker.nju.edu.cn",
+        "https://registry.docker-cn.com",
+        "https://hub-mirror.c.163.com",
+        "https://hub.uuuadc.top",
+        "https://docker.anyhub.us.kg",
+        "https://dockerhub.jobcher.com",
+        "https://dockerhub.icu",
+        "https://docker.ckyl.me",
+        "https://docker.awsl9527.cn",
+        "https://mirror.baidubce.com",
+        "https://docker.1panel.live",
+        "https://registry.cn-hangzhou.aliyuncs.com",
+        "https://akchsmlh.mirror.aliyuncs.com",
+        "https://2epe3hl0.mirror.aliyuncs.com"
+    ],
+    "exec-opts": ["native.cgroupdriver=systemd"]
 }
 EOF
-
-systemctl daemon-reload && systemctl restart docker
-
 ```
 
-2. 自建镜像加速
-
-视频教程参照：https://www.bilibili.com/video/BV13wDMYGECr
-
-Github仓库地址：https://github.com/jonssonyan/cf-workers-proxy
-
-在cloud flare配置好后（也可使用别的镜像配置），再配置docker即可：
-```bash
-sudo vim /etc/docker/daemon.json
-
-{
-"registry-mirrors" :
-    [
-        "https://ventixy.us.kg"
-    ]
-}
-```
 配置好后，重启Docker即可：
 ```bash
-sudo systemctl daemon-reload
-
-sudo systemctl restart docker
+systemctl daemon-reload && systemctl restart docker
 ```
 
 

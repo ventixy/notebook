@@ -64,7 +64,7 @@ vmware为我们提供了三种网络工作模式，它们分别是：Bridged(桥
     ```
 3. 进入虚拟机修改配置文件，以CentOS7为例：
 ```bash
-vi /etc/sysconﬁg/network-scripts/ifcfg-ens33   # 打开ifcfg-ens33⽂件，修改配置
+vi /etc/sysconfig/network-scripts/ifcfg-ens33   # 打开ifcfg-ens33⽂件，修改配置
 ```
 在桥接模式下，虚拟机IP地址需要与主机在同一网段，如果需要联网，则网关与DNS需要与主机网卡一致: 
  ```bash
@@ -86,6 +86,11 @@ DNS1=192.168.243.158              # 和 主机 的网关IP一致
 
 打开“Windows Defender 防火墙” -> “高级设置” -> “入站规则”，创建一条允许 ICMPv4 或 ICMPv6 的规则
 :::
+
+桥接模式IP地址资源有限，存在IP冲突的可能，主机所在网络环境不稳定或者设备多时不建议使用
+
+
+
 
 ### NAT模式
 在NAT(网络地址转换模式)中，会使用到VMnet8虚拟交换机，物理机上的 `VMware Network Adapter VMnet8 虚拟网卡` 将会和 `VMnet8交换机`相连接，来实现物理机与虚拟机之间的通信。
@@ -412,7 +417,25 @@ end
 
 镜像下载：[阿里云镜像](https://mirrors.aliyun.com/centos/7.9.2009/isos/x86_64/) 
 
+配置 yum 镜像源：
 
+```bash
+# 1. 备份现有的仓库配置文件，以防需要恢复
+cp /etc/yum.repos.d/CentOS-Base.repo /etc/yum.repos.d/CentOS-Base.repo.bak
+
+# 2. 下载并替换新的仓库配置文件
+wget -O /etc/yum.repos.d/CentOS-Base.repo http://mirrors.aliyun.com/repo/Centos-7.repo
+
+# 或者使用其他镜像源 (清华大学镜像源/中科大镜像源)
+wget -O /etc/yum.repos.d/CentOS-Base.repo https://mirrors.tuna.tsinghua.edu.cn help/centos/7/CentOS-Base.repo
+
+wget -O /etc/yum.repos.d/CentOS-Base.repo http://centos.ustc.edu.cn/centos/7/os/x86_64/CentOS-Base.repo
+```
+
+更新仓库信息并清理缓存：
+```bash
+yum clean all && yum makecache
+```
 
 CentOS替代方案：Rocky Linux，AlmaLinux
 
@@ -575,6 +598,36 @@ sudo pacman -U xxxx.pkg.tar.rst
 
 ### Linux防火墙设置
 
+在 CentOS 中，`firewalld` 是默认的防火墙管理工具。可以使用 `firewall-cmd` 命令来管理防火墙的状态和规则。
+
+- **查看状态**：使用 `firewall-cmd --state` 或 `firewall-cmd --info-all`。
+- **临时关闭**：使用 `systemctl stop firewalld`。
+- **永久关闭**：使用 `systemctl stop firewalld` 和 `systemctl disable firewalld`。
+- **重新启用**：使用 `systemctl start firewalld` 和 `systemctl enable firewalld`。
+
+要查看当前防火墙的状态，可以使用以下命令：
+
+```bash
+sudo firewall-cmd --state
+```
+
+这个命令会返回 `running` 或者 `not running`，分别表示防火墙是否正在运行。
+
+如果你想获得更详细的输出，包括活动区域、接口和服务等信息，可以使用：
+
+```bash
+sudo firewall-cmd --info-all
+```
+
+或者查看特定区域的信息：
+
+```bash
+sudo firewall-cmd --zone=public --list-all
+```
+<br/>
+
+特定端口号的防火墙规则设置：
+
 ```bash
 # 查看端口号是否开启,如果是no，就说明没有开放
 firewall-cmd --query-port=9200/tcp                           
@@ -586,7 +639,7 @@ firewall-cmd --zone=public --add-port=3306/tcp --permanent   #开通3306端口(m
 firewall-cmd --reload    # 重启防火墙，端口正常开启
 ```
 
-<br/>
+
 
 
 
@@ -595,33 +648,53 @@ firewall-cmd --reload    # 重启防火墙，端口正常开启
 
 Windows + Linux虚拟机的 代理设置：
 
-- 为避免Linux配置`clash`的一些麻烦，只在Windows上装有`clash`，并已有可用的服务
-- 虚拟机采用桥接模式（似乎也有不采用桥接模式而成功的例子，但是我没有成功）
-- `clash`开启`allow LAN`，并开启代理
-
-linux下通过图形界面设置的代理，终端和浏览器一般不使用该代理，需要分别设置
+- 在Windows上装有`clash` 并开启代理，记住顶部的端口号 `7890`
+- `clash`开启`allow LAN`，注意绑定：`0.0.0.0`
 
 ```bash
-# 终端设置(Linux 终端设置 HTTP 代理、注意只对当前终端有效)：
-$ export http_proxy=http://192.168.5.64:7890
-$ export https_proxy=http://192.168.5.64:7890
+可以通过设置以下环境变量来配置 HTTP 和 HTTPS 代理：
+export http_proxy=http://192.168.83.54:7890
+export https_proxy=http://192.168.83.54:7890
+export ftp_proxy=http://192.168.83.54:7890
 
-$ export http_proxy=socks5://127.0.0.1:1080
-$ export https_proxy=socks5://127.0.0.1:1080
+# 取消代理设置，只需将这些变量设置为空或者直接删除它们：
+unset http_proxy
+unset https_proxy
+unset ftp_proxy
+```
 
-$ export ALL_PROXY=http://192.168.5.64:7890
+永久代理设置：将代理命令写入配置文件 `~/.profile` 或 `~/.bashrc` 或 `~/.zshrc` 中
+```bash
+vim /etc/profile
 
+# 添加下面的内容
+export http_proxy=http://192.168.83.54:7890
+export https_proxy=http://192.168.83.54:7890
+export no_proxy=localhost,127.0.0.1,192.168.0.0/16
 
-# Linux 终端中取消代理设置：
-$ unset http_proxy
-$ unset https_proxy
-$ unset ALL_RPOXY
-
+# source
+source /etc/profile
 ```
 
 注意：ping 使用的是 ICMP 协议，不支持代理。可以执行 `curl -vv https://www.google.com ` 看看有没有走代理。
 
-永久代理设置：将代理命令写入配置文件 `~/.profile` 或 `~/.bashrc` 或 `~/.zshrc` 中
+::: important Kubernetes 和 Docker 代理设置
+Docker 配置代理，编辑代理配置文件：
+```bash
+sudo mkdir -p /etc/systemd/system/docker.service.d
+sudo vim /etc/systemd/system/docker.service.d/http-proxy.conf
+
+# 添加下面内容
+[Service]
+Environment="HTTP_PROXY=http://192.168.83.54:7890"
+Environment="HTTPS_PROXY=http://192.168.83.54:7890"
+Environment="NO_PROXY=localhost,127.0.0.1,192.168.0.0/16,172.20.0.0/16,10.96.0.0/12"
+
+# 重启Docker
+systemctl daemon-reload && systemctl restart docker
+```
+如果 Kubernetes 集群的组件需要访问本地服务（例如 API Server 或 etcd），确保在环境变量 NO_PROXY 中添加 Kubernetes 的服务网段（如 10.96.0.0/12）。
+:::
 
 <br>
 

@@ -357,6 +357,14 @@ Change: 2022-06-06 00:00:00.000000000 +0800
 cp /etc/ssh/sshd_config /etc/ssh/sshd_config.ori
 ```
 
+|          写法           |        `target` 是目录         |   `target` 是文件或不存在   |
+| ---------------------- | ----------------------------- | -------------------------- |
+| `cp -r source target`  | `source` 复制到 `target/`      | `source` 重命名为 `target` |
+| `cp -r source target/` | `source` 复制到 `target/`      | 错误，`target/` 无效        |
+| `cp -r source/ target` | `source/` 内容复制到 `target/` | 错误，`target` 无效         |
+
+
+
 
 
 <br/>
@@ -366,6 +374,11 @@ cp /etc/ssh/sshd_config /etc/ssh/sshd_config.ori
 ```shell
 mv a.txt b.txt             # 若b.txt 不存在，则将 a.txt 重命名为 b.txt
 ```
+|         写法         |        `target` 是目录         |   `target` 是文件或不存在   |
+| ------------------- | ----------------------------- | -------------------------- |
+| `mv source target`  | `source` 移动到 `target/`      | `source` 重命名为 `target` |
+| `mv source target/` | `source` 移动到 `target/`      | 错误，`target/` 无效        |
+| `mv source/ target` | `source/` 内容移动到 `target/` | 错误，`target` 无效         |
 
 
 
@@ -376,13 +389,17 @@ mv a.txt b.txt             # 若b.txt 不存在，则将 a.txt 重命名为 b.tx
 ![](https://image.ventix.top/img01/202101101734001.png)
 
 ```shell
-rm -rf dir                   # 递归强制删除dir目录及其内部文件和目录
+rm -rf ./kubernetes/dashboard/*      # 递归强制删除dashboard目录内部文件和目录
+rm -rf ./kubernetes/dashboard        # 删除dashboard整个目录(包括内部文件目录) 等同于：
+rm -rf ./kubernetes/dashboard/
 ```
 
 
 <br/>
 
 ==rmdir：删除空目录==: rmdir命令用于删除空目录（remove empty directories），当目录不为空时，命令不起作用。rmdir命令在实际工作中使用的极少
+
+
 
 
 
