@@ -451,7 +451,7 @@ Dashboard是官方提供的可视化插件，可用于 部署容器化的应用�
 dashboard的服务默认没使用nodeport，可将yaml文件下载到本地，在service里添加nodeport
 
 ```bash
-curl -O https://raw.githubusercontent.com/kubernetes/dashboard/v2.3.1/aio/deploy/recommended.yaml
+curl -O https://raw.githubusercontent.com/kubernetes/dashboard/v2.7.0/aio/deploy/recommended.yaml
 ```
 
 编辑文件内容,修改type和nodePort（nodePort也可以不声明，会自动生成随机端口号）
@@ -546,34 +546,9 @@ kubectl top pods
 ```
 
 
-## 基于本地镜像部署
+### 基于本地镜像部署
 
 以在集群中通过本地镜像安装dashboard为例：
-
-master节点配置了代理：
-
-```bash
-vim /etc/profile
-# 内容：
-export http_proxy=http://192.168.83.54:7890
-export https_proxy=http://192.168.83.54:7890
-export no_proxy=localhost,127.0.0.1,192.168.0.0/16
-# source
-source /etc/profile
-
-# docker proxy
-mkdir -p /etc/systemd/system/docker.service.d
-vim /etc/systemd/system/docker.service.d/http-proxy.conf
-# 添加下面内容
-[Service]
-Environment="HTTP_PROXY=http://192.168.83.54:7890"
-Environment="HTTPS_PROXY=http://192.168.83.54:7890"
-Environment="NO_PROXY=localhost,127.0.0.1,192.168.0.0/16,172.20.0.0/16,10.96.0.0/12"
-
-# 重启Docker
-systemctl daemon-reload && systemctl restart docker
-```
-
 
 提前准备好 yaml 文件，根据配置文件提前将镜像文件pull下来，复制到其他节点：
 ```bash
@@ -603,4 +578,58 @@ docker images | grep kubernetesui
 rm -f /root/docker-images/metrics-scraper.tar
 rm -f /root/docker-images/dashboard.tar
 ```
+
+
+
+
+
+## 通过代理安装官方源
+
+配置永久代理：
+
+```bash
+vim /etc/profile
+# 内容：
+export http_proxy=http://192.168.83.54:7890
+export https_proxy=http://192.168.83.54:7890
+export no_proxy=localhost,127.0.0.1,192.168.0.0/16
+# source
+source /etc/profile
+
+# docker proxy
+mkdir -p /etc/systemd/system/docker.service.d
+vim /etc/systemd/system/docker.service.d/http-proxy.conf
+# 添加下面内容
+[Service]
+Environment="HTTP_PROXY=http://192.168.83.54:7890"
+Environment="HTTPS_PROXY=http://192.168.83.54:7890"
+Environment="NO_PROXY=localhost,127.0.0.1,192.168.0.0/16,10.233.64.0/18,lb.kubesphere.local,10.233.0.0/18"
+
+# 重启Docker
+systemctl daemon-reload && systemctl restart docker
+
+
+# containerd proxy
+mkdir -p /etc/systemd/system/containerd.service.d
+vim /etc/systemd/system/containerd.service.d/http-proxy.conf
+# 添加下面内容
+[Service]
+Environment="HTTP_PROXY=http://192.168.83.54:7890"
+Environment="HTTPS_PROXY=http://192.168.83.54:7890"
+Environment="NO_PROXY=localhost,127.0.0.1,192.168.0.0/16,10.233.64.0/18,lb.kubesphere.local,10.233.0.0/18"
+
+# 重启containerd
+systemctl daemon-reload && systemctl restart containerd
+```
+
+临时代理方式：
+
+```bash
+export http_proxy=http://192.168.83.54:7890
+export https_proxy=http://192.168.83.54:7890
+export no_proxy=localhost,127.0.0.1,192.168.0.0/16
+
+unset http_proxy
+```
+
 
