@@ -43,14 +43,14 @@ kubesphere将会发送以下三个文件到指定邮箱：`kubesphere-images.txt
 
 以下命令需要联网（最好提前配置好代理），也可以预先使用  `export KKZONE=cn` 命令
 
-1. 安装 KubeKey，执行以下命令安装⼯具 KubeKey：
+1. 安装 [KubeKey](https://github.com/kubesphere/kubekey/blob/master/README_zh-CN.md) （安装kubernetes的工具），执行以下命令安装⼯具 KubeKey：
 
 ```bash
 curl -sSL https://get-kk.kubesphere.io | sh -
 ```
 下载完成后当前目录下将生成 KubeKey 二进制文件 `kk`
 
-2. 安装 helm
+2. 安装 helm（安装kubesphere的工具）
 
 ```bash
 curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
@@ -331,7 +331,14 @@ spec:
 
 <br/>
 
-后续操作全部再**主节点**上进行即可（自己提前配置好内网环境）
+后续操作全部再**主节点**上进行即可（自己提前配置好内网环境），下面分为基于两种不同本地镜像仓库的安装方式（Docker Registry 和 Harbor）
+
+
+
+
+## 基于Registry安装
+
+以下为基于Docker Registry的安装方式
 
 
 ### 离线集群配置文件
@@ -412,8 +419,6 @@ spec:
 
 
 
-## 自建镜像仓库
-
 ### 创建镜像仓库
 
 执行以下命令创建镜像仓库: （KubeKey帮我们在指定节点创建一个镜像仓库）
@@ -477,11 +482,6 @@ curlimages  grafana  jenkins        kubeedge    library        openpolicyagent  
 dockerhub.kubekey.local
 ```
 
-
-
-
-
-## 安装KubeSphere
 
 创建好仓库并准备好镜像后，安装就变得很简单了
 
@@ -585,3 +585,238 @@ spec:
 kubectl get node
 ```
 在kubesphere的管理界面中也能看到新添加的节点信息
+
+
+
+
+## 基于Harbor仓库安装
+
+以下为基于Harbor仓库的安装方式
+
+
+### 离线集群配置文件
+
+创建离线集群配置文件：
+
+```bash
+./kk create config --with-kubernetes v1.28.12
+```
+
+⭐⭐⭐**修改配置文件** ：按照离线环境的实际配置修改节点信息
+
+```bash
+vim config-sample.yaml
+```
+
+::: details 基于Harbor的安装方式配置文件
+```yaml
+apiVersion: kubekey.kubesphere.io/v1alpha2
+kind: Cluster
+metadata:
+  name: ks-sample
+spec:
+  hosts:
+  - {name: ks-control, address: 192.168.16.78, internalAddress: 192.168.16.78, user: root, password: "000000"}
+  - {name: ks-harbor, address: 192.168.16.77, internalAddress: 192.168.16.77, user: root, password: "000000"}
+  roleGroups:
+    etcd:
+    - ks-control
+    control-plane: 
+    - ks-control
+    worker:
+    - ks-control
+    - ks-harbor
+    registry:
+    - ks-harbor
+  controlPlaneEndpoint:
+    ## Internal loadbalancer for apiservers 
+    # internalLoadbalancer: haproxy
+
+    domain: lb.kubesphere.local
+    address: ""
+    port: 6443
+  kubernetes:
+    version: v1.28.12
+    clusterName: cluster.local
+    autoRenewCerts: true
+    containerManager: containerd
+  etcd:
+    type: kubekey
+  network:
+    plugin: calico
+    kubePodsCIDR: 10.233.64.0/18
+    kubeServiceCIDR: 10.233.0.0/18
+    ## multus support. https://github.com/k8snetworkplumbingwg/multus-cni
+    multusCNI:
+      enabled: false
+  registry:
+    type: harbor
+    auths:
+      "dockerhub.local":
+        # 部署 harbor 时需指定 harbor 帐号密码
+        username: admin
+        password: Harbor12345
+        skipTLSVerify: true
+    privateRegistry: "dockerhub.local"
+    namespaceOverride: "kubesphereio"
+    registryMirrors: []
+    insecureRegistries: []
+  addons: []
+```
+:::
+
+
+
+
+### 初始化Harbor仓库
+
+
+执行以下命令创建镜像仓库: （KubeKey帮我们在指定节点创建一个镜像仓库）
+```bash
+./kk init registry -f config-sample.yaml -a kubesphere.tar.gz
+```
+看到下列提示表示执行成功：
+```bash
+Local image registry created successfully. Address: dockerhub.local
+23:28:48 EST success: [ks-harbor]
+23:28:48 EST [ChownWorkerModule] Chown ./kubekey dir
+23:28:48 EST success: [LocalHost]
+23:28:48 EST Pipeline[InitRegistryPipeline] execute successfully
+```
+
+执行成功后，通过浏览器访问仓库节点的主机IP即可进入登录界面
+
+
+
+### 创建Harbor项目
+
+在指定为Harbor仓库的节点创建如下脚本并执行：
+
+```bash
+vim create_project_harbor.sh
+```
+
+```bash
+#!/usr/bin/env bash
+
+url="https://dockerhub.local"
+user="admin"
+passwd="Harbor12345"
+
+harbor_projects=(
+        ks
+        kubesphere
+        kubesphereio
+        coredns
+        calico
+        flannel
+        cilium
+        hybridnetdev
+        kubeovn
+        openebs
+        library
+        plndr
+        jenkins
+        argoproj
+        dexidp
+        openpolicyagent
+        curlimages
+        grafana
+        kubeedge
+        nginxinc
+        prom
+        kiwigrid
+        minio
+        opensearchproject
+        istio
+        jaegertracing
+        timberio
+        prometheus-operator
+        jimmidyson
+        elastic
+        thanosio
+        brancz
+        prometheus
+)
+
+for project in "${harbor_projects[@]}"; do
+    echo "creating $project"
+    curl -u "${user}:${passwd}" -X POST -H "Content-Type: application/json" "${url}/api/v2.0/projects" -d "{ \"project_name\": \"${project}\", \"public\": true}" -k  
+done
+```
+
+赋予执行权限并执行该脚本：
+```bash
+chmod +x create_project_harbor.sh
+
+./create_project_harbor.sh
+```
+
+
+
+
+
+### 推送镜像到仓库 
+
+推送离线镜像到刚才创建的镜像仓库：
+```bash
+./kk artifact image push -f config-sample.yaml -a kubesphere.tar.gz
+```
+如果显示`execute successfully`，则表明镜像推送到仓库成功
+
+
+推送成功后，可以刷新web界面看到同步到仓库的镜像
+
+
+拷贝Harbor仓库 `/etc/docker/cert.d/`下的 ca.ert 文件到主机后，可以在内网环境的机器中使用 `crictl pull` 或 `docker pull` 拉去到该仓库的镜像（使用自定义域名需要修改`/etc/hosts`），例如：
+```bash
+docker login dockerhub.local
+
+docker pull dockerhub.local/ks/kubesphere/ks-extensions-museum:v1.1.2
+```
+
+
+
+
+
+
+### 安装KubeSphere
+
+先安装 Kubernetes，执行以下命令创建 Kubernetes 集群
+```bash
+./kk create cluster -f config-sample.yaml -a kubesphere.tar.gz --with-local-storage --skip-push-images
+```
+
+安装 KubeSphere：
+```bash
+helm upgrade --install -n kubesphere-system --create-namespace ks-core ks-core-1.1.3.tgz \
+     --set global.imageRegistry=dockerhub.local/ks \
+     --set extension.imageRegistry=dockerhub.local/ks \
+     --set ksExtensionRepository.image.tag=v1.1.2 \
+     --debug \
+     --wait
+```
+如需高可用部署 KubeSphere，可在命令中添加 `--set ha.enabled=true,redisHA.enabled=true`
+
+
+
+
+
+
+### 卸载KubeSphere
+
+安装过程中出现解决不了的错误，或者需要重试需要删除时，可以参考如下命令：
+
+仅卸载卸载KubeSphere，执行下面命令即可 ：
+```
+helm -n kubesphere-system uninstall ks-core
+```
+
+如果 Kubernetes 是通过 KubeKey 安装的，执行以下命令开始卸载 Kubernetes 和 KubeSphere：
+
+```bash
+./kk delete cluster -f config-sample.yaml
+```
+
+命令中的文件为安装时的配置文件 `config-sample.yaml` ，并确保文件中的集群信息与集群的当前实际情况一致。
+

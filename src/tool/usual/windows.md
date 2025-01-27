@@ -306,6 +306,14 @@ wsl --unregister <Distri>   # 卸载某个子系统
 ```
 
 
+### 常见操作
+
+1. 在Windows中访问子系统中的文件：在`文件资源管理器`的输入框中输入 `\\wsl$` 回车即可
+
+2. 关于WSL的IP地址，通过`ip addr show`或`ifconfig`查看，通常会有一个 `eth0` ，其 IP 地址是 WSL2 的虚拟机地址。Windows 主机与 WSL2 虚拟机之间有直通网络（类似于NAT模式），因此两者可以通过 `localhost` 或 WSL2 的具体 IP 地址互相访问。
+
+
+
 
 
 
