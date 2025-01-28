@@ -720,6 +720,16 @@ git config --global --unset https.proxy
 
 <br>
 
+### set-hostname
+
+使用命令 `hostnamectl set-hostname 主机名` 来设置主机名，然后使用 `bash` 命令让主机名不重启即可生效
+
+```bash
+hostnamectl set-hostname rocky
+
+bash
+```
+
 
 
 ### 终端配色方案
