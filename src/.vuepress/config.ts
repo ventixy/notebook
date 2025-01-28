@@ -7,8 +7,8 @@ export default defineUserConfig({
   locales: {
     "/": {
       lang: "en-US",
-      title: "ventix",
-      description: "A docs for develop note",
+      title: "doc",
+      description: "docs for develop note",
     },
     // "/zh/": {
     //   lang: "zh-CN",
