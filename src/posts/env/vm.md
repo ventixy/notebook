@@ -129,9 +129,16 @@ VMware 点击 编辑 ——> 虚拟网络编辑器 (如图：)
 
 ![](https://image.ventix.top/img01/202101101724339.png)
 
-注意图中的 NETMASH 有误，应该是 METMASK
+注意图中的 NETMASH 有误，应该是 NETMASK
 
 ::: code-tabs#shell
+
+@tab Ubuntu
+
+```bash
+sudo vim /etc/netplan/00-installer-config.yaml   # 文件名可能会不同
+sudo netplan apply                               # 应用更改
+```
 
 @tab Centos
 
@@ -142,11 +149,12 @@ service network restart  # 刷新网络服务 centos8使用: ifup  ens33
 ```
 
 
-@tab Ubuntu
+@tab:active Rocky
 
 ```bash
-sudo vim /etc/netplan/00-installer-config.yaml   # 文件名可能会不同
-sudo netplan apply                               # 应用更改
+ifconfig
+vim /etc/sysconfig/network-scripts/ifcfg-ens160
+systemctl restart NetworkManager
 ```
 :::
 
@@ -170,10 +178,10 @@ NAME=ens33
 UUID=ee4084e5-a3b6-43f0-8b06-80a20d647a10
 DEVICE=ens33
 ONBOOT=yes
-IPADDR=192.168.42.10
+IPADDR=192.168.16.10
 NETMASK=255.255.255.0
-GATEWAY=192.168.42.2
-DNS1=192.168.42.2
+GATEWAY=192.168.16.2
+DNS1=192.168.16.2
 ```
 :::
 
