@@ -1,9 +1,16 @@
 ---
-
-order: -1
-title:  Windows命令和工具
-icon: windows
-
+article: true
+date: 2021-06-03
+category:
+  - tool
+tag:
+  - CMD
+  - PowerShell
+  - WSL
+  - Terminal
+shortTitle: windows
+title: Windows命令和工具
+order: 1
 ---
 
 

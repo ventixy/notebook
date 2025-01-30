@@ -1,12 +1,14 @@
 ---
-
-order: 1
-title:  IDEA和Eclipse
+article: true
+date: 2021-12-07
+category:
+  - tool
+tag:
+  - IDEA
 shortTitle: JetbrainsIDEA
-icon: intellij-idea
-
+title: JetbrainsIDEA
+order: 20
 ---
-
 
 
 ## 一 IDEA设置

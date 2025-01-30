@@ -1,9 +1,14 @@
 ---
-
-order: -10
-title:  Mac常用工具和软件
-icon: macos
-
+article: true
+date: 2021-09-02
+category:
+  - tool
+tag:
+  - Homebrew
+  - MacOS
+shortTitle: macos
+title: Mac常用工具和软件
+order: 10
 ---
 
 ## Homebrew软件管理

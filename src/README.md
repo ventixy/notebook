@@ -18,7 +18,7 @@ features:
 - title: 常用工具和软件
   icon: tool
   details: 介绍一些常用的工具和软件及其使用技巧.
-  link: /tool/usual/
+  link: /posts/blog/windows
 
 - title: Git版本控制
   icon: git

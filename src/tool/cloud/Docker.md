@@ -3,7 +3,6 @@
 order: 1
 title:  Docker
 shortTitle: docker
-icon: docker
 
 ---
 
