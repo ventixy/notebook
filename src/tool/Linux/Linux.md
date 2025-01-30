@@ -437,7 +437,7 @@ find [路径] [表达式]
 
 ::: tabs
 
-@tab 按文件名查找
+@tab 文件名
    - `-name`：按文件名匹配（区分大小写）。
    - `-iname`：按文件名匹配（不区分大小写）。
    - `-regex`：按正则表达式匹配。
@@ -448,7 +448,7 @@ find [路径] [表达式]
    find /var/log -regex ".*\.log"    # 查找 /var/log 目录下所有 .log 文件
    ```
 
-@tab 按文件类型查找
+@tab 文件类型
    - `-type`：按文件类型查找。
      - `f`：普通文件。
      - `d`：目录。
@@ -460,7 +460,7 @@ find [路径] [表达式]
    find /usr/bin -type l             # 查找 /usr/bin 目录下所有符号链接
    ```
 
-@tab 按文件大小查找
+@tab 文件大小
    - `-size`：按文件大小查找。
      - `+n`：大于 n 个单位。
      - `-n`：小于 n 个单位。
@@ -473,7 +473,7 @@ find [路径] [表达式]
    find /home -size 1G               # 查找 /home 目录下等于 1GB 的文件
    ```
 
-@tab 按时间查找
+@tab 时间
    - `-mtime`：按文件修改时间查找（天数）。
    - `-atime`：按文件访问时间查找（天数）。
    - `-ctime`：按文件状态变更时间查找（天数）。
@@ -487,7 +487,7 @@ find [路径] [表达式]
    find /tmp -cmin -60               # 查找 /tmp 目录下 60 分钟内状态变更的文件
    ```
 
-@tab 按权限查找
+@tab 权限
    - `-perm`：按文件权限查找。
      - `mode`：精确匹配权限。
      - `-mode`：包含指定权限。
@@ -499,7 +499,7 @@ find [路径] [表达式]
    find /var -perm /u=x              # 查找 /var 目录下用户可执行的文件
    ```
 
-@tab 按用户或用户组查找
+@tab 用户
    - `-user`：按文件所有者查找。
    - `-group`：按文件所属用户组查找。
 
@@ -508,7 +508,7 @@ find [路径] [表达式]
    find /var -group www-data         # 查找 /var 目录下属于用户组 www-data 的文件
    ```
 
-@tab 组合条件查找
+@tab 组合条件
    - `-a` 或 `-and`：逻辑与（默认）。
    - `-o` 或 `-or`：逻辑或。
    - `!` 或 `-not`：逻辑非。
@@ -519,7 +519,7 @@ find [路径] [表达式]
    find /home -user bob -not -name "*.tmp"  # 查找 /home 目录下属于 bob 且不是 .tmp 的文件
    ```
 
-@tab:active 执行操作
+@tab 执行操作
    - `-exec`：对查找到的文件执行命令。
    - `-delete`：删除查找到的文件。
    - `-print`：打印查找到的文件路径（默认行为）。
@@ -529,6 +529,20 @@ find [路径] [表达式]
    find . -name "*.bak" -exec rm {} \;   # 删除当前目录下所有 .bak 文件
    find /var/log -name "*.log" -exec gzip {} \;  # 压缩 /var/log 目录下所有 .log 文件
    ```
+@tab:active grep
+通过结合 `find` 和 `grep`，可以高效地查找某目录下包含指定内容的文件
+```bash
+# 查找当前目录下包含 "hello" 的文件
+find . -type f -exec grep -l "hello" {} +
+
+# 查找 /var/log 目录下包含 "error" 的文件
+find /var/log -type f -exec grep -l "error" {} +
+# 查找 /home 目录下包含 "password" 的 .txt 文件
+find /home -type f -name "*.txt" -exec grep -l "password" {} +
+
+# 查找 /etc 目录下包含 "127.0.0.1" 的文件，并显示匹配行的内容
+find /etc -type f -exec grep -H "127.0.0.1" {} +
+```
 ::: 
 
 高级用法示例：
