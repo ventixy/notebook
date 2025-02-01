@@ -351,8 +351,10 @@ sudo chmod 764 fileName
 查看用户信息和切换用户： `id` ， `su`
 
 ```bash
-who            # 关注谁登录到了系统
+who            # 当前登录用户的相关信息
 w              # 显示当前登录到系统的用户及其执行的进程信息
+whoami         # 当前执行命令的用户名
+users          # 当前登录的所有用户名列表
 
 id john        # 查看用户 john 的 UID、GID 和所属组等信息
  
@@ -392,7 +394,6 @@ userdel -r john       # 删除用户 john 并删除其主目录
 
 组管理：用户组管理涉及创建、修改、删除用户组，以及管理用户组的成员
 
-::: tip 用户组管理
 ```shell
 sudo groupadd groupName     # 添加组
 
@@ -404,7 +405,15 @@ groupmod -n newgroup oldgroup  # 将用户组 oldgroup 重命名为 newgroup
 
 groupdel developers         # 删除用户组
 ```
-:::
+
+用户相关配置文件：
+
+|    文件路径    |                                                                          说明                                                                          |
+| ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `/etc/passwd` | 存储系统中所有用户的基本信息，每行代表一个用户，字段包括用户名、密码占位符（实际密码存储在`/etc/shadow`中）、用户ID (UID)、组ID (GID)、用户描述、主目录和默认shell。 |
+| `/etc/group`  | 记录了系统中的用户组信息，每行代表一个组，字段包括组名、组密码占位符、组ID (GID) 和该组的成员列表（以逗号分隔）。                                                  |
+| `/etc/shadow` | 包含用户的加密密码以及密码过期信息等安全相关数据，只有root权限可以读取。每行对应一个用户，字段包括用户名、加密后的密码、上次修改密码的时间、最小和最大密码年龄等。       |
+
 
 
 
@@ -424,21 +433,22 @@ ps aux | grep 进程名或进程id
 pstree  # 以树状结构显示进程及其子进程 （加-p参数显示更多）
 
 # 使用 top 命令实时查看进程(按 q 退出)
-top  # 按 k 终止进程。按 P 按 CPU 使用率排序。按 M 按内存使用率排序。
-# 使用 htop 命令实时查看进程（需要安装）
-htop 
+top  # 按 P 按 CPU 使用率排序。按 M 按内存使用率排序。
+# 按s 可改变刷新间隔， 按 k 终止进程。
+
+htop  # 使用 htop 命令实时查看进程（需要安装）
 ```
 
 `ps`: 显示当前终端或指定用户的进程状态。当单独使用`ps`命令时，默认情况下它仅显示与当前终端会话相关的进程信息，为了获取更全面的信息，需要指定额外的选项来扩展查询范围
 
-| 参数（选项） |                                                                 描述                                                                 |
-| ----------- | ------------------------------------------------------------------------------------------------------------------------------------ |
-| `-e`        | 显示所有进程，包括其他用户的进程。等同于`-A`。                                                                                            |
-| `-f`        | 使用完整格式列表（full-format listing）。这增加了额外的信息列，如UID、PID、PPID、C、STIME、TTY、TIME和CMD。                                 |
-| `-a`        | 显示与终端相关的所有进程，不仅仅是当前用户的。它不会显示没有控制终端的进程。结合`-x`可以显示所有进程。                                          |
-| `-u`        | 选择列出哪些用户的进程。如果没有指定用户，则默认为当前用户。当与`-a`一起使用时，它将以用户导向的格式显示信息，如用户名、CPU使用率、内存使用情况等。 |
-| `-x`        | 显示没有控制终端的进程。通常与`-a`组合使用来显示所有进程，无论它们是否关联到一个终端。                                                        |
-| `-l`        | 提供长格式输出（long format），提供更详细的进程信息，例如状态（S）、优先级（PRI）等。                                                        |
+| 参数(选项) |                                                                 描述                                                                 |
+| ---------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| `-e`       | 显示所有进程，包括其他用户的进程。等同于`-A`。                                                                                            |
+| `-f`       | 使用完整格式列表（full-format listing）。这增加了额外的信息列，如UID、PID、PPID、C、STIME、TTY、TIME和CMD。                                 |
+| `-a`       | 显示与终端相关的所有进程，不仅仅是当前用户的。它不会显示没有控制终端的进程。结合`-x`可以显示所有进程。                                          |
+| `-u`       | 选择列出哪些用户的进程。如果没有指定用户，则默认为当前用户。当与`-a`一起使用时，它将以用户导向的格式显示信息，如用户名、CPU使用率、内存使用情况等。 |
+| `-x`       | 显示没有控制终端的进程。通常与`-a`组合使用来显示所有进程，无论它们是否关联到一个终端。                                                        |
+| `-l`       | 提供长格式输出（long format），提供更详细的进程信息，例如状态（S）、优先级（PRI）等。                                                        |
 
 
 
@@ -485,144 +495,83 @@ renice -n 10 -p 1234  # 将 PID 为 1234 的进程优先级设置为 10
 ```
 
 
-  
 
+### 服务管理器
 
+SysV init 和 systemd 是 Linux 系统中两种不同的初始化系统和服务管理器。
 
+- SysV init 采用一种线性的、基于运行级别的服务启动方式。它依赖于一系列位于 `/etc/init.d/` 目录下的脚本来启动或停止服务。SysV init 使用 `service` 命令管理服务
 
-### Linux服务管理
+- systemd 使用单元文件（Unit File）来管理服务，支持并行地启动服务，这大大加快了系统的启动时间。systemd使用 `systemctl` 命令管理服务
 
-在Linux系统中，服务管理是一个非常重要的任务，涉及到启动、停止、重启、查看状态等操作。传统的Linux系统使用 `init` 作为初始化进程，而近年来，越来越多的Linux发行版转而使用 `systemd` 作为初始化系统。
+| 特性             | SysV init                                      | systemd                                       |
+|------------------|------------------------------------------------|-----------------------------------------------|
+| 启动机制         | 按顺序启动服务                                  | 并行启动服务                                   |
+| 配置文件         | 使用位于 `/etc/init.d/` 下的脚本                | 使用单元文件（如 `.service` 文件）            |
+| 运行级别 vs. 目标 | 通过运行级别（runlevel）管理                    | 使用目标（target）来定义系统状态              |
+| 依赖关系管理     | 主要通过脚本中的逻辑处理，较为基础              | 强大的依赖关系图，自动解决复杂的依赖问题       |
+| 功能扩展         | 需要额外的工具来完成更多任务                    | 内置了广泛的系统管理功能                      |
+| 日志管理         | 通常依赖外部的日志管理工具                      | 集成了日志管理功能（journalctl）               |
+| 用户服务支持     | 不直接支持用户级别的服务                        | 支持用户特定的服务                             |
 
-- **init 系统**：服务通过 `/etc/init.d/` 下的脚本进行管理，命令相对简单。
-- **systemd 系统**：服务通过 `systemctl` 命令进行管理，提供了更多的功能和灵活性。
+systemd 在 SysV init 的基础上进行了大量的改进，提供了更为现代、高效且功能丰富的服务管理解决方案。随着越来越多的发行版转向 systemd，它已成为主流的选择。
 
 如果不确定当前系统使用的是哪种初始化系统，可以通过以下命令来确认：
 
-```sh
+```bash
 cat /proc/1/comm
 ```
 
 如果输出是 `systemd`，则当前系统使用的是 `systemd` 初始化系统。如果输出是 `sysvinit` 或其他类似的字符串，则当前系统使用的是传统的 `init` 系统。
 
 
+### service命令
 
-::: tabs
+service命令本身是一个shell脚本，它在`/etc/init.d/`目录查找指定的服务脚本，然后调用该服务脚本来完成任务。
 
-@tab init服务管理
-
-在使用 `init` 系统的传统Linux发行版中，服务通常通过 `/etc/init.d/` 目录下的脚本来控制。服务脚本通常遵循一定的命名规则，例如 `service_name.sh`。 常见命令：
-
-- **启动服务**：
-  ```sh
-  /etc/init.d/service_name start
-  ```
-
-- **停止服务**：
-  ```sh
-  /etc/init.d/service_name stop
-  ```
-
-- **重启服务**：
-  ```sh
-  /etc/init.d/service_name restart
-  ```
-
-- **重新加载配置文件**：
-  ```sh
-  /etc/init.d/service_name reload
-  ```
-
-- **查看服务状态**：
-  ```sh
-  /etc/init.d/service_name status
-  ```
-
-- **设置服务开机启动**：
-  在 `init` 系统下，可以使用 `chkconfig`（对于支持 `chkconfig` 的发行版）或手动编辑 `/etc/rc.local` 文件来设置服务开机启动。
-
-  ```sh
-  chkconfig --add service_name
-  chkconfig service_name on
-  ```
-
-示例：假设我们要管理名为 `nginx` 的服务：
-
-```sh
-/etc/init.d/nginx start
-/etc/init.d/nginx stop
-/etc/init.d/nginx restart
-/etc/init.d/nginx status
-```
-
-在一些 Linux 发行版中，可以使用 service 命令来管理服务，这可以简化命令：
 ```bash
-sudo service nginx start
-sudo service nginx stop
-sudo service nginx restart
-sudo service nginx status
+service --status-all     # 查看系统服务的状态
+service nginx status     # /etc/init.d/nginx status
+
+service nginx start      # /etc/init.d/nginx start
+service nginx stop       # /etc/init.d/nginx stop
+service nginx restart    # /etc/init.d/nginx restart
 ```
 
-@tab:active systemd服务管理
 
-`systemd` 是一种现代化的初始化系统，提供了更为丰富的功能和更精细的服务控制。在使用 `systemd` 的Linux发行版中，服务由 `.service` 文件控制，通常位于 `/lib/systemd/system/` 或 `/etc/systemd/system/` 目录下。常见命令：
 
-- **启动服务**：
-  ```sh
-  sudo systemctl start service_name.service
-  ```
+使用 `chkconfig` 或 `update-rc.d` 管理开机自启：
+```bash
+chkconfig --list                   # 显示SysV服务，不包含systemd服务
+chkconfig service_name on|off      # CentOS/RHEL
 
-- **停止服务**：
-  ```sh
-  sudo systemctl stop service_name.service
-  ```
+update-rc.d service_name defaults  # Debian/Ubuntu
+```
 
-- **重启服务**：
-  ```sh
-  sudo systemctl restart service_name.service
-  ```
 
-- **重新加载配置文件**：
-  ```sh
-  sudo systemctl reload-or-restart service_name.service
-  ```
+### systemctl命令
 
-- **查看服务状态**：
-  ```sh
-  sudo systemctl status service_name.service
-  ```
+在使用 `systemd` 的Linux发行版中，服务由 `.service` 文件控制，通常位于 `/lib/systemd/system/` 或 `/etc/systemd/system/` 目录下
 
-- **设置服务开机启动**：
-  ```sh
-  sudo systemctl enable service_name.service
-  ```
+```bash
+sudo systemctl status nginx.service
 
-- **取消服务开机启动**：
-  ```sh
-  sudo systemctl disable service_name.service
-  ```
-
-- **查看所有已启用的服务**：
-  ```sh
-  sudo systemctl list-unit-files --type=service --state=enabled
-  ```
-
-- **查看所有已禁用的服务**：
-  ```sh
-  sudo systemctl list-unit-files --type=service --state=disabled
-  ```
-
-示例：在 `systemd` 系统下管理名为 `nginx` 的服务：
-
-```sh
 sudo systemctl start nginx.service
 sudo systemctl stop nginx.service
 sudo systemctl restart nginx.service
-sudo systemctl status nginx.service
-sudo systemctl enable nginx.service
-sudo systemctl disable nginx.service
+sudo systemctl reload nginx.service	  # 重新加载配置文件（不终止服务）
+
+sudo systemctl enable nginx.service   # 设置服务开机启动
+sudo systemctl disable nginx.service  # 取消服务开机启动
 ```
-:::
+
+查看所有已启用/已禁用的服务
+
+```bash
+sudo systemctl list-unit-files --type=service --state=enabled
+
+sudo systemctl list-unit-files --type=service --state=disabled
+```
 
 
 
@@ -630,7 +579,7 @@ sudo systemctl disable nginx.service
 
 
 
-## SSH和网络管理
+## 防火墙和网络管理
 
 ### 常用网络工具
 
