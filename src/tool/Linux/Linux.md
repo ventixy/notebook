@@ -1,11 +1,11 @@
 ---
 
-order: 1
+order: 5
 title:  Linux常用命令
 
 ---
 
-VM和Linux的安装参照：[VM和Linux](/posts/om/vm.md)，[WSL2](/posts/blog/windows.md#二-wsl-wsl2)。Linux基础参照：[Linux基础常识](/posts/om/linux.md)
+VM和Linux的安装参照：[VM和Linux](/posts/om/vm.md)，[WSL2](/posts/blog/windows.md#二-wsl-wsl2)
 
 
 
@@ -62,28 +62,46 @@ Linux系统中的info命令是一个查看程序对应文档信息的命令，�
 
 
 
-### ls 命令
-ls 命令是Linux下最常用的指令之一。==ls：显示目录下的内容及相关属性信息==：
+### ls和du命令
+ls 命令是Linux下最常用的指令之一。==ls：显示目录下的内容及相关属性信息==，ls命令可以理解为英文单词list的缩写，其功能是列出目录的内容及其内容属性信息（list directory contents）。该命令有点类似于DOS系统下的dir命令，有趣的是，Linux下其实也有dir命令，但我们更习惯于使用ls。
 
 ```bash
 ls -al
+
+# 以长格式以及易于阅读的文件大小格式展示
+ls -lh /
+# 查看根目录的每个文件目录大小并按照文件大小排序
+ls -lhSr /  
 ```
-
-- ls命令可以理解为英文单词list的缩写，其功能是列出目录的内容及其内容属性信息（list directory contents）。
-
-- 该命令有点类似于DOS系统下的dir命令，有趣的是，Linux下其实也有dir命令，但我们更习惯于使用ls。
-
 ls命令常用参数：
 
-| 常用参数 | 参数说明                                         |
-| :------: | ------------------------------------------------ |
-|    -a    | 显示所有文件及目录 (包括以“.”开头的隐藏文件)     |
-|    -l    | 使用长格式列出文件及目录信息  （有时可以使用 `ll` 命令代替 `ls -l`）                    |
-|    -r    | 将文件以相反次序显示(默认依英文字母次序)         |
-|    -t    | 根据最后的修改时间排序                           |
-|    -A    | 同 -a ，但不列出 “.” (当前目录) 及 “..” (父目录) |
-|    -S    | 根据文件大小排序                                 |
-|    -R    | 递归列出所有子目录                               |
+| 常用参数 |                             参数说明                             |
+| :------: | --------------------------------------------------------------- |
+|    -a    | 显示所有文件及目录 (包括以“.”开头的隐藏文件)                        |
+|    -l    | 使用长格式列出文件及目录信息  （有时可以使用 `ll` 命令代替 `ls -l`） |
+|    -h    | 代表“human readable”, 以易于阅读的文件大小格式展示                 |
+|    -r    | 反向排序                                                         |
+|    -S    | 根据文件大小排序                                                 |
+|    -t    | 根据最后的修改时间排序                                            |
+|    -R    | 递归列出所有子目录                                                |
+
+对于目录，`ls -lh` 通常只显示目录元数据的大小（通常很小，如 4KB），而不是目录中所有文件的总大小。如果需要查看目录占用的磁盘空间，需要使用 `du -h`
+<br/>
+
+`du`命令，全称为“disk usage”，是一个用于==估算文件空间使用情况==的命令行工具。它可以帮助用户查看目录或文件在磁盘上的占用空间大小。
+
+```bash
+du -sh /etc  # 分别展示/etc目录下所有文件目录的大小
+
+du -ah /etc  # 统计/etc目录的总大小
+
+du -h / -d 1 # 查看根目录下文件及一级目录的大小
+```
+
+- `-a` 或 `--all`: 显示每个文件的大小，而不仅仅是目录。
+- `-h` 或 `--human-readable`: 以人类可读的格式显示大小（K, M, G等）。
+- `-s` 或 `--summarize`: 显示总计，对于查看某个目录的整体大小很有用。
+- `-d [N]` 或 `--max-depth=N`：此选项指定du命令递归进入子目录的最大深度
 
 
 
@@ -335,6 +353,8 @@ sudo chmod 764 fileName
 查看用户信息和切换用户： `id` ， `su`
 
 ```bash
+who            # 关注谁登录到了系统
+
 id john        # 查看用户 john 的 UID、GID 和所属组等信息
  
 su username    # 切换到指定用户
@@ -630,35 +650,8 @@ netstat -ano | findstr port
 
 
 
-<br/>
 
 
-
-### SSH远程连接
-
-```shell
-
-# 首先需要给远程服务器（Linux服务器）安装ssh
-
-## 搜索ssh是否已经安装
-ps -ef | grep ssh
-
-
-# 假如没有搜索到，则需要安装ssh服务
-apt update
-
-# 安装ssh
-sudo apt install openssh-server
-
-# 重启ssh
-sudo service ssh restart 
-
-# 执行完了以上指令之后，我们可以搜索ssh服务是否已经启动
-ps -ef | grep ssh
-
-```
-
-阿里云、华为云、腾讯云等云服务器会默认安装好ssh服务。
 
 
 
@@ -667,6 +660,47 @@ ps -ef | grep ssh
 
 
 ### Linux防火墙
+
+在 CentOS 中，`firewalld` 是默认的防火墙管理工具。可以使用 `firewall-cmd` 命令来管理防火墙的状态和规则。
+
+- **查看状态**：使用 `firewall-cmd --state` 或 `firewall-cmd --info-all`。
+- **临时关闭**：使用 `systemctl stop firewalld`。
+- **永久关闭**：使用 `systemctl stop firewalld` 和 `systemctl disable firewalld`。
+- **重新启用**：使用 `systemctl start firewalld` 和 `systemctl enable firewalld`。
+
+要查看当前防火墙的状态，可以使用以下命令：
+
+```bash
+sudo firewall-cmd --state
+```
+
+这个命令会返回 `running` 或者 `not running`，分别表示防火墙是否正在运行。
+
+如果你想获得更详细的输出，包括活动区域、接口和服务等信息，可以使用：
+
+```bash
+sudo firewall-cmd --info-all
+```
+
+或者查看特定区域的信息：
+
+```bash
+sudo firewall-cmd --zone=public --list-all
+```
+<br/>
+
+特定端口号的防火墙规则设置：
+
+```bash
+# 查看端口号是否开启,如果是no，就说明没有开放
+firewall-cmd --query-port=9200/tcp                           
+
+firewall-cmd --zone=public --add-port=6379/tcp --permanent   #开通6379端口(redis)
+firewall-cmd --zone=public --add-port=8848/tcp --permanent   #开通8848端口(nacos)
+firewall-cmd --zone=public --add-port=3306/tcp --permanent   #开通3306端口(mysql)
+
+firewall-cmd --reload    # 重启防火墙，端口正常开启
+```
 
 
 

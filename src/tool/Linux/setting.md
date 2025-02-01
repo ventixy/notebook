@@ -1,14 +1,8 @@
 ---
-article: true
-date: 2023-02-19
-category:
-  - linux
-tag:
-  - linux 
-  - Rocky
-  - CentOS
-shortTitle: Linux基础常识
-title: Linux基础信息及发展记录
+
+order: 1
+title:  Linux基础设置
+
 ---
 
 
@@ -32,8 +26,9 @@ uname -a
 hostname
 
 hostnamectl set-hostname xxx
+bash
 ```
-
+使用 `hostnamectl set-hostname 主机名` 来设置主机名后，使用 `bash` 命令让主机名不重启即可生效
 
 
 
@@ -72,11 +67,42 @@ dmidecode | grep "Product Name"    # 查看机器型号
 
 
 
+
+### 命令行提示符
+
+Linux命令行结尾的提示符有 “#” 和 “$” 两种不同的符号
+
+```shell
+[root@hostname ~]#        # <==这是超级管理员root用户对应的命令行。
+[hostname@hostname ~]$    # <==这是普通用户对应的命令行。
+```
+
+> 命令行提示符@前面的字符代表当前登录的用户（可用whoami查询）
+>
+> @后面的为主机名（可用hostname查询）
+
+
+
+<br/>
+
+Linux命令提示符由PS1环境变量控制
+
+```shell
+set|grep PS1            # 注意PS要大写
+
+> PS1='[\u@\h \W]\$ '   # 可以通过全局配置文件/etc/bashrc或/etc/profile进行按需配置和调整
+```
+
+
+
+
+
 ### 命令执行时间
 time命令
 ```bash
 time ls /
 ```
+
 
 
 
@@ -133,34 +159,6 @@ timedatectl list-timezones | grep 'Shanghai'
 # 设置时区
 timedatectl set-timezone Asia/Shanghai
 ```
-
-
-### 命令行提示符
-
-Linux命令行结尾的提示符有 “#” 和 “$” 两种不同的符号
-
-```shell
-[root@hostname ~]#        # <==这是超级管理员root用户对应的命令行。
-[hostname@hostname ~]$    # <==这是普通用户对应的命令行。
-```
-
-> 命令行提示符@前面的字符代表当前登录的用户（可用whoami查询）
->
-> @后面的为主机名（可用hostname查询）
-
-
-
-<br/>
-
-Linux命令提示符由PS1环境变量控制
-
-```shell
-set|grep PS1            # 注意PS要大写
-
-> PS1='[\u@\h \W]\$ '   # 可以通过全局配置文件/etc/bashrc或/etc/profile进行按需配置和调整
-```
-
-
 
 
 
@@ -273,12 +271,169 @@ sudo systemctl isolate multi-user.target
 
 
 
+### SSH远程连接
+
+```shell
+
+# 首先需要给远程服务器（Linux服务器）安装ssh
+
+## 搜索ssh是否已经安装
+ps -ef | grep ssh
+
+
+# 假如没有搜索到，则需要安装ssh服务
+apt update
+
+# 安装ssh
+sudo apt install openssh-server
+
+# 重启ssh
+sudo service ssh restart 
+
+# 执行完了以上指令之后，我们可以搜索ssh服务是否已经启动
+ps -ef | grep ssh
+
+```
+
+阿里云、华为云、腾讯云等云服务器会默认安装好ssh服务。
 
 
 
 
 
+### http proxy
 
+Windows + Linux虚拟机的 代理设置：
+
+- 在Windows上装有`clash` 并开启代理，记住顶部的端口号 `7890`
+- `clash`开启`allow LAN`，注意绑定：`0.0.0.0`
+
+```bash
+可以通过设置以下环境变量来配置 HTTP 和 HTTPS 代理：
+export http_proxy=http://192.168.83.54:7890
+export https_proxy=http://192.168.83.54:7890
+export ftp_proxy=http://192.168.83.54:7890
+
+# 取消代理设置，只需将这些变量设置为空或者直接删除它们：
+unset http_proxy
+unset https_proxy
+unset ftp_proxy
+```
+
+永久代理设置：将代理命令写入配置文件 `~/.profile` 或 `~/.bashrc` 或 `~/.zshrc` 中
+```bash
+vim /etc/profile
+
+# 添加下面的内容
+export http_proxy=http://192.168.83.54:7890
+export https_proxy=http://192.168.83.54:7890
+export no_proxy=localhost,127.0.0.1,192.168.0.0/16
+
+# source
+source /etc/profile
+```
+
+注意：ping 使用的是 ICMP 协议，不支持代理。可以执行 `curl -vv https://www.google.com ` 看看有没有走代理。
+
+::: important Kubernetes 和 Docker 代理设置
+Docker 配置代理，编辑代理配置文件：
+```bash
+sudo mkdir -p /etc/systemd/system/docker.service.d
+sudo vim /etc/systemd/system/docker.service.d/http-proxy.conf
+
+# 添加下面内容
+[Service]
+Environment="HTTP_PROXY=http://192.168.83.54:7890"
+Environment="HTTPS_PROXY=http://192.168.83.54:7890"
+Environment="NO_PROXY=localhost,127.0.0.1,192.168.0.0/16,172.17.16.0/20"
+
+# 重启Docker
+systemctl daemon-reload && systemctl restart docker
+```
+如果 Kubernetes 集群的组件需要访问本地服务（例如 API Server 或 etcd），确保在环境变量 NO_PROXY 中添加 Kubernetes 的服务网段（如 10.96.0.0/12）。
+:::
+
+<br>
+
+Git 设置代理： 
+```bash
+git config --global http.proxy http://192.168.5.79:7890
+git config --global https.proxy http://192.168.5.79:7890
+
+# Git 取消代理设置：
+git config --global --unset http.proxy
+git config --global --unset https.proxy
+```
+
+
+
+<br>
+
+
+
+### 终端配色方案
+
+原生Shell配色: 
+
+更改到 centos 的 /etc/bashrc 中即可永久生效： ` vim /etc/bashrc  `         # 填入如下内容
+```bash
+
+if [ "${-#*i}" != "$-" ];then
+    # interactively shell
+    PS1="[\[\033[01;31m\]\u\[\033[00m\]@\[\033[36;36m\]\h\[\033[00m\] \[\033[01;34m\]\w\[\033[00m\]]$ "
+    trap 'echo -ne "\e[0m"' DEBUG
+fi
+
+```
+
+可以在/etc/profile中也去加载/etc/bashrc：
+
+```bash
+
+cat >> /etc/profile << EOF
+if [ -f /etc/bashrc ]; then 
+    . /etc/bashrc
+fi
+EOF
+
+```
+刷新即永久生效： `source /etc/profile` 
+
+
+<br/>
+
+参数说明-->PS1的定义中个常用的参数的含义如下：
+```bash
+\d ：#代表日期，格式为weekday month date，例如："Mon Aug 1"
+\H ：#完整的主机名称
+\h ：#仅取主机的第一个名字
+\T ：#显示时间为24小时格式，如：HH：MM：SS
+\t ：#显示时间为12小时格式 , 如：HH：MM：SS
+\A ：#显示时间为12小时格式：HH：MM
+\u ：#当前用户的账号名称
+\v ：#BASH的版本信息
+\w ：#完整的工作目录名称
+\W ：#利用basename取得工作目录名称，所以只会列出最后一个目录
+#  ：#下达的第几个命令
+$  ：#提示字符，如果是root时，提示符为：`#` ，普通用户则为：`$`
+
+```
+
+设置颜色: 在`PS1`中设置字符颜色的格式为：`[\e[F;Bm]`
+- `F`为字体颜色，编号为`30-37`
+- `B`为背景颜色，编号为`40-47`
+
+格式：`[\e[F;Bm]`需要改变颜色的部分`[\e[0m]` , `F B` 值分别对应的颜色
+```bash
+30 40 黑色
+31 41 红色
+32 42 绿色
+33 43 黄色
+34 44 蓝色
+35 45 紫红色
+36 46 青蓝色
+37 47 白色
+```
 
 
 
