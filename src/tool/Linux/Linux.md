@@ -308,6 +308,23 @@ Linux里面，任何一个文件都具有『`User`, `Group`及`Others`』三种�
 |  w   |   可写(write)   | w (modify contents of directory) |    2     |
 |  x   | 可执行(execute) |       x (access directory)       |    1     |
 
+::: important umask
+umask 是一个掩码（mask），用于屏蔽文件和目录的默认权限。它通过“减法”的方式，从默认权限中去掉某些权限位，从而得到最终的权限。默认情况下：
+
+- 文件: 初始权限是 `666`（即 `rw-rw-rw-`）, `默认权限 = 666 - umask`
+
+- 目录: 初始权限是 `777`（即 `rwxrwxrwx`）, `默认权限 = 777 - umask`
+
+示例：当`umask` 为 `022`时，文件默认权限：`666 - 022 = 644`（即 `rw-r--r--`），目录默认权限：`777 - 022 = 755`（即 `rwxr-xr-x`）
+```bash
+unmask            # 查看当前 umask
+umask 002         # 临时设置（仅在当前会话中有效）
+```
+永久设置（修改用户配置文件）: 编辑 `~/.bashrc` 或 `~/.bash_profile` 文件，添加：`umask 002`
+
+:::
+
+
 **修改文件/目录的权限**:  `chmod`
 
 ```shell

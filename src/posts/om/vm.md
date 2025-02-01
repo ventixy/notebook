@@ -423,30 +423,6 @@ end
 
 ### CentOS
 
-镜像下载：[阿里云镜像](https://mirrors.aliyun.com/centos/7.9.2009/isos/x86_64/) 
-
-配置 yum 镜像源：
-
-```bash
-# 1. 备份现有的仓库配置文件，以防需要恢复
-cp /etc/yum.repos.d/CentOS-Base.repo /etc/yum.repos.d/CentOS-Base.repo.bak
-
-# 2. 下载并替换新的仓库配置文件
-wget -O /etc/yum.repos.d/CentOS-Base.repo http://mirrors.aliyun.com/repo/Centos-7.repo
-
-# 或者使用其他镜像源 (清华大学镜像源/中科大镜像源)
-wget -O /etc/yum.repos.d/CentOS-Base.repo https://mirrors.tuna.tsinghua.edu.cn help/centos/7/CentOS-Base.repo
-
-wget -O /etc/yum.repos.d/CentOS-Base.repo http://centos.ustc.edu.cn/centos/7/os/x86_64/CentOS-Base.repo
-```
-
-更新仓库信息并清理缓存：
-```bash
-yum clean all && yum makecache
-```
-
-CentOS替代方案：Rocky Linux，AlmaLinux
-
 
 ::: tip Windows Terminal 连接 VM 中的虚拟机
 前置条件：VM中的Linux虚拟机需要运行 sshd 服务，且防火墙开放22端口
@@ -459,7 +435,7 @@ ssh root@192.168.243.222
 
 第一次连接时，可能会提示你确认主机的指纹，输入 `yes` 并按回车键继续，输入密码即可
 
-#### 配置 Windows Terminal 快速访问
+**配置 Windows Terminal 快速访问**
 在Windows Terminal 中，通过 `设置` --> `添加新配置文件` :
 ```bash
 {

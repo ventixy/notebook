@@ -439,16 +439,107 @@ $  ：#提示字符，如果是root时，提示符为：`#` ，普通用户则�
 ```
 
 
-### YUM源配置
-
-
-
-设置系统光盘自动挂载
-
-
-配置本地YUM源
 
 
 
 
-## Linux发展记录
+
+## Linux发行版及镜像
+
+
+### CentOS7YUM源
+
+镜像下载：[阿里云镜像](https://mirrors.aliyun.com/centos/7.9.2009/isos/x86_64/) 
+
+配置 yum 镜像源：
+
+```bash
+# 1. 备份现有的仓库配置文件，以防需要恢复
+cp /etc/yum.repos.d/CentOS-Base.repo /etc/yum.repos.d/CentOS-Base.repo.bak
+
+# 2. 下载并替换新的仓库配置文件
+wget -O /etc/yum.repos.d/CentOS-Base.repo http://mirrors.aliyun.com/repo/Centos-7.repo
+
+# 或者使用其他镜像源 (清华大学镜像源/中科大镜像源)
+wget -O /etc/yum.repos.d/CentOS-Base.repo https://mirrors.tuna.tsinghua.edu.cn help/centos/7/CentOS-Base.repo
+
+wget -O /etc/yum.repos.d/CentOS-Base.repo http://centos.ustc.edu.cn/centos/7/os/x86_64/CentOS-Base.repo
+```
+
+更新仓库信息并清理缓存：
+```bash
+yum clean all && yum makecache
+```
+
+CentOS替代方案：Rocky Linux，AlmaLinux
+
+
+
+### 本地YUM源配置
+
+**设置系统光盘自动挂载**
+
+1. 插入系统安装光盘（虚拟机中将ISO镜像文件挂载到虚拟机的光驱上）
+2. 选择一个目录作为光盘的挂载点。通常会选择`/mnt/cdrom`或`/media/cdrom`这样的路径
+3. 编辑`/etc/fstab`文件实现自动挂载
+    ```bash
+   vim /etc/fstab
+   # 添加以下内容
+   /dev/cdrom  /mnt/cdrom  iso9660  defaults  0 0
+    ```
+4. 手动挂载一次以验证设置：`mount -a`
+
+
+
+**配置本地YUM源**（CentOS7）
+
+1. 在`/etc/yum.repos.d/`目录下，创建一个新的`.repo`文件
+    ```bash
+   vim /etc/yum.repos.d/local.repo
+    ```
+2. 编辑`.repo`文件，加入如下内容
+    ```bash
+    [LocalRepo]
+    name=Local Repository
+    baseurl=file:///mnt/cdrom/
+    enabled=1
+    gpgcheck=1
+    gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-redhat-release
+    ```
+3. 清理并更新YUM缓存，测试配置是否成功
+    ```bash
+   yum clean all && yum makecache 
+   yum list available  
+    ```
+    
+在 Rocky Linux 8 及其类似版本（如 CentOS 8、AlmaLinux 8 等）中，配置本地 YUM 源时有时会将配置文件分成两个部分或两个文件的做法，通常指的是将应用程序（AppStream）和操作系统基础组件（BaseOS）的仓库分开配置。
+
+
+
+### YUM和DNF
+
+yum 和 dnf 都是 Red Hat 系列 Linux 发行版中的软件包管理工具，用于处理 RPM 包的安装、更新、查询和删除等操作。
+
+- Yum (Yellowdog Updater Modified) 是较早出现的包管理工具，广泛应用于基于 RPM 的早期发行版
+- DNF (Dandified Yum) 是作为 Yum 的下一代替代品开发的，首次出现在 Fedora 18 中。从 RHEL 8 开始，Red Hat 官方推荐使用 DNF 而不是 Yum。
+
+|   特性/工具   |            Yum            |         DNF          |
+| ------------ | ------------------------- | -------------------- |
+| **语言基础** | Python                    | C/C++（libsolv）     |
+| **性能**     | 较慢，特别是在大型仓库环境下 | 快速高效的依赖解析     |
+| **内存使用** | 较高                       | 优化更好              |
+| **API支持**  | 较少                       | 更强大，更适合开发集成 |
+| **兼容性**   | 广泛应用于旧版本系统         | 新版本系统的标准选择   |
+
+在8的版本中，使用用yum和dnf几乎是一样的
+
+```bash
+yum list available
+
+dnf module list nginx
+```
+
+阿里云Epel 镜像配置参考：[Epel 镜像](https://developer.aliyun.com/mirror/epel)
+
+
+
