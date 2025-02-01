@@ -5,6 +5,7 @@ title:  Linux基础设置
 
 ---
 
+VM和Linux的安装参照：[VM和Linux](/posts/om/vm.md)，[WSL2](/posts/blog/windows.md#二-wsl-wsl2)
 
 一些在线网站：[鸟哥的 Linux 私房菜 基础学习篇](http://cn.linux.vbird.org/linux_basic/linux_basic.php) , [鸟哥的 Linux 私房菜 服务器架设篇](http://cn.linux.vbird.org/linux_server/)
 
