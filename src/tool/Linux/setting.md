@@ -98,12 +98,18 @@ set|grep PS1            # 注意PS要大写
 
 
 
-### 命令执行时间
-time命令
+### time和watch
+
+统计命令执行时间：time命令
 ```bash
 time ls /
 ```
 
+使用 `watch` 命令监控变化：
+
+```bash
+watch -n 2 netstat -tuln
+```
 
 
 

@@ -89,9 +89,10 @@ ls命令常用参数：
 `du`命令，全称为“disk usage”，是一个用于==估算文件空间使用情况==的命令行工具。它可以帮助用户查看目录或文件在磁盘上的占用空间大小。
 
 ```bash
-du -sh /etc  # 分别展示/etc目录下所有文件目录的大小
+du -sh /etc    # 分别展示/etc目录下所有文件目录的大小
 
-du -ah /etc  # 统计/etc目录的总大小
+du -ah /etc    # 统计/etc目录的总大小
+du -lLah /etc  # 包含链接文件
 
 du -h / -d 1 # 查看根目录下文件及一级目录的大小
 ```
@@ -100,7 +101,8 @@ du -h / -d 1 # 查看根目录下文件及一级目录的大小
 - `-h` 或 `--human-readable`: 以人类可读的格式显示大小（K, M, G等）。
 - `-s` 或 `--summarize`: 显示总计，对于查看某个目录的整体大小很有用。
 - `-d [N]` 或 `--max-depth=N`：此选项指定du命令递归进入子目录的最大深度
-
+- `l`: 对每个链接都单独计数
+- `L`: 让 du 跟随符号链接，并计算它们指向的实际文件的大小
 
 
 
@@ -433,6 +435,44 @@ groupdel developers         # 删除用户组
 
 
 
+### 软链接和硬链接
+
+**软链接（Symbolic Link，Symlink）**：存储的是目标文件的路径，类似于 Windows 的快捷方式
+
+**硬链接（Hard Link）** : 与原始文件共享相同的 inode 和数据块, 删除原始文件后，硬链接仍然有效
+
+```bash
+ln mydir/profile hard_link        # 创建硬链接
+ln -s mydir/profile symlink       # 创建软连接
+```
+
+软链接文件通过`ls -ali` 查看时，在权限开头有 `l` 的标识，后面也有明确的原始文件指向：
+```bash
+100688087 -rw-r--r--   2 root root 2173 Jan 31 13:44 hard_link
+100688078 lrwxrwxrwx   1 root root   13 Feb  2 10:03 symlink -> mydir/profile
+```
+在上述命令中，权限后面的字段表示文件链接计数（大于1表示有硬链接），`ls -i`可在开头显示文件的`inode`号，可以用来确定硬链接关系。Linux系统中有不少硬链接示例，如`/bin/bash`和 `/usr/bin/bash`：
+```bash
+[root@rocky ~]$ ls -li /bin/bash /usr/bin/bash
+1707 -rwxr-xr-x. 1 root root 1150584 Feb 10  2024 /bin/bash
+1707 -rwxr-xr-x. 1 root root 1150584 Feb 10  2024 /usr/bin/bash
+```
+这里显示 inode 相同，但是链接数又是 1 ，再通过其他方式验证：
+```bash
+sha256sum /bin/bash /usr/bin/bash   # 验证文件内容一致性
+find / -xdev -samefile /bin/bash    # 查找所有具有相同 inode 的文件
+file /usr/bin/bash                  # 检查是否为符号链接
+```
+
+使用 `find` 命令查找所有硬链接示例：
+```bash
+[root@rocky ~]$ find ./ -samefile ./mydir/profile
+./mydir/profile
+./hard_link
+```
+
+
+
 
 ## 进程与服务管理
 
@@ -598,28 +638,24 @@ sudo systemctl list-unit-files --type=service --state=disabled
 
 ## 防火墙和网络管理
 
-### 常用网络工具
-
 ```shell
-
 # 安装网络管理工具
 sudo apt install net-tools
 
-# 查看ip
-ifconfig
+ifconfig     # 查看ip
 
-# 通过网络中的心跳机制查看网络是否正常
-ping ip
+ping ip      # 通过网络中的心跳机制查看网络是否正常
+```
 
+### 端口号查询
 
-# 端口号查询
+```shell
 netstat -anp | grep port
 
 lsof -i:port
 
 # windows下
 netstat -ano | findstr port
-
 ```
 
 
