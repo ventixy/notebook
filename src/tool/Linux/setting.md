@@ -600,14 +600,55 @@ Linux分区工具介绍：
 
 ### 格式化分区
 
+1. 确定文件系统类型
+常见的文件系统类型包括 ext4, xfs, btrfs 等。这里我们以 ext4 为例。
+
+2. 格式化分区
+使用 mkfs 工具格式化新分区：
+
+```bash
+sudo mkfs.ext4 /dev/sdb1
+```
+
 
 
 
 ### 挂载
 
+1. 创建挂载点：创建一个新的目录作为挂载点：
+
+```bash
+sudo mkdir /mnt/newdisk
+```
+
+2. 挂载分区：将新分区挂载到刚才创建的挂载点
+
+```bash
+sudo mount /dev/sdb1 /mnt/newdisk
+```
+
+::: important 设置开机自动挂载
+
+1. 编辑 `/etc/fstab` 文件：打开 `/etc/fstab` 文件进行编辑：
+```bash
+vim /etc/fstab
+```
+
+2. 添加挂载条目：在文件末尾添加一行，指定新分区的 UUID 和挂载点：
+```bash
+UUID=your-partition-uuid /mnt/newdisk ext4 defaults 0 0
+```
+
+可以使用 `blkid` 命令找到新分区的 UUID：
+
+```bash
+sudo blkid /dev/sdb1
+```
+
+:::
 
 
-
+---
 
 
 
