@@ -45,6 +45,8 @@ cat /proc/meminfo  # 查看详细内存信息
 产看硬盘信息：
 ```bash
 df -h
+
+lsblk
 ```
 
 
@@ -449,6 +451,18 @@ $  ：#提示字符，如果是root时，提示符为：`#` ，普通用户则�
 
 ## LVM及硬盘管理
 
+Linux 中可以使用 `lsblk` 命令查看机器的硬盘信息：
+```bash
+[root@rocky ~]$ lsblk -d
+NAME    MAJ:MIN RM SIZE RO TYPE MOUNTPOINT
+sda       8:0    0   1G  0 disk
+sdb       8:16   0   2G  0 disk
+nvme0n1 259:0    0  80G  0 disk
+```
+在 Linux 中 传统硬盘（如SATA、SCSI等）通常以 `/dev/sdX` 的形式命名，而 NVMe SSD 则是 `/dev/nvmeXnY`（其中 `X` 是控制器编号，`Y` 是命名空间编号）
+
+---
+
 Linux 的文件系统结构设计使得它看起来不像 Windows 那样直接将每个分区映射为一个驱动器字母（如 `C:、D:` 等）。Linux 使用一种称为“挂载”（mount）的机制，将各个分区关联到文件系统的特定目录（挂载点）上。
 
 在 Linux 中，通过编辑 `/etc/fstab` 文件，可以在系统启动时自动挂载指定的分区到特定的挂载点:
@@ -460,7 +474,139 @@ Linux 的文件系统结构设计使得它看起来不像 Windows 那样直接�
 ```
 这段配置表示：`/dev/sda1` 被挂载到根目录 `/`，使用 `ext4` 文件系统。`/dev/sda2` 被挂载到 `/home` 目录。`/dev/sda3` 被用作交换空间。
 
-### 硬盘分区和挂载
+---
+
+### 添加新硬盘
+
+确保硬盘被正确识别（可以使用 `lsblk` 或 `sudo fdisk -l` 查看）
+
+```bash
+[root@rocky ~]$ lsblk -d
+NAME    MAJ:MIN RM SIZE RO TYPE MOUNTPOINT
+sda       8:0    0   1G  0 disk
+sdb       8:16   0   2G  0 disk
+nvme0n1 259:0    0  80G  0 disk
+```
+
+在 `/dev/` 目录下也有相关文件：
+
+```bash
+[root@rocky ~]$ ls /dev/sd* /dev/nvme*
+/dev/nvme0  /dev/nvme0n1  /dev/nvme0n1p1  /dev/nvme0n1p2  /dev/sda  /dev/sdb
+```
+
+
+
+### 硬盘分区
+
+分区前后通常需要查看硬盘的分区情况：
+
+```bash
+fdisk -l /dev/sda        # 查看sda这块硬盘的分区情况
+
+lsblk                    # 查看所有硬盘的分区信息
+```
+
+Linux分区工具介绍：
+
+|   工具    | 支持的分区表 |                            特点                            |
+| -------- | ----------- | ---------------------------------------------------------- |
+| `fdisk`  | MBR、GPT    | 传统工具，适合简单分区操作                                   |
+| `gdisk`  | GPT         | 专为 GPT 设计，功能更强大                                    |
+| `parted` | MBR、GPT    | 支持多种分区表，并且具有更多的高级功能(调整分区大小和脚本化操作) |
+
+
+
+
+::: tabs
+
+@tab fdisk
+
+使用 `fdisk` 创建新分区（默认为`MBR`分区，也就是`DOS` 分区表）
+
+1. **启动 `fdisk` 工具**：使用 `fdisk` 启动交互式分区程序：
+   ```bash
+   sudo fdisk /dev/sdb
+   ```
+2. **查看现有分区**：在 `fdisk` 提示符下，输入 `p` 来打印当前硬盘上的分区表：
+
+3. **创建新分区**：输入 `n` 来创建一个新分区 （可以提前输入`g`转换为`GPT`类型）
+
+4. **选择分区类型**：选择创建主分区（primary partition）或扩展分区（extended partition）。
+   - 输入 `p` 创建主分区。
+   - 输入 `e` 创建扩展分区（如果需要多个逻辑分区）。
+
+5. **指定分区编号**： 一般默认即可（MBR分区通常是 `1` 到 `4`）
+
+6. **指定第一个扇区**：按回车键接受默认的第一个扇区（通常是第一个可用的扇区）。
+
+7. **指定最后一个扇区**：输入你想分配给该分区的大小（例如 `+5G` 表示分配 5GB 的空间），或者直接按回车键使用剩余的所有空间。
+   ```bash
+   Last sector, +/-sectors or +/-size{K,M,G,T,P} (2048-41943039, default 41943039): +5G
+   ```
+8. **检查分区表**：再次输入 `p` 查看新的分区表，确认分区是否正确创建。
+
+9. **保存并退出**：输入 `w` 保存更改并退出 `fdisk`：
+   ```plaintext
+   Command (m for help): w
+   ```
+
+@tab:active gdisk
+
+使用 `gdisk` 进行分区的过程与 `fdisk` 类似，它是专门设计用于 GPT（GUID Partition Table）分区表的工具
+
+1. **启动 `gdisk` 工具**：使用 `gdisk` 启动交互式分区程序：
+   ```bash
+   sudo gdisk /dev/sdb
+   ```
+
+2. **创建新的 GPT 分区表（如果需要）**：如果你的硬盘还没有初始化为 GPT 分区表，或者你想重新初始化它，可以在 `gdisk` 提示符下输入 `o` 来创建一个新的空 GPT 分区表。
+   ```plaintext
+   Command (? for help): o
+   This option deletes all partitions and creates a new protective MBR.
+   Proceed? (Y/N): y
+   ```
+
+3. **查看现有分区**： 在 `gdisk` 提示符下，输入 `p` 来打印当前硬盘上的分区表：
+
+4. **创建新分区**：输入 `n` 来创建一个新分区：
+
+5. **选择分区编号**：按回车键接受默认的第一个可用分区编号（例如 `1`）。
+
+6. **指定第一个扇区**：按回车键接受默认的第一个可用扇区。
+
+7. **指定最后一个扇区**：输入你想分配给该分区的大小（例如 `+5G` 表示分配 5GB 的空间），或者直接按回车键使用剩余的所有空间。
+   ```bash
+   Last sector (xxx-yyy, default yyy): +5G
+   ```
+
+8. **选择分区类型**：默认情况下，新分区的类型是 "Linux filesystem" (代码 `8300`)。如果你想改变分区类型，可以输入 `t` 并根据需要选择不同的类型代码。例如，对于 EFI 系统分区，你可以输入 `ef00`。
+   ```bash
+   Command (? for help): t
+   Partition number (1-128): 1
+   Hex code or GUID (L to show codes, 0 for empty): ef00
+   ```
+
+9. **检查分区表**: 再次输入 `p` 查看新的分区表，确认分区是否正确创建。
+
+10. **保存并退出**:  输入 `w` 保存更改并退出 `gdisk`
+
+:::
+
+
+
+
+
+
+### 格式化分区
+
+
+
+
+### 挂载
+
+
+
 
 
 
