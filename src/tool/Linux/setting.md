@@ -444,6 +444,29 @@ $  ：#提示字符，如果是root时，提示符为：`#` ，普通用户则�
 37 47 白色
 ```
 
+---
+
+
+## LVM及硬盘管理
+
+Linux 的文件系统结构设计使得它看起来不像 Windows 那样直接将每个分区映射为一个驱动器字母（如 `C:、D:` 等）。Linux 使用一种称为“挂载”（mount）的机制，将各个分区关联到文件系统的特定目录（挂载点）上。
+
+在 Linux 中，通过编辑 `/etc/fstab` 文件，可以在系统启动时自动挂载指定的分区到特定的挂载点:
+```bash
+# <file system> <dir>   <type>  <options>       <dump>  <pass>
+/dev/sda1       /       ext4    defaults        0       1
+/dev/sda2       /home   ext4    defaults        0       2
+/dev/sda3       swap    swap    defaults        0       0
+```
+这段配置表示：`/dev/sda1` 被挂载到根目录 `/`，使用 `ext4` 文件系统。`/dev/sda2` 被挂载到 `/home` 目录。`/dev/sda3` 被用作交换空间。
+
+### 硬盘分区和挂载
+
+
+
+
+### LVM基础介绍
+
 
 
 
@@ -516,6 +539,7 @@ CentOS替代方案：Rocky Linux，AlmaLinux
     ```bash
    yum clean all && yum makecache 
    yum list available  
+   yum list | wc -l
     ```
     
 在 Rocky Linux 8 及其类似版本（如 CentOS 8、AlmaLinux 8 等）中，配置本地 YUM 源时有时会将配置文件分成两个部分或两个文件的做法，通常指的是将应用程序（AppStream）和操作系统基础组件（BaseOS）的仓库分开配置。
