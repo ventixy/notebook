@@ -639,10 +639,12 @@ vim /etc/fstab
 UUID=your-partition-uuid /mnt/newdisk ext4 defaults 0 0
 ```
 
-可以使用 `blkid` 命令找到新分区的 UUID：
+可以使用 `blkid` 或 `lsblk` 命令找到新分区的 UUID：
 
 ```bash
 sudo blkid /dev/sdb1
+
+lsblk -f
 ```
 
 :::
@@ -654,8 +656,161 @@ sudo blkid /dev/sdb1
 
 ### LVM基础介绍
 
+LVM（逻辑卷管理，Logical Volume Manager）是Linux系统中用于磁盘分区管理和文件系统扩展的一种高级工具。
+
+1. **物理卷（Physical Volume, PV）**： 物理卷是指在LVM架构中最底层的概念，指的是实际的存储设备或其分区（如硬盘、SSD或它们的一部分）。
+
+2. **卷组（Volume Group, VG）**： 卷组是由一个或多个物理卷组成的集合。可以将卷组想象成是一个大的存储池，从中可以创建逻辑卷。
+   
+3. **逻辑卷（Logical Volume, LV）**： 逻辑卷是在卷组之上创建的虚拟分区。==它们就像传统意义上的分区一样使用，但是提供了更大的灵活性==，比如可以在不影响数据的情况下动态调整大小。
 
 
+![](https://image.ventix.top/img02/20240203222145690.png)
+
+
+
+**物理扩展（Physical Extent, PE）和逻辑扩展（Logical Extent, LE）**： 物理扩展是物理卷上分配给卷组的基本单位，默认大小通常是`4MB`。逻辑扩展则是逻辑卷中的基本单元，与物理扩展相对应。通过改变PE的大小，可以影响LVM的性能和效率。
+
+
+
+### PV物理卷 
+
+先查看系统中的磁盘和分区信息，查出可被用作pv的设备：
+```bash
+[root@rocky ~]$ lvmdiskscan
+  /dev/sda       [       1.00 GiB]
+  /dev/nvme0n1p1 [       1.00 GiB]
+  /dev/nvme0n1p2 [     <79.00 GiB] LVM physical volume
+  /dev/sdb1      [     800.00 MiB]
+  /dev/sdb2      [      <1.22 GiB]
+  1 disk
+  3 partitions
+  0 LVM physical volume whole disks
+  1 LVM physical volume
+[root@rocky ~]$ lsblk
+```
+
+
+使用`pvcreate`命令创建pv
+```bash
+pvcreate /dev/sda /dev/sdb1 /dev/sdb2
+```
+
+
+查看当前所有PV信息：可以通过`pvs`、`pvscan`、`pvdisplay` 查看pv信息 ​
+
+```bash
+pvs
+pvscan
+pvdisplay
+```
+
+
+### VG卷组 
+
+创建卷组：使用 `vgcreate` 创建卷组并将指定PV加入该卷组
+
+```bash
+vgcreate vg01 /dev/sda /dev/sdb1
+```
+
+扩展卷组：使用 `vgextend` 命令将新的物理卷添加到指定的卷组中
+
+```bash
+vgextend vg01 /dev/sdb2
+```
+
+::: info 从VG中删除PV
+首先，查看目标物理卷的状态以及它是否包含活跃的数据，若有则使用 `pvmove` 命令将目标物理卷上的所有数据迁移到卷组中的其他物理卷上
+```bash
+pvmove /dev/sdb2
+```
+使用 `vgreduce` 命令从卷组中正式移除物理卷:
+```bash
+vgreduce vg01 /dev/sdb2
+```
+:::
+
+
+可以通过 ·`vgs`、`vgscan`、`vgdisplay` 查看卷组信息：
+
+```bash
+[root@rocky ~]$ vgs
+  VG   #PV #LV #SN Attr   VSize   VFree
+  rl     1   3   0 wz--n- <79.00g     0
+  vg01   3   0   0 wz--n-  <2.99g <2.99g
+[root@rocky ~]$ vgdisplay vg01
+  --- Volume group ---
+  VG Name               vg01
+  System ID
+  Format                lvm2
+  Metadata Areas        3
+  Metadata Sequence No  3
+  VG Access             read/write
+  VG Status             resizable
+  MAX LV                0
+  Cur LV                0
+  Open LV               0
+  Max PV                0
+  Cur PV                3
+  Act PV                3
+  VG Size               <2.99 GiB
+  PE Size               4.00 MiB
+  Total PE              765
+  Alloc PE / Size       0 / 0
+  Free  PE / Size       765 / <2.99 GiB
+  VG UUID               LEMV4I-BV9X-5zei-TPTq-N1um-5UuU-DIV362
+```
+
+
+
+
+### LV逻辑卷
+
+使用 `lvcreate` 命令创建逻辑卷:
+
+```bash
+lvcreate -L 500M vg01 -n lv01
+```
+- `-L` 参数用于指定逻辑卷的大小
+- `-n` 参数用于指定新创建的逻辑卷的名字
+
+在执行此命令之前，指定卷组必须已经存在，并且有足够的未分配空间来创建指定大小的逻辑卷。
+
+---
+
+使用 `lvs`、`lvscan`、`lvdisplay` 查看LV
+```bash
+lvs
+lvscan
+lvdisplay /dev/vg01/lv01  
+```
+
+
+通过命令 `lvextend` 扩容逻辑卷
+```bash
+lvextend  -L +500M  /dev/vg01/lv01  
+```
+注意：如果扩容的逻辑卷已经挂载到具体文件系统，则需要执行 `resize2fs` 或者 `xfs_growfs`（针对xfs文件系统）命令使修改生效
+
+::: info 格式化LV并挂载
+
+建完逻辑卷之后，还需要对其进行格式化和挂载，以便实际使用这块存储空间
+
+```bash
+# 格式化逻辑卷
+mkfs.ext4 /dev/vg01/lv01
+
+# 创建挂载点并挂载逻辑卷
+mkdir /mnt/mylv01
+mount /dev/vg01/lv01 /mnt/mylv01
+
+# 设置开机自动挂载（可选）: 编辑 /etc/fstab 文件
+vim /etc/fstab
+/dev/vg01/lv01 /mnt/mylv ext4 defaults 0 0
+```
+
+:::
 
 
 
