@@ -129,7 +129,7 @@ VMware 点击 编辑 ——> 虚拟网络编辑器 (如图：)
 
 ![](https://image.ventix.top/img01/202101101724339.png)
 
-注意图中的 NETMASH 有误，应该是 NETMASK
+注意图中的 NETMASH 有误，应该是 `NETMASK`，该选项也可以配置为：`PREFIX=24`
 
 ::: code-tabs#shell
 
@@ -140,7 +140,7 @@ sudo vim /etc/netplan/00-installer-config.yaml   # 文件名可能会不同
 sudo netplan apply                               # 应用更改
 ```
 
-@tab Centos
+@tab Centos7
 
 ```bash
 ip addr
@@ -154,6 +154,11 @@ service network restart  # 刷新网络服务 centos8使用: ifup  ens33
 ```bash
 ifconfig
 vim /etc/sysconfig/network-scripts/ifcfg-ens160
+
+# NetworkManager 提供了一个命令行工具 nmcli 来管理和配置网络连接
+sudo nmcli connection reload && sudo nmcli connection up ens160
+
+# 也可以使用 systemctl 重启 NetworkManager 服务
 systemctl restart NetworkManager
 ```
 :::
@@ -434,6 +439,14 @@ end
 
 ### CentOS
 
+安装CentOS时，推荐使用自定义分区，使用标准分区方式分为：`/boot` 1G，`/swap` 4G，剩余全给 `/`
+
+其他推荐的设置：
+
+- 注意选择安装 `server`，没必要使用默认的GUI界面
+- 将时区选择为 `Asia/Shanghai`
+- 配置静态IP：IPv4选项中选择 `munual` 而不是 `dhcp` , 并添加自定义IP
+
 
 ::: tip Windows Terminal 连接 VM 中的虚拟机
 前置条件：VM中的Linux虚拟机需要运行 sshd 服务，且防火墙开放22端口
@@ -458,6 +471,31 @@ ssh root@192.168.243.222
 ```
 :::
 
+在重新安装系统，但是使用了与之前相同的IP，在终端中可能会出现：
+
+```bash
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+@    WARNING: REMOTE HOST IDENTIFICATION HAS CHANGED!     @
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+IT IS POSSIBLE THAT SOMEONE IS DOING SOMETHING NASTY!
+Someone could be eavesdropping on you right now (man-in-the-middle attack)!
+It is also possible that a host key has just been changed.
+The fingerprint for the ED25519 key sent by the remote host is
+SHA256:2ULWhC8+ftFced58wmhGFvmaC8ni0nXq5lN3IoMQ0hQ.
+Please contact your system administrator.
+Add correct host key in C:\\Users\\admin/.ssh/known_hosts to get rid of this message.
+Offending ECDSA key in C:\\Users\\admin/.ssh/known_hosts:13
+Host key for 192.168.16.80 has changed and you have requested strict checking.
+Host key verification failed.
+```
+此时执行下列命令（从本地 `~/.ssh/known_hosts` 文件中删除与 该 IP 地址 相关联的条目）：
+
+```bash
+ssh-keygen -R 192.168.16.80   # IP换成自己服务器的地址
+```
+
+
+---
 
 
 

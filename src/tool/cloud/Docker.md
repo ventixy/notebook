@@ -16,9 +16,9 @@ docker 官网安装教程：https://docs.docker.com/engine/install/ubuntu/
 
 ::: tabs 
 
-@tab:active CentOS
+@tab:active CentOS7/Rocky8
 
-安装docker之前需要确保已配置可用的yum镜像源，参照：[CentOS的安装](/posts/blog/vm.md#centos)
+安装docker之前需要确保已配置可用的yum镜像源，参照：[CentOS的YUM源配置](/tool/Linux/setting.md#centos7yum源)
 
 **Uninstall old versions**：
 
@@ -30,19 +30,19 @@ yum remove docker docker-client docker-client-latest docker-common docker-latest
 **install using the repository** :
 
 ```shell
-#Set up the repository
+yum install -y yum-utils
+
+#Set up the repository    `ls /etc/yum.repos.d/`
 yum-config-manager --add-repo \
     http://mirrors.aliyun.com/docker-ce/linux/centos/docker-ce.repo
     
-yum install -y yum-utils
-
-#install
-yum makecache fast && yum install -y docker-ce docker-ce-cli containerd.io && systemctl enable docker
+# centos7 install
+yum makecache fast && yum install -y docker-ce docker-ce-cli containerd.io 
+# rocky8 install
+yum install -y docker-ce --allowerasing
 
 #start
-systemctl start docker     #启动
-systemctl restart docker   #重启
-systemctl enable docker    #自启动
+systemctl start docker && systemctl enable docker
 
 docker version
 ```

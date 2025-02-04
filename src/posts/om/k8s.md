@@ -83,6 +83,113 @@ sudo firewall-cmd --state   # not running
 
 
 
+### 配置时间同步
+
+CentOS 7 开始默认使用 Chrony，不再默认安装 NTP（ntpd），推荐使用基于chrony配置服务器时间跟网络时间同步
+
+::: tabs
+
+@tab NTP（ntpd）
+
+```bash
+# 硬件时钟设置为UTC
+timedatectl set-local-rtc 0
+
+# 设置本地时区，显示本地时间
+timedatectl set-timezone Asia/Shanghai
+
+# 手动加载RTC设置
+hwclock --systohc
+```
+
+@tab:active Chrony
+
+确保安装了chronyd 并设置了开机自启
+
+```bash
+yum install -y chrony
+systemctl enable chronyd --now
+
+systemctl status chronyd
+```
+
+修改配置文件： `vim /etc/chrony.conf` ，添加时间服务器：
+```bash
+server ntp.aliyun.com iburst
+server ntp1.aliyun.com iburst
+server ntp2.aliyun.com iburst
+server ntp.tencent.com iburst
+server ntp1.tencent.com iburst
+server ntp2.tencent.com iburst
+server time1.ntsc.ac.cn iburst
+server time2.ntsc.ac.cn iburst
+```
+在修改完配置文件之后，需要重启 `chronyd`: `systemctl restart chronyd`
+
+检查 `chronyd` 是否正确地连接到了新的NTP服务器：`chronyc sources` （重启后可能需要等一段时间才正常）
+
+:::
+
+使用 `timedatectl` 验证是否启用了时间同步（主要看最后三个字段）：
+```bash
+System clock synchronized: yes
+              NTP service: active
+          RTC in local TZ: no
+```
+
+NTP（Network Time Protocol） 是一种用于计算机时钟同步的协议
+
+Chrony 是 NTP 的一个轻量级实现，专为现代系统优化，尤其适用于间歇性联网或高精度需求的环境。
+
+
+
+---
+
+
+
+### 配置网络
+
+通过修改 iptables 的配置, 让 K8s 能够转发网络流量
+
+- `modprobe`： 是一个用于管理 Linux 内核模块的工具
+- `br_netfilter` 模块：为网桥（bridge）提供网络过滤功能，允许桥接接口参与 iptables 规则处理
+
+```bash
+modprobe br_netfilter  # 临时加载 br_netfilter 模块到当前运行的内核中
+
+lsmod | grep br_netfilter    # 检查模块是否已被加载
+```
+
+**自动加载 `br_netfilte`r 模块**:  创建/更新一个名为 `br_netfilter.conf` 的文件，并将 `br_netfilter` 写入其中，以便系统启动时自动加载该模块
+```bash
+echo "br_netfilter" | sudo tee /etc/modules-load.d/br_netfilter.conf
+```
+查看 `/etc/modules-load.d/` 目录下的相关文件来确认设置是否正确
+
+---
+
+设置内核参数（启用网桥上的`iptables`处理和`IP`转发）：
+
+```bash
+tee /etc/sysctl.d/k8s.conf << EOF
+net.bridge.bridge-nf-call-ip6tables = 1
+net.bridge.bridge-nf-call-iptables = 1
+net.ipv4.ip_forward = 1
+EOF
+```
+从指定配置文件中读取并立即应用内核参数设置: 
+```bash
+sysctl -p /etc/sysctl.d/k8s.conf
+```
+
+---
+
+
+
+
+
+## kubernetes相关准备
+
 
 ### 安装Docker
 
@@ -138,62 +245,6 @@ ExecStart=/usr/bin/cri-dockerd --container-runtime-endpoint fd:// --pod-infra-co
 ```bash
 systemctl daemon-reload
 systemctl enable cri-docker && systemctl start cri-docker
-```
-
-
-
-## kubernetes相关配置
-
-
-### 集群时钟同步
-
-
-Centos7默认使用Chrony工具而非NTP进行时间同步，修改硬件时钟为UTC，时区为本地时区
-
-```bash
-# 硬件时钟设置为UTC
-timedatectl set-local-rtc 0
-
-# 设置本地时区，显示本地时间
-timedatectl set-timezone Asia/Shanghai
-
-# 手动加载RTC设置
-hwclock --systohc
-
-# 验证
-timedatectl
-```
-
-
-
-
-
-### 配置网络
-
-通过修改 iptables 的配置, 让 K8s 能够转发网络流量
-
-- `modprobe`： 是一个用于管理 Linux 内核模块的工具
-- `br_netfilter` 模块：为网桥（bridge）提供网络过滤功能，允许桥接接口参与 iptables 规则处理
-
-```bash
-# 临时加载 br_netfilter 模块到当前运行的内核中
-modprobe br_netfilter
-
-# /etc/profile 在用户登录时执行，但此时可能还不是加载内核模块的最佳时机
-echo "modprobe br_netfilter" >> /etc/profile
-```
-
-推荐使用 udev 规则、`/etc/modules-load.d/` 文件或 `sysctl` 来确保模块在系统启动时自动加载
-```bash
-tee /etc/sysctl.d/k8s.conf << EOF
-net.bridge.bridge-nf-call-ip6tables = 1
-net.bridge.bridge-nf-call-iptables = 1
-net.ipv4.ip_forward = 1
-EOF
-```
-从指定配置文件中读取并立即应用内核参数设置: 
-```bash
-sysctl -p /etc/sysctl.d/k8s.conf
 ```
 
 
