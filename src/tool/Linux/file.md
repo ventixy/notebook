@@ -333,38 +333,6 @@ cat file.txt | grep -n "hello"
 ## 修改/编辑文件
 
 
-
-### 追加与重定向
-
-在 Linux 中，重定向和追加是用于控制命令输出的重要机制。通过重定向，可以将命令的标准输出（stdout）或标准错误（stderr）重定向到文件或其他流中。通过追加，可以将输出添加到文件的末尾，而不是覆盖现有内容。
-
-```bash
-echo "Hello, World!" > greeting.txt           # 输出重定向 (Output Redirection)
-ls non_existent_file 2> error_log.txt         # 错误重定向 (Error Redirection)
-ls non_existent_file &> combined_log.txt      # 同时重定向 stdout 和 stderr
-
-echo "Another line" >> greeting.txt           # 输出追加 (Append Output)
-ls non_existent_file 2>> error_log.txt        # 错误追加 (Append Error)
-ls non_existent_file &>> combined_log.txt     # 同时追加 stdout 和 stderr
-```
-
-::: info 重定向 (Redirection) 与 追加 (Appending)
-#### 重定向 (Redirection)
-重定向：如果文件不存在，那么会创建文件。如果文件已经存在，那么会覆盖文件中的内容
-- 输出重定向 (`>`)：将标准输出重定向到文件，覆盖现有内容。
-- 错误重定向 (`2>`)：将标准错误重定向到文件，覆盖现有内容。
-- 同时重定向 stdout 和 stderr (`&>`)：将标准输出和标准错误重定向到同一个文件，覆盖现有内容。
-
-#### 追加 (Appending)
-追加：如果文件不存在，依然会创建文件。文件已存在时不会覆盖原来文件中的内容
-
-- 输出追加 (`>>`)：将标准输出追加到文件的末尾，不覆盖现有内容。
-- 错误追加 (`2>>`)：将标准错误追加到文件的末尾，不覆盖现有内容。
-- 同时追加 stdout 和 stderr (`&>>`)：将标准输出和标准错误追加到同一个文件的末尾，不覆盖现有内容。
-:::
-
-
-
 ### 修改文件时间
 
 - **modifiy time (mtime)**：当该文件的『内容』变更时，就会升级这个时间！内容数据指的是文件的内容，而不是文件的属性或权限喔！
@@ -436,6 +404,136 @@ Change: 2022-06-06 00:00:00.000000000 +0800
 :::
 
 
+---
+
+
+
+### 追加与重定向
+
+在 Linux 中，重定向和追加是用于控制命令输出的重要机制。通过重定向，可以将命令的标准输出（stdout）或标准错误（stderr）重定向到文件或其他流中。通过追加，可以将输出添加到文件的末尾，而不是覆盖现有内容。
+
+```bash
+echo "Hello, World!" > greeting.txt           # 输出重定向 (Output Redirection)
+ls non_existent_file 2> error_log.txt         # 错误重定向 (Error Redirection)
+ls non_existent_file &> combined_log.txt      # 同时重定向 stdout 和 stderr
+
+echo "Another line" >> greeting.txt           # 输出追加 (Append Output)
+ls non_existent_file 2>> error_log.txt        # 错误追加 (Append Error)
+ls non_existent_file &>> combined_log.txt     # 同时追加 stdout 和 stderr
+```
+
+::: info 重定向 (Redirection) 与 追加 (Appending)
+#### 重定向 (Redirection)
+重定向：如果文件不存在，那么会创建文件。如果文件已经存在，那么会覆盖文件中的内容
+- 输出重定向 (`>`)：将标准输出重定向到文件，覆盖现有内容。
+- 错误重定向 (`2>`)：将标准错误重定向到文件，覆盖现有内容。
+- 同时重定向 stdout 和 stderr (`&>`)：将标准输出和标准错误重定向到同一个文件，覆盖现有内容。
+
+#### 追加 (Appending)
+追加：如果文件不存在，依然会创建文件。文件已存在时不会覆盖原来文件中的内容
+
+- 输出追加 (`>>`)：将标准输出追加到文件的末尾，不覆盖现有内容。
+- 错误追加 (`2>>`)：将标准错误追加到文件的末尾，不覆盖现有内容。
+- 同时追加 stdout 和 stderr (`&>>`)：将标准输出和标准错误追加到同一个文件的末尾，不覆盖现有内容。
+:::
+
+
+利用 `tee` 结合 Here Document ，实现多行内容的插入：
+
+```bash
+tee /etc/sysctl.d/k8s.conf << EOF
+net.bridge.bridge-nf-call-ip6tables = 1
+net.bridge.bridge-nf-call-iptables = 1
+net.ipv4.ip_forward = 1
+EOF
+```
+使用 `<<` 标识符时，所有输入文本必须严格按照给出的格式书写。任何前导空格或制表符都会被视为输入的一部分。
+
+如果希望保持脚本的缩进整洁，同时又不想这些缩进出现在实际的输出中，可以使用 `<<-` 标识符：
+
+```bash
+tee /etc/sysctl.d/k8s.conf <<- EOF
+    net.bridge.bridge-nf-call-ip6tables = 1
+    net.bridge.bridge-nf-call-iptables = 1
+    net.ipv4.ip_forward = 1
+EOF
+```
+
+`<<- EOF` 允许使用制表符进行缩进。所有的前导制表符将会被忽略，因此尽管这里的每一行都有缩进，但实际写入到文件中的内容是没有这些缩进的。但是注意空格不会被忽略。
+
+
+
+
+
+---
+
+
+
+
+
+
+### sed搜索替换
+
+sed（Stream Editor）是一个流式文本编辑器，主要用于对文本进行逐行处理，支持查找、替换、删除、插入等操作。
+
+```bash
+# 将文件中的 old 替换为 new
+sed 's/old/new/' file.txt
+
+# g: 全局替换（一行中的所有匹配）
+sed 's/old/new/g' file.txt
+
+# 仅替换第 2 行
+sed '2s/old/new/' file.txt
+```
+
+- `s`：替换文本
+
+使用 sed 进行批量文件的内容替换示例：
+
+```bash
+sed -e 's|^mirrorlist=|#mirrorlist=|g' \
+    -e 's|^#baseurl=http://dl.rockylinux.org/$contentdir|baseurl=https://mirrors.aliyun.com/rockylinux|g' \
+    -i.bak /etc/yum.repos.d/*.repo
+```
+
+---
+
+
+
+### awk过滤处理
+
+awk 是一种强大的文本处理工具，支持按列处理文本数据，适合处理结构化文本（如 CSV、日志文件等）。常用变量:
+
+- `$0`：整行内容。
+- `$1, $2, ...`：第 1、第 2 列内容。
+- `NF`：当前行的列数。
+- `NR`：当前行号。
+- `FS`：输入字段分隔符（默认是空格）。
+- `OFS`：输出字段分隔符（默认是空格）。
+
+```bash
+# 打印第 1 列和第 3 列
+awk '{print $1, $3}' file.txt
+
+# 打印最后一列
+awk '{print $NF}' file.txt
+
+# 打印第 2 列大于 10 的行
+awk '$2 > 10 {print $0}' file.txt
+
+# 打印包含 pattern 的行
+awk '/pattern/ {print $0}' file.txt
+
+# 自定义分隔符为 `:` , 设置输出分隔符为 `,`
+awk -F: -v OFS=, '{print $1, $3}' /etc/passwd
+```
+
+
+
+
+---
+
 
 ### 常见文本编辑器
 
@@ -459,6 +557,18 @@ Change: 2022-06-06 00:00:00.000000000 +0800
   - 日常编辑推荐 **Gedit**。
   - 开发推荐 **VS Code** 或 **Sublime Text**。
   - 开源爱好者推荐 **Atom**
+
+
+
+
+
+
+---
+
+
+
+
+
 
 
 
