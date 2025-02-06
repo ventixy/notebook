@@ -27,7 +27,7 @@ title: KubeSphere离线安装Kubernetes集群
 ```bash
 yum install socat conntrack -y
 ```
-实验环境并且最好关闭防火墙，交换分区等，详细设置参考：[linux基础环境设置](/posts/env/k8s.md#linux基础环境准备)，避免后续安装出问题
+实验环境并且最好关闭防火墙，交换分区等，详细设置参考：[linux基础环境设置](/posts/om/k8s.md#linux基础环境准备)，避免后续安装出问题
 
 
 ## 构建离线安装包

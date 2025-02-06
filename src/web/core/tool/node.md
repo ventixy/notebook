@@ -25,7 +25,7 @@ Node.js 是一个基于 Chrome V8 JavaScript 引擎构建的开源、跨平台�
 1. **下载安装程序**：访问 Node.js 官方网站 [https://nodejs.org/](https://nodejs.org/)，根据你的操作系统下载对应的安装包。
 2. **安装**：双击下载的安装程序，跟随向导完成安装过程。通常情况下，安装程序会自动添加 Node.js 到系统的 PATH 环境变量中，使你能在命令行直接使用 `node` 和 `npm` 命令。
 
-除了基本的直接下载安装外，还可以借助 Nvm 管理多个 node 版本，参照：[NVM的安装和使用](../../../tool/usual/mac.md#node-js多版本管理)
+除了基本的直接下载安装外，还可以借助 Nvm 管理多个 node 版本，参照：[NVM的安装和使用](/posts/blog/mac.md#node-js多版本管理)
 
 
 #### 在 Linux 上安装

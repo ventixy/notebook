@@ -45,25 +45,25 @@ features:
   details: Maven依赖管理，Gradle项目构建
   link: /tool/maven
 
-- title: 设计模式
+- title: 设计模式理论和实践
   icon: es6
   details: 常见设计模式（单例，工厂，代理，责任链）
-  link: /tool/design
+  link: /theory/design/
 
 - title: 项目管理和测试
   icon: k8s
   details: 项目规划，进度管理，缺陷跟踪，自动化测试（JIRA，禅道）
-  link: /tool/usual/
+  link: /project/
   
 - title: 计算机基础
   icon: computer
   details: 计算机组成原理、网络基础知识，操作系统
-  link: /tool/usual/
+  link: /theory/cs/
 
 - title: 数据结构与算法
   icon: stream
   details: 常用数据结构及算法
-  link: https://www.hello-algo.com/chapter_hello_algo/
+  link: /theory/ds/
 
 copyright: false
 footer: Java Docs | MIT Licensed, Copyright © 2020-present Ventixy

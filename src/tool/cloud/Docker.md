@@ -145,7 +145,8 @@ tee /etc/docker/daemon.json <<-'EOF'
         "https://rsbud4vc.mirror.aliyuncs.com",
         "https://registry.cn-hangzhou.aliyuncs.com",
         "https://akchsmlh.mirror.aliyuncs.com",
-        "https://2epe3hl0.mirror.aliyuncs.com"
+        "https://2epe3hl0.mirror.aliyuncs.com",
+        "https://k7wsl2ss.mirror.aliyuncs.com"
     ],
     "exec-opts": ["native.cgroupdriver=systemd"]
 }

@@ -38,7 +38,7 @@ export const enSidebar = sidebar({
   ],
   "/tool/": [
     {
-      text: "常用软件和开发工具",
+      text: "常用开发工具和环境",
       icon: "tools",
       link: "/tool/",
       children: "structure",
@@ -59,5 +59,29 @@ export const enSidebar = sidebar({
       link: "/interview/",
       children: "structure",
     },
-  ]
+  ],
+  "/theory/cs/": [
+      {
+        text: "计算机网络和操作系统",
+        icon: "computer",
+        link: "/theory/cs/",
+        children: "structure",
+      }
+  ],
+  "/theory/ds/": [
+    {
+      text: "数据结构与算法",
+      icon: "stream",
+      link: "/theory/ds/",
+      children: "structure",
+    }
+  ],
+  "/theory/design/": [
+    {
+      text: "设计模式理论与实践",
+      icon: "es6",
+      link: "/theory/cs/",
+      children: "structure",
+    }
+  ],
 });
