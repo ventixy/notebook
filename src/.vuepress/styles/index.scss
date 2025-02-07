@@ -1,17 +1,22 @@
-
-.vp-blog-hero.fullscreen {
+body {
+  .vp-blog-hero.fullscreen {
     display: none;
   }
 
-
-
-@keyframes fall {
-  0% { transform: translateY(0) translateX(0); opacity: 0; }
-  50% { opacity: 1; }
-  100% { transform: translateY(100vh) translateX(var(--snowflake-translate-x)); opacity: 0.7; }
+  .header-anchor {
+    color: blue;
+  }
 }
 
-@keyframes sway {
-  0%, 100% { transform: rotate(0deg); }
-  50% { transform: rotate(360deg); }
-}
+
+
+// @keyframes fall {
+//   0% { transform: translateY(0) translateX(0); opacity: 0; }
+//   50% { opacity: 1; }
+//   100% { transform: translateY(100vh) translateX(var(--snowflake-translate-x)); opacity: 0.7; }
+// }
+
+// @keyframes sway {
+//   0%, 100% { transform: rotate(0deg); }
+//   50% { transform: rotate(360deg); }
+// }
