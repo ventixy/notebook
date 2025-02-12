@@ -82,7 +82,7 @@ yum install docker-ce-3:20.10.5-3.el7.x86_64 docker-ce-cli-3:20.10.5-3.el7.x86_6
 sudo mkdir -p /etc/systemd/system/docker.service.d
 sudo vim /etc/systemd/system/docker.service.d/http-proxy.conf
 
-# 添加下面内容
+# 添加下面内容（clash）
 [Service]
 Environment="HTTP_PROXY=http://192.168.248.54:7890"
 Environment="HTTPS_PROXY=http://192.168.248.54:7890"
@@ -90,6 +90,12 @@ Environment="NO_PROXY=localhost,127.0.0.1,192.168.0.0/16,172.17.16.0/20"
 
 # 重启Docker
 systemctl daemon-reload && systemctl restart docker
+```
+
+v2ray代理的添加：
+```bash
+Environment="HTTP_PROXY=http://192.168.120.54:10808"
+Environment="HTTPS_PROXY=http://192.168.120.54:10808"
 ```
 
 ---

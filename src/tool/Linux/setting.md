@@ -319,11 +319,16 @@ Windows + Linux虚拟机的 代理设置：
 - 在Windows上装有`clash` 并开启代理，记住顶部的端口号 `7890`
 - `clash`开启`allow LAN`，注意绑定：`0.0.0.0`
 
+若是 v2ray，则需要在参数设置中启用“允许来自局域网的连接”选项，且端口号为 `10808`
+
 ```bash
 可以通过设置以下环境变量来配置 HTTP 和 HTTPS 代理：
 export http_proxy=http://192.168.83.54:7890
 export https_proxy=http://192.168.83.54:7890
 export ftp_proxy=http://192.168.83.54:7890
+
+export http_proxy=http://192.168.120.54:10808
+export https_proxy=http://192.168.120.54:10808
 
 # 取消代理设置，只需将这些变量设置为空或者直接删除它们：
 unset http_proxy
