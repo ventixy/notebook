@@ -109,7 +109,7 @@ tee /etc/docker/daemon.json <<-'EOF'
 {
     "registry-mirrors": [
         "https://docker.m.daocloud.io",
-        "https://registry.cn-hangzhou.aliyuncs.com"
+        "https://docker.1ms.run"
     ],
     "exec-opts": ["native.cgroupdriver=systemd"]
 }
@@ -123,31 +123,15 @@ systemctl daemon-reload && systemctl restart docker
 
 
 
-已废弃地址：
+其他可能可用的地址：
 ```bash
 tee /etc/docker/daemon.json <<-'EOF'
 {
     "registry-mirrors": [
-        "https://do.nark.eu.org",
-        "https://dc.j8.work",
-        "https://docker.m.daocloud.io",
-        "https://dockerproxy.com",
-        "https://docker.mirrors.ustc.edu.cn",
-        "https://docker.nju.edu.cn",
-        "https://registry.docker-cn.com",
-        "https://hub-mirror.c.163.com",
-        "https://hub.uuuadc.top",
-        "https://docker.anyhub.us.kg",
-        "https://dockerhub.jobcher.com",
-        "https://dockerhub.icu",
-        "https://docker.ckyl.me",
-        "https://docker.awsl9527.cn",
-        "https://mirror.baidubce.com",
-        "https://docker.1panel.live",
-        "https://registry.docker-cn.com",
-        "https://dockerhub.azk8s.cn",
-        "https://hub-mirror.c.163.com",
-        "https://docker.mirrors.ustc.edu.cn",
+        "https://dytt.online",
+        "https://func.ink",
+        "https://docker.linkedbus.com",
+        "https://lispy.org",
         "https://rsbud4vc.mirror.aliyuncs.com",
         "https://registry.cn-hangzhou.aliyuncs.com",
         "https://akchsmlh.mirror.aliyuncs.com",
