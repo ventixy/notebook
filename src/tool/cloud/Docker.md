@@ -77,7 +77,7 @@ yum install docker-ce-3:20.10.5-3.el7.x86_64 docker-ce-cli-3:20.10.5-3.el7.x86_6
 
 ### 配置镜像加速
 
-配置代理的方式（本机使用Clash并开启`LAN`）：Docker 配置代理，编辑代理配置文件：
+1. 配置代理的方式（本机使用Clash并开启`LAN`）：Docker 配置代理，编辑代理配置文件：
 ```bash
 sudo mkdir -p /etc/systemd/system/docker.service.d
 sudo vim /etc/systemd/system/docker.service.d/http-proxy.conf
@@ -100,11 +100,11 @@ Environment="HTTPS_PROXY=http://192.168.120.54:10808"
 
 ---
 
-**在线配置镜像加速**（越来越难找到能用的了）:  [阿里云镜像加速说明](https://help.aliyun.com/zh/acr/user-guide/accelerate-the-pulls-of-docker-official-images)
+2. **在线配置镜像加速**（越来越难找到能用的了）:  [阿里云镜像加速说明](https://help.aliyun.com/zh/acr/user-guide/accelerate-the-pulls-of-docker-official-images)
 
-```shell
-mkdir -p /etc/docker 
+确保存在 `/etc/docker` 目录，若不存在先创建：`mkdir -p /etc/docker `
 
+```bash
 tee /etc/docker/daemon.json <<-'EOF'
 {
     "registry-mirrors": [
@@ -121,7 +121,9 @@ EOF
 systemctl daemon-reload && systemctl restart docker
 ```
 
+镜像加速网站：[毫秒镜像](https://www.mliev.com/docs/1ms.run/config-mirror)，[public-image-mirror](https://github.com/DaoCloud/public-image-mirror)
 
+---
 
 其他可能可用的地址：
 ```bash
@@ -192,6 +194,7 @@ docker pull mysql:5.7               # 可指定docker官网可查询到的版本
 
 删除镜像：
 ```bash
+docker rmi redis:7.4.1
 docker rmi -f imageID                    #根据镜像ID删除镜像
 docker rmi -f $(docker images -aq)       #删除所有镜像
 
@@ -312,7 +315,7 @@ docker commit <container_id> my_ubuntu_with_curl:latest
 
 ---
 
-2. `docker expor`t 和 `docker import` （主要用于容器文件系统的备份和迁移）
+2. `docker export` 和 `docker import` （主要用于容器文件系统的备份和迁移）
 
 ```bash
 # 导出容器文件系统

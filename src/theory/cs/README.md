@@ -7,6 +7,9 @@ icon: computer
 ---
 
 
+计算机网络相关视频：[网络短视频合集](https://space.bilibili.com/327247876/lists/60187?type=season) ，
+
+
 ## 计算机网络性能指标
 
 常用的计算机网络性能指标：速率（Speed），带宽（Bandwidth），吞吐量（Throughput），时延（Latency），往返时间（Round-Trip Time, RTT），利用率（Utilization），丢包率（Packet Loss）

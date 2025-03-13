@@ -497,6 +497,12 @@ C71D49A6144772F352806201EF564951BE55EDD5
 
 ### HTTPS内容总结  
 
+HTTPS 通过 **SSL/TLS 加密、身份认证、完整性校验**，大幅提升了 Web 传输的安全性，是现代网络安全通信的基础
+
+1. **防窃听**（Eavesdropping）：数据加密（对称 + 非对称）。  
+2. **防篡改**（Tampering）：消息摘要（SHA-256）。  
+3. **防冒充**（Impersonation）：数字签名 + 证书验证。  
+
 |   **概念**   |         **作用**          |       **核心算法**       |
 | ------------ | ------------------------- | ------------------------ |
 | 对称加密      | 保护数据不被窃听            | AES、DES、3DES           |
@@ -506,11 +512,8 @@ C71D49A6144772F352806201EF564951BE55EDD5
 | SSL/TLS 握手 | 交换密钥，建立安全连接      | TLS 1.2、TLS 1.3         |
 | HTTPS 报文   | HTTP + SSL/TLS 加密       | 基于 HTTP 结构扩展        |
 
-1. **防窃听**（Eavesdropping）：数据加密（对称 + 非对称）。  
-2. **防篡改**（Tampering）：消息摘要（SHA-256）。  
-3. **防冒充**（Impersonation）：数字签名 + 证书验证。  
 
-HTTPS 通过 **SSL/TLS 加密、身份认证、完整性校验**，大幅提升了 Web 传输的安全性，是现代网络安全通信的基础
+更多关于加密的内容参照：[密码学合集](https://space.bilibili.com/327247876/lists/4073046?type=season)
 
 
 ---
@@ -521,5 +524,108 @@ HTTPS使用==混合加密==来结合对称加密和非对称加密的优点。�
 3. **生成会话密钥**：客户端使用服务器的公钥加密一个随机生成的对称密钥（会话密钥），然后发送给服务器。
 4. **加密数据传输**：服务器收到会话密钥后，使用自己的私钥解密得到会话密钥，之后所有数据都使用这个会话密钥进行对称加密和解密。
 
+
+---
+
+
+## HTTPS抓包及解密
+
+HTTPS 虽然通过加密保护了数据传输的安全性，但在某些情况下（如未正确验证证书或密钥泄露），仍然可能被攻击者解密。
+
+
+- **mitmproxy** 是一个强大的工具，用于拦截和修改 HTTP/HTTPS 流量，适合安全测试和调试。
+- **Wireshark** 结合 `SSLKEYLOGFILE` 可以解密 HTTPS 流量，用于深度分析网络通信。
+
+**mitmproxy** 用于拦截和修改流量，适合实时分析和调试。**Wireshark** 用于深度分析网络流量，结合 `SSLKEYLOGFILE` 可以解密 HTTPS 流量。两者结合可以更全面地分析网络通信的安全性。
+
+
+中间人攻击与捕获密钥，参照视频：[抓包解密https — mitmproxy与wireshark](https://www.bilibili.com/video/BV1w7ADeLEPE)
+
+---
+
+1. **中间人攻击（MITM）简介**
+中间人攻击是一种网络攻击方式，攻击者通过拦截通信双方的流量，窃取或篡改数据。
+
+![](https://image.ventix.top/img02/20230306164803167.png)
+
+---
+
+
+2. **利用 mitmproxy 进行中间人攻击**
+
+**mitmproxy** 是一个强大的开源工具，支持 HTTP 和 HTTPS 流量的拦截、修改和重放。以下是使用 mitmproxy 进行中间人攻击的步骤：
+
+
+**2.1 安装 mitmproxy**
+- 通过 pip 安装：
+  ```bash
+  pip install mitmproxy
+  ```
+- 或者从 [mitmproxy 官网](https://mitmproxy.org/) 下载适合操作系统的版本。
+
+
+**2.2 启动 mitmproxy**
+- 在终端运行以下命令启动 mitmproxy：
+  ```bash
+  mitmproxy
+  ```
+- 默认监听端口为 `8080`。
+
+
+**2.3 配置客户端代理**
+- 在需要监控的设备或浏览器上，设置代理服务器为运行 mitmproxy 的机器 IP 地址及端口（如 `192.168.1.100:8080`）。
+
+
+**2.4 安装 mitmproxy 根证书**
+- 为了解密 HTTPS 流量，客户端需要信任 mitmproxy 的根证书。
+- 在客户端浏览器中访问 `http://mitm.it/`，下载并安装适合操作系统的根证书。
+- 安装完成后，mitmproxy 可以解密并查看 HTTPS 请求的内容。
+
+
+**2.5 拦截和查看流量**
+- 启动 mitmproxy 后，所有经过代理的 HTTP/HTTPS 流量都会显示在 mitmproxy 的交互界面中。
+- 可以查看请求和响应的详细信息，甚至修改数据包。
+
+---
+
+
+3. **使用 Wireshark 捕获和解密 HTTPS 流量**
+
+**Wireshark** 是一个网络协议分析工具，可以捕获和分析网络流量。结合 `SSLKEYLOGFILE`，Wireshark 可以解密 HTTPS 流量。
+
+
+**3.1 启用 SSLKEYLOGFILE**
+- `SSLKEYLOGFILE` 是一个环境变量，用于导出 TLS 会话密钥。
+- 在启动目标应用程序（如浏览器）之前，设置环境变量：
+  - **Windows**：
+    ```cmd
+    set SSLKEYLOGFILE=C:\path\to\sslkeylog.log
+    ```
+  - **Linux/macOS**：
+    ```bash
+    export SSLKEYLOGFILE=/path/to/sslkeylog.log
+    ```
+- 确保目标应用程序重启后生效。
+
+
+**3.2 配置 Wireshark**
+1. 打开 Wireshark，进入 `Edit -> Preferences -> Protocols -> TLS`。
+2. 在 `(Pre)-Master-Secret log filename` 选项中，浏览并选择刚才设置的 `SSLKEYLOGFILE` 路径。
+3. 应用更改后，Wireshark 将使用日志文件中的密钥解密捕获的 TLS 流量。
+
+
+**3.3 捕获和解密流量**
+- 启动 Wireshark，选择需要捕获的网络接口。
+- 开始捕获流量，Wireshark 会自动解密 HTTPS 流量（前提是 `SSLKEYLOGFILE` 已正确配置）。
+
+---
+
+
+
+
+**注意事项**
+
+- **证书验证**：确保客户端正确验证服务器证书，避免中间人攻击。
+- **密钥保护**：`SSLKEYLOGFILE` 包含敏感信息，需妥善保管，防止泄露。
 
 
