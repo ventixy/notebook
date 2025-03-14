@@ -11,8 +11,7 @@ shortTitle: docker
 
 ### Docker的安装
 
-docker 官网安装教程：https://docs.docker.com/engine/install/ubuntu/ 
-
+不同的Linux发行版中Docker的安装方式略有不同：
 
 ::: tabs 
 
@@ -68,7 +67,7 @@ yum install docker-ce-3:20.10.5-3.el7.x86_64 docker-ce-cli-3:20.10.5-3.el7.x86_6
 
 
 @tab Ubuntu
-参照官网教程
+参照 docker 官网安装教程：https://docs.docker.com/engine/install/ubuntu/ 
 :::
 
 
@@ -78,6 +77,7 @@ yum install docker-ce-3:20.10.5-3.el7.x86_64 docker-ce-cli-3:20.10.5-3.el7.x86_6
 ### 配置镜像加速
 
 1. 配置代理的方式（本机使用Clash并开启`LAN`）：Docker 配置代理，编辑代理配置文件：
+
 ```bash
 sudo mkdir -p /etc/systemd/system/docker.service.d
 sudo vim /etc/systemd/system/docker.service.d/http-proxy.conf
@@ -215,11 +215,11 @@ docker top container_id         # 查看指定容器中的进程信息
 docker run xxx
 # 启动并进入容器（使用exit停止并退出，也可以使用Ctrl+P+Q不停止退出）
 docker run -it centos /bin/bash 
-#【问题】发现centos停止了！？原因：docker容器使用后天运行必须要有一个前台进程
+#【问题】发现centos停止了！？原因：docker容器使用后台运行必须要有一个前台进程
 docker run -d centos            
 ```
 
-从镜像创建容器和，后续再次启动需要执行`docker start`, 停止和重启等参照：
+从镜像创建容器后，后续再次启动需要执行`docker start`, 停止和重启等参照：
 
 ```bash
 docker start   container_id     #启动容器
@@ -259,18 +259,263 @@ Retype new UNIX password:
 
 ### Docker数据卷
 
+Docker 数据卷（Volumes）是一种管理容器数据的机制，它允许你在宿主机和容器之间持久化数据、共享数据，并且可以独立于容器生命周期之外进行管理。数据卷提供了比直接在容器文件系统上存储数据更好的灵活性和控制力。
+
+- **持久性**：即使创建它的容器被删除，数据仍然存在。
+- **共享性**：可以在多个容器间共享数据。
+- **性能**：由于数据卷绕过了联合文件系统（UnionFS），因此具有更好的读写性能。
+- **隔离性**：每个数据卷都是相互独立的，一个容器中的操作不会影响到其他容器的数据卷。
+
+---
+
+**常用命令**
+
 ```bash
 docker volume ls           # 列出所有的数据卷
-docker volume inspect xxx  # 查看数据卷的详细信息
+docker volume inspect xxx  # 查看数据卷的详细信息（包括所在位置,即挂载点Mountpoint）
 
 docker volume create xxx   # 创建数据卷
 
-docker volume pause        # 删除所有的未使用的数据卷
+docker volume prune        # 删除所有的未使用的数据卷
 docker volume rm xxx       # 删除指定的数据卷
+```
+默认情况下，Docker 数据卷会被创建在 `/var/lib/docker/volumes/` 目录下。例如，你创建了一个名为 myvolume 的数据卷，那么它通常会被存储在 `/var/lib/docker/volumes/myvolume/_data` 路径中
 
+1. **挂载数据卷到容器中**
+   在启动容器时使用 `-v` 或 `--mount` 参数来挂载数据卷。
+   ```bash
+   docker run -d -v myvolume:/app myimage
+   ```
+   或者使用更明确的语法：
+   ```bash
+   docker run -d --mount source=myvolume,target=/app myimage
+   ```
+
+2. **备份数据卷**
+   可以通过运行一个临时容器来备份数据卷。
+   ```bash
+   docker run --rm -v myvolume:/data -v $(pwd):/backup busybox tar cvf /backup/backup.tar /data
+   ```
+
+3. **恢复数据卷**
+   同样地，可以通过另一个临时容器来恢复数据卷。
+   ```bash
+   docker run --rm -v myvolume:/data -v $(pwd):/backup busybox sh -c "cd /data && tar xvf /backup/backup.tar --strip 1"
+   ```
+---
+
+**使用场景示例**
+
+1. **数据库持久化**
+   当运行一个数据库服务时，如 MySQL 或 PostgreSQL，你需要确保数据库文件保存在一个数据卷中，这样即使容器被删除或重新创建，数据也不会丢失。
+   ```bash
+   docker run -d --name db -v db_data:/var/lib/mysql mysql:latest
+   ```
+
+2. **开发环境与生产环境分离**
+   开发人员可以将代码挂载到容器内的指定目录，这样修改代码后无需重建镜像即可看到效果。
+   ```bash
+   docker run -d -p 80:80 -v $(pwd):/usr/share/nginx/html nginx:latest
+   ```
+
+3. **多容器间的共享数据**
+   如果你有多个容器需要访问相同的数据集，比如日志分析工具和应用服务器都需要访问相同的日志文件，可以使用数据卷实现共享。
+   ```bash
+   docker run -d --name app -v shared_logs:/var/log/myapp myapp:latest
+   docker run -d --name log_analyzer -v shared_logs:/var/log/myapp loganalyzer:latest
+   ```
+
+4. **定期备份**
+   定期对重要数据卷进行备份是非常重要的。你可以设置定时任务（cron jobs）来自动执行备份脚本。
+
+
+
+---
+
+## docker run 命令详解
+
+`docker run` 用于从镜像创建并启动一个容器。支持多种参数和选项，可以灵活地配置容器的行为
+
+```bash
+docker run [OPTIONS] IMAGE [COMMAND] [ARG...]
+```
+
+- **`OPTIONS`**：配置容器的各种选项。
+- **`IMAGE`**：指定要运行的镜像名称或 ID。
+- **`COMMAND`**：容器启动后执行的命令（可选）。
+- **`ARG`**：传递给命令的参数（可选）。
+
+```bash
+# 从 `ubuntu` 镜像启动一个容器，执行默认命令后退出
+docker run ubuntu  
+
+#  从 `ubuntu` 镜像启动一个容器，执行 `echo "Hello, Docker!"` 后退出    
+docker run ubuntu echo "Hello, Docker!"
+```
+---
+
+常用 `OPTIONS` 参数说明如下：
+
+---
+
+**容器基础信息`OPTIONS` 参数**
+
+| **选项** |             **描述**             |
+| -------- | -------------------------------- |
+| `--name` | 为容器指定一个名称（默认随机生成） |
+| `-h`     | 指定容器的hostname                |
+
+
+---
+
+
+### 容器运行模式
+
+| **选项**          | **描述**                                                                 |
+|-------------------|-------------------------------------------------------------------------|
+| `-d` 或 `--detach` | 后台运行容器（ detached 模式）。                                        |
+| `-it`             | 以交互模式运行容器（分配一个伪终端并保持 STDIN 打开）。                 |
+| `--rm`            | 容器退出后自动删除容器。                                                |
+
+1. 从 `nginx` 镜像启动一个容器，并在**后台运行**
+
+```bash
+docker run -d nginx
+```
+
+2. 从 `ubuntu` 镜像启动一个容器，并以**交互模式**运行 Bash
+
+```bash
+docker run -it ubuntu /bin/bash
+```
+
+3. 从 `ubuntu` 镜像启动一个容器，并在容器退出后自动删除
+
+```bash
+docker run --rm ubuntu
+```
+
+
+
+### 网络和资源限制
+
+1. **端口映射和网络配置**
+
+| **选项**          | **描述**                                                                 |
+|-------------------|-------------------------------------------------------------------------|
+| `-p` 或 `--publish` | 将容器端口映射到宿主机端口（格式：`宿主机端口:容器端口`）。             |
+| `--network`       | 指定容器使用的网络（如 `bridge`、`host`、`none` 或自定义网络）。         |
+
+从 `nginx` 镜像启动一个容器，并将容器的 80 端口映射到宿主机的 8080 端口
+
+```bash
+docker run -d -p 8080:80 nginx
+```
+
+创建一个自定义网络 `my-network`，并在该网络中启动一个容器
+
+```bash
+docker network create my-network
+docker run -d --name my-container --network my-network nginx
+```
+
+
+
+---
+
+2. **容器资源限制**
+
+| **选项**          | **描述**                                                                 |
+|-------------------|-------------------------------------------------------------------------|
+| `-m` 或 `--memory` | 限制容器使用的内存（如 `-m 512m` 限制为 512MB）。                       |
+| `--cpus`          | 限制容器使用的 CPU 核心数（如 `--cpus="1.5"` 限制为 1.5 个核心）。      |
+
+示例：从 `ubuntu` 镜像启动一个容器，并限制内存为 512MB，CPU 为 1.5 个核心
+
+```bash
+docker run -m 512m --cpus="1.5" ubuntu
+```
+
+
+
+---
+
+
+
+### 数据卷和文件挂载
+
+在 Docker 中，`-v` 或 `--volume` 和 `--mount` 标志用于将宿主机上的文件或目录挂载到容器中，或者创建数据卷
+
+|      **选项**      |                            **描述**                            |
+| ------------------ | -------------------------------------------------------------- |
+| `-v` 或 `--volume` | 将宿主机的目录或文件挂载到容器中（格式：`宿主机路径:容器路径`）。 |
+| `--mount`          | 更灵活的挂载方式（支持绑定挂载、卷挂载等）。                     |
+
+1. `-v` 或 `--volume` 语法及使用示例
+
+```bash
+-v [host-src]:[container-dest][:<options>]
+```
+- host-src: 宿主机上的路径（可以是绝对路径或相对路径）或者一个已存在的数据卷名称。
+- container-dest: 容器内的目标路径。
+- options (可选): 可以包括 ro（只读）或 rw（读写，默认值）。
+
+如：`/path/on/host:/path/in/container:ro`
+
+从 `nginx` 镜像启动一个容器，并将宿主机的 `/host/data` 目录挂载到容器的 `/container/data` 目录
+
+```bash
+docker run -d -v /host/data:/container/data nginx
 ```
 
 ---
+
+2. `--mount`的语法及应用
+
+```bash
+--mount source=<source>,target=<destination>[,option=value]
+```
+- source: 宿主机上的路径、文件或数据卷名。
+- target: 容器内的路径。
+- options (可选): 包括但不限于 readonly, volume-opt, 等等
+
+示例：将名为 mydata 的数据卷挂载到容器中的 `/var/lib/mysql` 目录
+```bash
+docker run -d --mount source=mydata,target=/var/lib/mysql --name db mysql:latest
+```
+
+---
+
+
+
+### 其他常用选项
+
+|    **选项**    |                         **描述**                          |
+| -------------- | --------------------------------------------------------- |
+| `--restart`    | 设置容器的重启策略（如 `--restart always`）。默认为 `no`    |
+| `--entrypoint` | 覆盖镜像的默认入口点。默认情况下运行的是 `/bin/bash`         |
+| `--user`       | 指定运行容器的用户（如 `--user 1000`）。默认为 `root`       |
+| `--workdir`    | 设置容器的工作目录（如 `--workdir /app`）。默认是根目录 `/` |
+
+---
+
+**环境变量**
+
+|    **选项**     |                  **描述**                   |
+| --------------- | ------------------------------------------- |
+| `-e` 或 `--env` | 设置容器的环境变量（如 `-e MY_ENV=value`）。 |
+| `--env-file`    | 从文件加载环境变量（每行一个变量）。          |
+
+从 `ubuntu` 镜像启动一个容器，并设置环境变量 `MY_ENV=value`
+
+```bash
+docker run -e MY_ENV=value ubuntu
+```
+
+---
+
+
+
 
 ## 离线镜像和镜像仓库
 
@@ -517,399 +762,123 @@ CMD ["nginx", "-g", "daemon off;"]
 ---
 
 
-## 常用镜像安装和配置
-
-如何使用Docker部署组件：
-1、先去找组件的镜像—— [Docker Hub](https://hub.docker.com/)
-2、查看镜像文档，了解组件的可配置内容
-3、docker run进行部署
-
-
-::: info docker run
-
-常用关键参数OPTIONS 说明：
-
-```bash
-
--d:   # 后台运行容器，并返回容器ID；
--P:   # 随机端口映射，容器内部端口随机映射到主机的端口
--p:   # 指定端口映射，格式为：主机(宿主)端口:容器端口
-
--i:   # 以交互模式运行容器，通常与 -t 同时使用；
--t:   # 为容器重新分配一个伪输入终端，通常与 -i 同时使用
-
---restart ,      # 指定重启策略，可以写--restart=awlays 总是故障重启
---volume , -v:   # 绑定一个卷。一般格式 主机文件或文件夹:虚拟机文件或文件夹
-
-
---name="nginx-lb":         # 为容器指定一个名称；
---dns 8.8.8.8:             # 指定容器使用的DNS服务器，默认和宿主一致；
---dns-search example.com:  # 指定容器DNS搜索域名，默认和宿主一致；
--h "mars":                 # 指定容器的hostname；
-
--e username="ritchie":     # 设置环境变量；
---env-file=[]:             # 从指定文件读入环境变量；
-
---cpuset="0-2" or --cpuset="0,1,2":   # 绑定容器到指定CPU运行；
-
--m :             # 设置容器使用内存最大值；
---net="bridge":  # 指定容器的网络连接类型，支持 bridge/host/none/container: 四种类型；
-
---link=[]:       # 添加链接到另一个容器；
---expose=[]:     # 开放一个端口或一组端口；
-
-```
-:::
-
-
-
-
-### Portainer工具
-
-Portainer是功能强大的开源工具集，可让您轻松地在Docker，Swarm，Kubernetes和Azure ACI中构建和管理容器。 Portainer的工作原理是在易于使用的GUI后面隐藏使管理容器变得困难的复杂性。
-
-```bash
-sudo docker pull portainer/portainer-ce
-
-# 服务端部署
-sudo docker volume create portainer_data
-
-sudo docker run -d -p 8000:8000 -p 9000:9000 --name=portainer --restart=always \
--v /var/run/docker.sock:/var/run/docker.sock \
--v portainer_data:/data portainer/portainer-ce
-# 访问 9000 端口即可
-
-# agent端部署
-sudo docker run -d -p 9001:9001 --name portainer_agent --restart=always \
--v /var/run/docker.sock:/var/run/docker.sock \
--v /var/lib/docker/volumes:/var/lib/docker/volumes portainer/agent
-
-```
-
-
-
-
-
-### MySQL数据库
-
-创建实例并启动（将重要配置和数据映射到外部主机）：
-
-```shell
-docker pull mysql:5.7
-
-sudo mkdir -p /docker/mysql/mysql5.7/{log,data,conf,conf/conf.d,conf/mysql.conf.d}
-sudo chmod 644 /docker/mysql/mysql5.7/conf/my.cnf  # 此处配置文件权限不能是777，否则会被忽略
-
-# 创建实例并启动mysql （5.7）
-docker run -p 3307:3306 --name mysql5.7 --restart=always --privileged=true \
--v /docker/mysql/mysql5.7/log:/var/log/mysql \
--v /docker/mysql/mysql5.7/data:/var/lib/mysql \
--v /docker/mysql/mysql5.7/conf:/etc/mysql \
--e MYSQL_ROOT_PASSWORD=root \
--d mysql:5.7
-
-docker cp 52361b11faeb:/etc/my.cnf /docker/mysql/mysql5.7/my.cnf
-```
-
-设置mysql的配置文件
-```bash
-cat > /docker/data/mysql/conf/mysql.conf << EOF
-[client]
-default-character-set=utf8
-[mysql]
-default-character-set=utf8
-[mysqld]
-init_connect='SET collation_connection=utf8_unicode_cli'
-init_connect='SET NAMES utf8'
-character-set-server=utf8
-collation-server=utf8_unicode_ci
-skip-character-set-client-handshark
-skip-name-resolve
-secure_file_priv=/var/lib/mysql
-EOF
-
-docker restart mysql                    # 修改完要重启mysql
-docker exec -it mysql /bin/bash         # 进入mysql
-```
-
-
-创建多个MySQL实例：
-```shell
-# 创建实例并启动mysql（ 8.0 ）
-docker run -p 3306:3306 --name mysql8 --restart=always --privileged=true \
--v /docker/data/mysql/log:/var/log/mysql \
--v /docker/data/mysql/data:/var/lib/mysql \
--v /docker/data/mysql/conf:/etc/mysql \
--e MYSQL_ROOT_PASSWORD=123456 \
--d mysql:8.0
-
-#启动两个mysql
-docker run -p 3307:3306 --name mysql_gmall \
--v /docker/data/mysql_gmall/log:/var/log/mysql \
--v /docker/data/mysql_gmall/data:/var/lib/mysql \
--v /docker/data/mysql_gmall/conf:/etc/mysql \
--e MYSQL_ROOT_PASSWORD=root \
--d mysql:5.7
-```
-
-
----
-
-### Redis安装与配置
-
-```shell
-docker pull redis  # 下载镜像
-
-# 创建实例并启动redis
-mkdir -p /docker/data/redis/conf && touch /docker/data/redis/conf/redis.conf
-
-docker run -p 6379:6379 --name redis --restart=always \
- -v /docker/data/redis/conf/redis.conf:/etc/redis/redis.conf \
- -v /docker/data/redis/data:/data \
- -d redis redis-server /etc/redis/redis.conf
-
-
-#配置（持久化）
-cat > /docker/data/redis/conf/redis.conf << EOF
-appendonly yes
-EOF
-
-docker restart redis                    #修改完要重启redis
-
-```
-
-测试持久化配置是否生效
-
-```shell
-docker exec -it redis redis-cli
->set name alice                     # ok
->get name                           # "alice"
->exit
-
-docker restart redis
-docker exec -it redis redis-cli
->get name                           # "alice"   成功保存到硬盘，重启数据依旧存在
->exit
-
-```
-
-
-
-
-
-### ELK环境的部署
-
-```bash
-# 下载镜像
-docker search elasticsearch
-docker pull elasticsearch:7.16.3
-
-# 创建数据、数据和日志的挂载目录
-sudo mkdir -p /docker/data/elk/es/{config,data,logs}
-
-
-# 赋予权限, docker中elasticsearch的用户UID是1000.
-sudo chown -R 1000:1000 /docker/data/elk/es
-
-
-# 创建配置文件
-cd /docker/data/elk/es/config
-sudo vim elasticsearch.yml
-#-----------------------配置内容----------------------------------
-cluster.name: "my-es"
-network.host: 0.0.0.0
-http.port: 9200
-```
-
-通过镜像，启动一个容器，并将9200和9300端口映射到本机（elasticsearch的默认端口是9200，我们把宿主环境9200端口映射到Docker容器中的9200端口）。此处建议给容器设置固定ip，我这里没设置。
-
-```bash
-sudo docker run -it -d -p 9200:9200 -p 9300:9300 --name es --restart=always \
--e ES_JAVA_OPTS="-Xms1g -Xmx1g" -e "discovery.type=single-node"  \
--v /docker/data/elk/es/config/es.yml:/usr/share/elasticsearch/config/elasticsearch.yml \
--v /docker/data/elk/es/data:/usr/share/elasticsearch/data \
--v /docker/data/elk/es/logs:/usr/share/elasticsearch/logs elasticsearch:7.16.3
-```
-
-验证安装是否成功：浏览器访问 `http://localhost:9200` 
-
-
-IK中文分词器：
-
-```bash
-# 将Linux 中的 ik 目录复制到es容器中
-sudo docker cp /home/drizzle/Software/elk/ik es:/usr/share/elasticsearch/plugins/
-
-# 重启容器即可
-sudo docker restart es
-
-```
-
-<br>
-
----
-
-**kibana安装与配置**
-
-```bash
-# 下载镜像
-sudo docker pull kibana:7.16.3
-
-# 获取elasticsearch容器ip: 172.17.0.6
-sudo docker inspect --format '{{ .NetworkSettings.IPAddress }}' es
-
-# 新建配置文件
-sudo mkdir /docker/data/elk/kibana
-sudo touch /docker/data/elk/kibana/kibana.yml
-sudo vim /docker/data/elk/kibana/kibana.yml
-
-#Default Kibana configuration for docker target
-server.name: kibana
-server.host: "0"
-elasticsearch.hosts: ["http://172.17.0.6:9200"]
-xpack.monitoring.ui.container.elasticsearch.enabled: true
-
-
-# run kibana
-sudo docker run -d --restart=always --log-driver json-file --log-opt max-size=100m --log-opt max-file=2 --name kibana -p 5601:5601 -v /docker/data/elk/kibana/kibana.yml:/usr/share/kibana/config/kibana.yml kibana:7.16.3
-
-```
-
-浏览器上输入：http://localhost:5601，如无法访问进容器检查配置是否生效
-
-
-
-### nacos安装与配置
-
-注意服务器内存不足，启动后内存溢出问题（单机standalone模式默认服务器堆大小512M）[nacos官方文档](https://nacos.io/zh-cn/docs/what-is-nacos.html)
-
-```shell
-
-docker pull nacos/nacos-server
-
-# 创建本地的映射文件：custom.properties
-mkdir -p /docker/data/nacos/{init.d,logs}
-touch /docker/data/nacos/init.d/custom.properties
-
-cat > /docker/data/nacos/init.d/custom.properties << EOF
-management.endpoints.web.exposure.include=*
-EOF
-
-```
-
-<br>
-
-创建数据库 `nacos_config` :  创建nacos数据库后，然后执行下面的Sql 。 [nacos官网的Sql](https://github.com/alibaba/nacos/blob/master/config/src/main/resources/META-INF/nacos-db.sql) . 
-
-```shell
-
-# 创建容器并启动(开机自启动)
-docker run -d -p 8848:8848 --name nacos --restart always \
--e MODE=standalone \
--e PREFER_HOST_MODE=ip \
--e SPRING_DATASOURCE_PLATFORM=mysql \
--e MYSQL_SERVICE_HOST=192.168.5.106 \
--e MYSQL_SERVICE_PORT=3306 \
--e MYSQL_SERVICE_DB_NAME=nacos_config \
--e MYSQL_SERVICE_USER=root \
--e MYSQL_SERVICE_PASSWORD=123456 \
--e MYSQL_DATABASE_NUM=1 \
--v /docker/data/nacos/init.d/custom.properties:/home/nacos/init.d/custom.properties \
--v /docker/data/nacos/logs:/home/nacos/logs \
-nacos/nacos-server
-
-docker ps
-
-```
-
-
-### Nginx安装与配置
-
-创建配置文件目录：
-
-```bash
-
-sudo mkdir -p /docker/data/nginx/conf/conf.d
-sudo mkdir -p /docker/data/nginx/html
-sudo mkdir -p /docker/data/nginx/logs
-
-```
-
-conf 和conf.d 分别 用于保存配置文件
-html 用于放置静态文件
-logs 用于保存日志
-
-
-
-<br>
-
-
-
-下载镜像，先随便启动一个容器，复制相关配置文件：
-
-```bash
-
-sudo docker pull nginx
-
-sudo docker run --name nginx-test -p 8088:80 -d nginx 
-
-
-# 复制相关文件
-sudo docker cp 622:/etc/nginx/nginx.conf /docker/data/nginx/conf/nginx.conf
-sudo docker cp 622:/etc/nginx/conf.d /docker/data/nginx/conf
-sudo docker cp 622:/usr/share/nginx/html /docker/data/nginx/
-
-
-# 停止、并删除原来的容器
-sudo docker stop 622
-sudo docker rm 622
-
-```
-
-<br>
-
-指定配置文件及数据保存位置、并启动Nginx：
-
-```bash
-
-sudo docker run --name nginx -p 80:80 \
--v /docker/data/nginx/conf/nginx.conf:/etc/nginx/nginx.conf \
--v /docker/data/nginx/html/:/usr/share/nginx/html/ \
--v /docker/data/nginx/logs/:/var/log/nginx/ \
--v /docker/data/nginx/conf/conf.d/:/etc/nginx/conf.d/ \
---privileged=true -d nginx
-
-```
-
-
-
-
-
-
-
-
-<br>
 
 
 
 ## Docker Compose
 
-[Get started with Docker Compose](https://docs.docker.com/compose/gettingstarted/) 
+**Docker Compose** 是一个用于定义和运行多容器 Docker 应用程序的工具。它通过一个 YAML 文件（通常命名为 `docker-compose.yml`）来配置应用程序的服务、网络和卷等资源，从而简化多容器应用的部署和管理。
 
- [You can use Docker Compose to easily run WordPress](https://docs.docker.com/samples/wordpress/) 
+- Docker Compose 依赖于 Docker 引擎运行。
+- 需要先安装 Docker 才能使用 Docker Compose。
 
- [菜鸟教程](https://www.runoob.com/docker/docker-compose.html) &nbsp; 
+相关文档：[Get started with Docker Compose](https://docs.docker.com/compose/gettingstarted/) ， [菜鸟教程](https://www.runoob.com/docker/docker-compose.html)
 
-[install-compose：](https://docs.docker.com/compose/install/#install-compose)
+---
 
-```shell
-#To install a different version of Compose, substitute 1.29.2 with the version of Compose you want to use
-sudo curl -L "https://github.com/docker/compose/releases/download/1.29.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+### Compose插件
 
-sudo chmod +x /usr/local/bin/docker-compose
-docker-compose --version                          #Test the installation
+在 Windows 和 macOS 上，安装 Docker Desktop 时会自动安装 Docker Compose。对于 Linux 用户，从 **Docker Engine 20.10.0** 版本开始，默认集成了 **Docker Compose 插件**（即 `docker compose` 命令，没有连字符）。可以通过以下命令确认是否已集成 Compose 插件：
 
-
-#To uninstall Docker Compose if you installed using curl:
-sudo rm /usr/local/bin/docker-compose
+```bash
+docker compose version
 ```
+
+官方推荐使用 Docker Compose 插件（`docker compose`），因为它是未来发展的方向，并且完全集成到了 Docker CLI 中。独立版本的 `docker-compose` 工具正在逐步被淘汰，仅用于向后兼容的目的。
+
+|   **特性**   |      **Docker Compose 插件**       | **Docker Compose 独立版本**  |
+| ------------ | ---------------------------------- | ---------------------------- |
+| **命令格式** | `docker compose`（无连字符）        | `docker-compose`（有连字符） |
+| **集成方式** | 集成到 Docker CLI                   | 独立二进制文件                |
+| **安装方式** | 随 Docker Engine 自动安装           | 需要单独安装                 |
+| **推荐程度** | 官方推荐，未来主推方向               | 逐步淘汰，仅用于向后兼容      |
+| **兼容性**   | 支持 Docker 最新功能（如 BuildKit） | 功能更新较慢                 |
+
+若需要安装独立版本的 Docker Compose 可参照文档：[Install the Docker Compose standalone](https://docs.docker.com/compose/install/standalone/)
+
+---
+
+### 部署WordPress
+
+以下是一个简单的 `docker-compose.yml` 文件示例，用于启动一个包含 WordPress 和 MySQL 的应用：
+
+```yaml
+version: '3.8'
+
+services:
+  db:
+    image: mysql:5.7
+    volumes:
+      - db_data:/var/lib/mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: example
+      MYSQL_DATABASE: wordpress
+      MYSQL_USER: wordpress
+      MYSQL_PASSWORD: wordpress
+
+  wordpress:
+    image: wordpress:latest
+    ports:
+      - "8080:80"
+    environment:
+      WORDPRESS_DB_HOST: db
+      WORDPRESS_DB_USER: wordpress
+      WORDPRESS_DB_PASSWORD: wordpress
+      WORDPRESS_DB_NAME: wordpress
+    depends_on:
+      - db
+
+volumes:
+  db_data:
+```
+
+在 `docker-compose.yml` 文件所在目录下运行以下命令以启动服务：
+```bash
+docker compose up
+```
+使用 `-d` 参数可以在后台运行：
+```bash
+docker compose up -d
+```
+
+---
+
+### Compose常用命令
+
+| **命令**                | **描述**                              |
+|-------------------------|--------------------------------------|
+| `docker compose up`     | 启动服务。                           |
+| `docker compose down`   | 停止并删除服务。                     |
+| `docker compose ps`     | 查看运行中的容器状态。               |
+| `docker compose logs`   | 查看服务日志。                       |
+| `docker compose build`  | 构建自定义镜像。                     |
+| `docker compose exec`   | 在运行中的容器中执行命令。           |
+| `docker compose pull`   | 拉取服务所需的镜像。                 |
+| `docker compose restart`| 重启服务。                           |
+
+查看运行状态：
+```bash
+docker compose ps
+```
+
+停止服务，使用 `-v` 参数可以删除关联的卷：
+```bash
+docker compose down -v
+```
+
+查看日志：
+```bash
+docker compose logs
+```
+
+重启服务：
+```bash
+docker compose restart
+```
+
+构建自定义镜像，如果服务使用本地 Dockerfile，可以使用以下命令构建镜像：
+```bash
+docker compose build
+```
+
+使用 Docker Compose 可以极大简化多容器应用的部署和管理，提升开发效率。
