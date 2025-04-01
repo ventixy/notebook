@@ -65,7 +65,7 @@ DMA拷贝的优点在于，一旦CPU初始化了DMA操作并指定了源和目�
 4. **控制返回用户空间**：当数据完全复制完成后，内核将控制权返回给应用程序，此时应用程序的线程解除阻塞状态。
 
 
-在Java中，`java.io`包提供了基于阻塞IO的API。详细的API及其使用参照：[Java IO](../../syntax/base/javaIO.md)
+在Java中，`java.io`包提供了基于阻塞IO的API。详细的API及其使用参照：[Java IO](/java/base/javaIO.md)
 
 
 

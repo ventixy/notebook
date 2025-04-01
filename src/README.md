@@ -12,7 +12,7 @@ actions:
   type: primary
 
 - text: Question⚡
-  link: /interview/
+  link: /java/interview/
 
 features:
 - title: 常用工具和软件

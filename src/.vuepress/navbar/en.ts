@@ -7,7 +7,7 @@ export const enNavbar = navbar([
   },
   {
     text: "Java", icon: "java",
-    children: ["/java/syntax/", "/java/frame/", "/java/service/", "/java/database/", "/java/interview/"],
+    children: ["/java/base/", "/java/core/", "/java/frame/", "/java/service/", "/java/database/", "/java/interview/"],
   },
   {
     text: "Project", icon: "app",

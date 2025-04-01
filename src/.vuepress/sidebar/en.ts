@@ -9,12 +9,13 @@ export const enSidebar = sidebar({
   "/posts/om/": [{text: "Blog-系统运维博客", icon: "es6", link: "/posts/om/", children: "structure"}],
   "/posts/blog/": [{text: "Blog-日常博客记录", icon: "es6", link: "/posts/blog/", children: "structure"}],
 
-  "/project/base/": [{text: "常用工具及项目环境搭建", icon: "project", link: "/project/base/", children: "structure"}],
+  "/project/base/": [{text: "常用工具及项目环境", icon: "project", link: "/project/base/", children: "structure"}],
   "/project/mall/": [{text: "电商项目综合实践", icon: "project", link: "/project/mall/", children: "structure"}],
   "/project/ai/": [{text: "AI综合应用开发实践", icon: "project", link: "/project/ai/", children: "structure"}],
   "/project/solution/": [{text: "项目常见场景解决方案", icon: "project", link: "/project/solution/", children: "structure"}],
 
-  "/java/syntax/": [{text: "Java基础及核心特性", icon: "java", link: "/java/syntax/", children: "structure"}],
+  "/java/base/": [{text: "Java基础语法介绍", icon: "java", link: "/java/base/", children: "structure"}],
+  "/java/core/": [{text: "Java进阶及核心特性", icon: "java", link: "/java/core/", children: "structure"}],
   "/java/frame/": [{text: "JavaWeb及常用框架", icon: "spring-framework", link: "/java/frame/", children: "structure"}],
   "/java/service/": [{text: "分布式组件与微服务架构", icon: "java", link: "/java/service/", children: "structure"}],
   "/java/database/": [{text: "数据库与ORM框架", icon: "db", link: "/java/database/", children: "structure"}],

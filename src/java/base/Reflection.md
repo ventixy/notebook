@@ -1,6 +1,6 @@
 ---
 
-order: 15
+order: 120
 title: Reflection反射
 
 ---
@@ -719,7 +719,7 @@ public class ReflectArrayExample {
 
 ### 动态代理的实现
 
-详见：[动态代理](../../frame/spring/design.md#动态代理及其实现)
+详见：[动态代理](/java/frame/spring/design.md#动态代理及其实现)
 
 
 ### 通过反射创建对象

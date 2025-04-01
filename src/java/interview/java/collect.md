@@ -221,5 +221,5 @@ Iterator是Java集合框架中用于遍历集合元素的接口，迭代器是�
 List专门提供了ListIterator方法，其返回值是一个Iterator的子接口，最明显的特点就是支持双向遍历(`hasPrevious`和`previous`)
 :::
 
-关于集合 迭代器，及其与Foreach的关系参照：[Iterator](/java/syntax/base/collection.md#_1-iterator)
+关于集合 迭代器，及其与Foreach的关系参照：[Iterator](/java/base/collection.md#_1-iterator)
 

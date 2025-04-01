@@ -1,6 +1,6 @@
 ---
 
-order: 40
+order: 150
 title: Stream API
 
 ---

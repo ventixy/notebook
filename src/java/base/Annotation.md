@@ -1,8 +1,7 @@
 ---
 
-order: 10
+order: 110
 title: Annotation
-shortTitle: Annotation注解
 
 ---
 

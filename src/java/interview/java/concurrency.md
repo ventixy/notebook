@@ -113,7 +113,7 @@ Java 线程池中 shutdown 与 shutdownNow 的区别是什么？
 
 
 ::: info ForkJoinPool
-ForkJoinPool是Fork/Join框架的核心执行器，它是一个特殊的线程池，用于管理和调度任务。它使用了==工作窃取（Work-Stealing）算法==，这意味着当一个线程完成其分配的任务并且没有更多任务可执行时，它会尝试“窃取”其他线程的任务，从而提高CPU利用率。 具体使用方法参照：[ForkJoinPool使用示例](/java/syntax/thread/pool.md#使用及代码示例)
+ForkJoinPool是Fork/Join框架的核心执行器，它是一个特殊的线程池，用于管理和调度任务。它使用了==工作窃取（Work-Stealing）算法==，这意味着当一个线程完成其分配的任务并且没有更多任务可执行时，它会尝试“窃取”其他线程的任务，从而提高CPU利用率。 具体使用方法参照：[ForkJoinPool使用示例](/java/core/thread/pool.md#使用及代码示例)
 :::
 
 
@@ -226,7 +226,7 @@ get()方法在Future计算完成之前会一直处在阻塞状态下，阻塞的
 - 默认情况下，CompletableFuture 使用 ForkJoinPool.commonPool() 作为执行器，用户也可以指定自定义的线程池。
 - 利用了 LockSupport.park/unpark 和 CAS 操作实现高效的线程同步，减少不必要的阻塞等待。
 
-具体使用方式参照：[CompletableFuture代码示例](/java/syntax/thread/tool.md#使用场景及示例-2)
+具体使用方式参照：[CompletableFuture代码示例](/java/core/thread/tool.md#使用场景及示例-2)
 
 
 
