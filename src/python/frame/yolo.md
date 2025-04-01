@@ -2,7 +2,7 @@
 
 order: -15
 title:  YOLOv8
-shortTitle: yolov8
+shortTitle: YOLO & YOLOv8
 
 ---
 

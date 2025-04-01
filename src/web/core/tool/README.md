@@ -2,6 +2,7 @@
 
 dir:
     order: 1
+    collapsible: false
 index: false
 title: Node.js与前端工具
 

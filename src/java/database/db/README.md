@@ -1,6 +1,7 @@
 --- 
 dir:
     order: 1
+    collapsible: false
 index: false
 title: 常用数据库
 

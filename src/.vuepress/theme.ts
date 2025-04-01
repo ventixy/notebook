@@ -13,7 +13,7 @@ export default hopeTheme({
   logo: "logo.svg",
   favicon: "jav.ico",
 
-  iconAssets: "//at.alicdn.com/t/c/font_3708474_z1p3kxj9i5c.css",
+  iconAssets: "//at.alicdn.com/t/c/font_3708474_gl16oflwpyn.css",
 
   docsDir: "src",
   breadcrumb: false,    // 是否全局启用路径导航

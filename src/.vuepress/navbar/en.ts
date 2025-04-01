@@ -1,15 +1,33 @@
 import { navbar } from "vuepress-theme-hope";
 
 export const enNavbar = navbar([
-  {text: "Blog", icon: "blog", link: "/blog"},
-  {text: "Java", icon: "java", link: "/java/"},
-  {text: "Project", icon: "app", link: "/project/"},
-  {text: "Web", icon: "net", link: "/web/"},
-  {text: "Python", icon: "python", link: "/python/"},
+  {
+    text: "Blog", icon: "blog",
+    children: ["/blog", "/posts/cs/", "/posts/java/", "/posts/db/", "/posts/om/", "/posts/blog/"],
+  },
+  {
+    text: "Java", icon: "java",
+    children: ["/java/syntax/", "/java/frame/", "/java/service/", "/java/database/", "/java/interview/"],
+  },
+  {
+    text: "Project", icon: "app",
+    children: ["/project/base/", "/project/mall/", "/project/ai/", "/project/solution/"],
+  },
+  {
+    text: "Web", icon: "net",
+    children: ["/web/base/", "/web/core/", "/web/security/"],
+  },
+  {
+    text: "Python", icon: "python",
+    children: ["/python/base/", "/python/frame/", "/python/image/", "/python/Project/"],
+  },
+  {
+    text: "AI", icon: "ai-robot",
+    children: ["/AI/base/", "/AI/apply/"],
+  },
 
   {
-    text: "Other",
-    icon: "project",
-    children: ["/interview/", "/tool/theme.md"],
+    text: "Other", icon: "project",
+    children: ["/tool/theme.md"],
   },
 ]);

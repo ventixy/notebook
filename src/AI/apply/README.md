@@ -1,9 +1,8 @@
 --- 
 
 dir:
-    order: 5
     collapsible: false
 index: false
-title: ORM框架
+title: AI工具应用实践
 
 ---

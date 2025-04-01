@@ -1,7 +1,8 @@
 --- 
 
 dir:
-    order: 10
+    order: 1
+    collapsible: false
 index: false
 title: Web安全
 

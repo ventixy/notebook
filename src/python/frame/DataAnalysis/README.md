@@ -1,7 +1,8 @@
 --- 
 
 dir:
-    order: 15
+    order: 10
+    collapsible: false
 index: false
 title: DataAnalysis
 icon: data

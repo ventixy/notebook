@@ -2,6 +2,7 @@
 
 dir:
     order: 40
+    collapsible: false
 index: false
 title: Java并发编程
 

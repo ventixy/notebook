@@ -2,7 +2,6 @@
 
 order: 3
 title: 常见图像处理库
-icon: python
 
 ---
 
