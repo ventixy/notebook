@@ -8,6 +8,7 @@ tag:
   - notwork
 shortTitle: VPS
 title: Virtual Private Server
+order: 30
 ---
 
 

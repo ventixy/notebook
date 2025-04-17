@@ -1,8 +1,7 @@
 ---
 
-order: -5
-title: DAMB
-icon: app
+order: 25
+title: Carrying bricks
 
 ---
 
@@ -181,34 +180,7 @@ labelimg支持多种标注工具，包括矩形、圆形、线条和点等。使
 ### 4. Yolov目标检测
 
 
-## 三 串口通信及自动操作
 
-### 1. CH9329
-CH9329 芯片是由沁恒生产的一种串口转HID键盘鼠标芯片。
-它可以将上位机发送的串口数据转换为标准的USB键鼠设备信号，
-并将其发送给下位机，从而实现硬件级别的键鼠模拟。
-
-官网信息：
-
-https://special.wch.cn/zh_cn/USBChips/#/
-
-https://www.wch.cn/products/CH9329.html
-
-
-Github参考：
-
-https://github.com/beijixiaohu/CH9329_COMM
-
-
-```bash
-pip install ch9329Comm -i https://pypi.tuna.tsinghua.edu.cn/simple
-pip install pyserial  -i https://pypi.tuna.tsinghua.edu.cn/simple 
-pip install pyautogui -i https://pypi.tuna.tsinghua.edu.cn/simple
-```
-
-
-
-## 四 相关特殊功能实现
 
 
 
