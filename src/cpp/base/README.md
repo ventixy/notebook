@@ -246,6 +246,87 @@ int add(int x, int y) {
 ---
 
 
+### 进制及进制转换
+
+C语言支持以下几种常见进制的表示：
+
+1. **十进制 (Decimal)**： 默认的整数表示方式， 直接书写数字即可
+
+2. **八进制 (Octal)**：以数字 `0` 开头，后面跟八进制数字（0-7）
+     ```c
+     int num = 012; // 八进制12，等价于十进制的10
+     ```
+3. **十六进制 (Hexadecimal)**：以 `0x` 或 `0X` 开头，后面跟十六进制数字（0-9 和 A-F/a-f）
+     ```c
+     int num = 0x1A; // 十六进制1A，等价于十进制的26
+     ```
+4. **二进制 (Binary)**：C语言标准本身并不直接支持二进制字面量（如`0b1010`），但在某些编译器（如GCC和Clang）中可以通过扩展支持。
+     ```c
+     int num = 0b1010; // 二进制1010，等价于十进制的10
+     ```
+     如果需要跨平台兼容性，可以手动使用其他方法（如字符串或位运算）来表示二进制。
+
+---
+
+::: info 进制的输出样式
+
+C语言通过`printf()`函数可以以不同的进制格式输出整数值。以下是常用的格式说明符及其作用：
+
+1. **十进制输出**: 使用 `%d` 或 `%i` 格式说明符。
+     ```c
+     int num = 10;
+     printf("Decimal: %d\n", num); // 输出：Decimal: 10
+     ```
+2. **八进制输出**: 使用 `%o` 格式说明符。
+     ```c
+     int num = 10;
+     printf("Octal: %o\n", num); // 输出：Octal: 12
+     ```
+3. **十六进制输出**: 使用 `%x` 或 `%X` 格式说明符。
+     - `%x` 输出小写字母（a-f）。
+     - `%X` 输出大写字母（A-F）。
+     ```c
+     int num = 26;
+     printf("Hexadecimal (lowercase): %x\n", num); // 输出：Hexadecimal (lowercase): 1a
+     printf("Hexadecimal (uppercase): %X\n", num); // 输出：Hexadecimal (uppercase): 1A
+     ```
+4. **带前缀的十六进制输出**: 使用 `#` 标志可以在输出中添加前缀 `0x` 或 `0X`。
+     ```c
+     int num = 26;
+     printf("Hexadecimal with prefix: %#x\n", num); // 输出：Hexadecimal with prefix: 0x1a
+     printf("Hexadecimal with prefix: %#X\n", num); // 输出：Hexadecimal with prefix: 0X1A
+     ```
+5. **二进制输出**: C语言标准库没有直接支持二进制输出，但可以通过自定义函数实现。
+     ```c
+     void print_binary(int num) {
+         if (num == 0) {
+             printf("0");
+             return;
+         }
+         char binary[33] = {0};
+         int i = 32;
+         while (num > 0) {
+             binary[--i] = (num & 1) ? '1' : '0';
+             num >>= 1;
+         }
+         printf("%s", binary + i);
+     }
+
+     int main() {
+         int num = 10;
+         printf("Binary: ");
+         print_binary(num); // 输出：Binary: 1010
+         printf("\n");
+         return 0;
+     }
+     ```
+:::
+
+
+
+---
+
+
 ## C++核心特性简介
 
 C++ 是一种通用编程语言，由 Bjarne Stroustrup 于 1985 年在贝尔实验室开发，作为 C 语言的扩展。它在 C 语言的基础上增加了面向对象编程（OOP）和泛型编程的特性，同时保持了 C 语言的高效性和底层控制能力。

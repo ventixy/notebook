@@ -370,9 +370,337 @@ const int MAX_USERS = 1000;
 ---
 
 
-## C语言标准输入输出
+## 常见运算符及应用
 
-在C语言中，输入输出操作主要通过标准库函数来实现。这些函数提供了与用户进行交互的能力，允许程序读取用户的输入或将信息输出给用户：
+C语言中的运算符是用于执行各种操作（如算术运算、逻辑判断、位操作等）的符号。它们在程序中广泛使用，用于处理数据、控制流程和实现复杂逻辑。
+
+---
+
+### 算术运算符
+
+算术运算符用于执行基本的数学运算。
+
+| 运算符 | 描述                | 示例            | 结果（假设 `a = 10, b = 3`） |
+|--------|---------------------|-----------------|------------------------------|
+| `+`    | 加法                | `a + b`         | `13`                        |
+| `-`    | 减法                | `a - b`         | `7`                         |
+| `*`    | 乘法                | `a * b`         | `30`                        |
+| `/`    | 除法                | `a / b`         | `3` （整数除法，取商）       |
+| `%`    | 取模（求余数）      | `a % b`         | `1` （余数为1）              |
+| `++`   | 自增（前/后自增）   | `a++` 或 `++a`  | `a = 11`                    |
+| `--`   | 自减（前/后自减）   | `b--` 或 `--b`  | `b = 2`                     |
+
+**注意**：
+- `/` 和 `%` 的行为取决于操作数类型：
+  - 如果操作数是整数，则 `/` 执行整数除法。
+  - 如果操作数是浮点数，则 `/` 执行浮点除法。
+- 自增和自减运算符：
+  - 前置：先修改变量值，再使用。
+  - 后置：先使用变量值，再修改。
+
+---
+
+### 关系运算符
+
+关系运算符用于比较两个值，并返回布尔值（真或假）。C语言中用非零表示真，零表示假。
+
+| 运算符 | 描述          | 示例            | 结果（假设 `a = 10, b = 3`） |
+|--------|---------------|-----------------|------------------------------|
+| `==`   | 等于          | `a == b`        | `0` （假）                  |
+| `!=`   | 不等于        | `a != b`        | `1` （真）                  |
+| `>`    | 大于          | `a > b`         | `1` （真）                  |
+| `<`    | 小于          | `a < b`         | `0` （假）                  |
+| `>=`   | 大于等于      | `a >= b`        | `1` （真）                  |
+| `<=`   | 小于等于      | `a <= b`        | `0` （假）                  |
+
+---
+
+### 逻辑运算符
+
+逻辑运算符用于组合多个条件表达式。
+
+| 运算符 | 描述      | 示例                 | 结果（假设 `a = 1, b = 0`） |
+|--------|-----------|----------------------|----------------------------|
+| `&&`   | 逻辑与    | `a && b`            | `0` （假）                |
+| `\|\|`   | 逻辑或    | `a \|\| b`            | `1` （真）                |
+| `!`    | 逻辑非    | `!a`                | `0` （假）                |
+
+**注意**：
+- `&&` 和 `||` 具有短路特性：
+  - 对于 `&&`，如果第一个条件为假，则不计算第二个条件。
+  - 对于 `||`，如果第一个条件为真，则不计算第二个条件。
+
+---
+
+### 位运算符
+
+位运算符直接对整数的二进制位进行操作。
+
+| 运算符 | 描述           | 示例            | 结果（假设 `a = 5 (0101), b = 3 (0011)`） |
+|--------|----------------|-----------------|------------------------------------------|
+| `&`    | 按位与         | `a & b`         | `1` (`0001`)                            |
+| `\|`   | 按位或         | `a \| b`        | `7` (`0111`)                            |
+| `^`    | 按位异或       | `a ^ b`         | `6` (`0110`)                            |
+| `~`    | 按位取反       | `~a`            | `-6` （补码表示）                       |
+| `<<`   | 左移           | `a << 1`        | `10` (`1010`)                           |
+| `>>`   | 右移           | `a >> 1`        | `2` (`0010`)                            |
+
+**注意**：
+- 左移相当于将数值乘以2的幂次。
+- 右移相当于将数值除以2的幂次（对于无符号数）。
+
+---
+
+### 赋值运算符
+
+赋值运算符用于将一个值赋给变量。
+
+| 运算符 | 描述         | 示例            | 等价形式       |
+|--------|--------------|-----------------|----------------|
+| `=`    | 简单赋值     | `a = b`         | `a = b`        |
+| `+=`   | 加法赋值     | `a += b`        | `a = a + b`    |
+| `-=`   | 减法赋值     | `a -= b`        | `a = a - b`    |
+| `*=`   | 乘法赋值     | `a *= b`        | `a = a * b`    |
+| `/=`   | 除法赋值     | `a /= b`        | `a = a / b`    |
+| `%=`   | 取模赋值     | `a %= b`        | `a = a % b`    |
+| `<<=`  | 左移赋值     | `a <<= b`       | `a = a << b`   |
+| `>>=`  | 右移赋值     | `a >>= b`       | `a = a >> b`   |
+| `&=`   | 按位与赋值   | `a &= b`        | `a = a & b`    |
+| `\|=`  | 按位或赋值   | `a \|= b`       | `a = a \| b`   |
+| `^=`   | 按位异或赋值 | `a ^= b`        | `a = a ^ b`    |
+
+---
+
+### 条件运算符
+
+条件运算符是唯一的三目运算符，用于根据条件选择不同的值。
+
+语法：`condition ? value_if_true : value_if_false`
+  ```c
+  int a = 10, b = 20;
+  int max = (a > b) ? a : b; // 如果 a > b，max = a；否则 max = b
+  printf("Max: %d\n", max); // 输出：Max: 20
+  ```
+
+---
+
+### 其他运算符
+
+1. **逗号运算符 (`,`)**：
+   - 用于将多个表达式连接在一起，整个表达式的值是最后一个表达式的值。
+   - 示例：
+     ```c
+     int a = (1, 2, 3); // a = 3
+     ```
+
+2. **取地址运算符 (`&`)** 和 **指针解引用运算符 (`*`)**：
+   - 用于操作内存地址。
+   - 示例：
+     ```c
+     int x = 10;
+     int *p = &x; // p 存储 x 的地址
+     printf("%d\n", *p); // 输出：10
+     ```
+
+3. **sizeof 运算符**：
+   - 返回变量或数据类型的大小（以字节为单位）。
+   - 示例：
+     ```c
+     int size = sizeof(int); // size = 4（通常为4字节）
+     ```
+
+4. **成员访问运算符**：
+   - `.`：用于访问结构体或联合体的成员。
+   - `->`：用于通过指针访问结构体或联合体的成员。
+   - 示例：
+     ```c
+     struct Point {
+         int x, y;
+     };
+     struct Point p = {10, 20};
+     printf("%d\n", p.x); // 输出：10
+     
+     struct Point *ptr = &p;
+     printf("%d\n", ptr->y); // 输出：20
+     ```
+
+---
+
+### 运算符优先级
+
+C语言中的运算符具有不同的优先级和结合性，这决定了表达式的计算顺序。
+
+| 优先级 | 运算符               | 结合性       |
+|--------|----------------------|--------------|
+| 1      | `()` `[]` `->` `.`   | 从左到右     |
+| 2      | `!` `~` `++` `--`    | 从右到左     |
+| 3      | `*` `/` `%`          | 从左到右     |
+| 4      | `+` `-`              | 从左到右     |
+| 5      | `<<` `>>`            | 从左到右     |
+| 6      | `<` `<=` `>` `>=`    | 从左到右     |
+| 7      | `==` `!=`            | 从左到右     |
+| 8      | `&`                  | 从左到右     |
+| 9      | `^`                  | 从左到右     |
+| 10     | `\|`                 | 从左到右     |
+| 11     | `&&`                 | 从左到右     |
+| 12     | `||`                 | 从左到右     |
+| 13     | `?:`                 | 从右到左     |
+| 14     | `=` `+=` `-=` 等     | 从右到左     |
+| 15     | `,`                  | 从左到右     |
+
+**建议**： 在复杂的表达式中，使用括号明确优先级，以提高代码可读性和避免错误。
+
+
+---
+
+
+## 程序控制语句
+
+C语言中的程序控制语句用于控制程序的执行流程，包括条件判断、循环和跳转等。这些控制语句使得程序可以根据不同的条件执行不同的代码块，或者重复执行某些操作，从而实现复杂的功能。
+
+1. **条件语句**：`if`、`if-else`、`if-else if-else` 和 `switch`。
+2. **循环语句**：`for`、`while` 和 `do-while`。
+3. **跳转语句**：`break`、`continue`、`goto` 和 `return`。
+
+合理使用这些控制语句，可以使你的代码更加清晰、高效和易于维护。同时，建议避免过度使用 `goto`，以保持代码的可读性和结构化风格。
+
+---
+
+### 条件语句
+
+1. `if` 语句: 用于在满足某个条件时执行特定代码块。
+  ```c
+  int x = 10;
+  if (x > 5) {
+      printf("x is greater than 5\n");
+  }
+  ```
+
+2. `if-else` 语句: 用于在条件为真时执行一个代码块，否则执行另一个代码块。
+  ```c
+  int x = 3;
+  if (x > 5) {
+      printf("x is greater than 5\n");
+  } else {
+      printf("x is less than or equal to 5\n");
+  }
+  ```
+3. `if-else if-else` 语句: 当需要检查多个条件时，可以使用 `if-else if-else` 结构。
+  ```c
+  int score = 85;
+  if (score >= 90) {
+      printf("Grade: A\n");
+  } else if (score >= 75) {
+      printf("Grade: B\n");
+  } else {
+      printf("Grade: C\n");
+  }
+  ```
+4. `switch` 语句：用于基于变量的值执行多个代码块之一。
+  - 每个 `case` 后面必须有 `break`，否则会继续执行后续的 `case` 代码（称为“贯穿”）。
+  - `default` 是可选的，用于处理没有匹配的 `case` 的情况。
+  ```c
+  int day = 3;
+  switch (day) {
+      case 1:
+          printf("Monday\n");
+          break;
+      case 2:
+          printf("Tuesday\n");
+          break;
+      case 3:
+          printf("Wednesday\n");
+          break;
+      default:
+          printf("Invalid day\n");
+  }
+  ```
+
+---
+
+### 循环语句
+
+1. `for` 循环: 用于重复执行一段代码固定次数或基于某个条件。
+  ```c
+  for (int i = 1; i <= 5; i++) {
+      printf("%d ", i);
+  }
+  // 输出：1 2 3 4 5
+  ```
+
+2. `while` 循环: 在条件为真时重复执行代码块。
+  ```c
+  int i = 1;
+  while (i <= 5) {
+      printf("%d ", i);
+      i++;
+  }
+  // 输出：1 2 3 4 5
+  ```
+
+3. `do-while` 循环：至少执行一次循环体，然后在条件为真时继续执行。
+  ```c
+  int i = 1;
+  do {
+      printf("%d ", i);
+      i++;
+  } while (i <= 5);
+  // 输出：1 2 3 4 5
+  ```
+
+---
+
+### 跳转语句
+
+1. `break`：立即退出当前循环或 `switch` 语句。
+  ```c
+  for (int i = 1; i <= 10; i++) {
+      if (i == 5) {
+          break; // 退出循环
+      }
+      printf("%d ", i);
+  }
+  // 输出：1 2 3 4
+  ```
+
+2. `continue`：用于跳过当前迭代的剩余部分，直接进入下一次迭代。
+  ```c
+  for (int i = 1; i <= 5; i++) {
+      if (i == 3) {
+          continue; // 跳过 i == 3 的迭代
+      }
+      printf("%d ", i);
+  }
+  // 输出：1 2 4 5
+  ```
+
+3. `goto`：用于无条件跳转到指定标签处。虽然不推荐频繁使用，但在某些情况下（如错误处理）可能有用。
+  ```c
+  int x = 10;
+  if (x > 5) {
+      goto end;
+  }
+  printf("This will not be printed.\n");
+  end:
+      printf("Jumped to the end.\n");
+  // 输出：Jumped to the end.
+  ```
+
+4. `return`： 用于从函数中返回值，并结束函数的执行。
+  ```c
+  int add(int a, int b) {
+      return a + b;
+  }
+  ```
+
+
+
+---
+
+
+## stream和文件I/O
+
+C语言的标准输入输出功能由`stdio.h`头文件提供的一系列函数支持。这些函数提供了与用户进行交互的能力，允许程序读取用户的输入或将信息输出给用户
 
 ::: important 流(stream)
 C语言的I/O设计基于流(stream)的概念，为各种设备提供了统一的接口.
@@ -384,7 +712,73 @@ C语言的I/O设计基于流(stream)的概念，为各种设备提供了统一�
 常见预定义流：`stdin：标准输入流(键盘)`, `stdout：标准输出流(屏幕)`, `stderr：标准错误流(屏幕)`
 :::
 
-C语言的标准输入输出功能由`stdio.h`头文件提供的一系列函数支持。
+常用的流(stream)处理函数：
+
+1. **打开流**
+   - `FILE *fopen(const char *path, const char *mode);`  
+     用来打开一个文件并返回一个指向`FILE`结构体的指针。`mode`参数决定了打开文件的方式（读、写等）。
+
+2. **关闭流**
+   - `int fclose(FILE *fp);`  
+     关闭由`fopen()`打开的文件，释放资源。
+
+3. **读取和写入流**
+   - `int fprintf(FILE *stream, const char *format, ...);`  
+     类似于`printf()`，但允许指定不同的流。
+   - `size_t fread(void *ptr, size_t size, size_t nmemb, FILE *stream);`  
+     从流中读取数据到内存块中。
+   - `size_t fwrite(const void *ptr, size_t size, size_t nmemb, FILE *stream);`  
+     将内存块中的数据写入流。
+
+4. **其他操作**
+   - `int fgetc(FILE *stream);` 和 `int fputc(int c, FILE *stream);`  
+     分别用于从流中读取字符和向流中写入字符。
+   - `char *fgets(char *s, int size, FILE *stream);` 和 `int fputs(const char *s, FILE *stream);`  
+     分别用于从流中读取一行字符串和向流中写入一行字符串。
+   - `int fseek(FILE *stream, long offset, int whence);`  
+     改变流的位置指示器。
+
+
+这里给出一个简单的例子，展示如何使用流来读写文件：
+
+```c
+#include <stdio.h>
+
+int main() {
+    // 打开文件以写模式
+    FILE *file = fopen("example.txt", "w");
+    if (file == NULL) {
+        printf("无法打开文件\n");
+        return 1;
+    }
+
+    // 向文件写入数据
+    fprintf(file, "Hello, World!\n");
+
+    // 关闭文件
+    fclose(file);
+
+    // 重新打开文件以读模式
+    file = fopen("example.txt", "r");
+    if (file == NULL) {
+        printf("无法打开文件\n");
+        return 1;
+    }
+
+    // 创建缓冲区
+    char buffer[100];
+    // 从文件读取数据
+    while (fgets(buffer, sizeof(buffer), file) != NULL) {
+        printf("%s", buffer);
+    }
+
+    // 关闭文件
+    fclose(file);
+    return 0;
+}
+```
+
+---
 
 ### printf() 函数
 
@@ -412,13 +806,26 @@ printf() 函数 用于格式化输出数据到终端或指定的输出流, `int 
 | %X     | 十六进制(大写)      | 0X1A3      |
 | %%     | 百分号本身          | %          |
 
+printf()函数向标准输出（stdout）写入数据，默认情况下就是终端屏幕。它本质上是对标准输出流的操作。在底层，printf() 使用了 stdout 这个预定义的 FILE* 流指针。
+
+::: info fprintf()
+fprintf()：类似于 printf()，但允许指定不同的流
+```c
+FILE *file = fopen("example.txt", "w");
+if (file != NULL) {
+    fprintf(file, "Hello, file!\n");
+    fclose(file);
+}
+```
+:::
 
 ---
 
 
 ### scanf() 函数
 
-scanf() 函数用于从标准输入（通常是键盘）读取数据并根据指定的格式存储到变量中: `int scanf(const char *format, ...);`
+scanf() 函数用于从标准输入（通常是键盘）读取数据并根据指定的格式存储到变量中: 
+`int scanf(const char *format, ...);`
 
   ```c
   #include <stdio.h>
@@ -435,152 +842,315 @@ scanf() 函数用于从标准输入（通常是键盘）读取数据并根据指
 
 **格式化字符串的安全性**：当使用`printf()`和`scanf()`时，确保提供的格式字符串与实际参数匹配，否则可能导致未定义行为。
 
+scanf()函数从标准输入（stdin）读取数据，默认情况下是从键盘读取。同样地，它也是对标准输入流的操作，使用了 stdin 这个预定义的 FILE* 流指针。
+
+::: info fscanf()
+fscanf()：类似于 scanf()，但可以从指定的流中读取数据
+```c
+FILE *file = fopen("example.txt", "r");
+if (file != NULL) {
+    char buffer[100];
+    fscanf(file, "%s", buffer);
+    printf("Read from file: %s\n", buffer);
+    fclose(file);
+}
+```
+:::
+
 ---
 
 ### 行 I/O 函数
 
-- `gets()`：从标准输入读取一行文本（不推荐使用，因为它不能很好地处理缓冲区溢出）。
-- `puts()`：向标准输出打印字符串，并自动添加换行符。
+1. **`fgets(char *str, int n, FILE *stream)`**
+   - **用途**：从指定流中读取最多`n-1`个字符（或直到遇到换行符`\n`）到缓冲区`str`，并在末尾添加一个空字符`\0`。
+   - **优点**：相比`gets()`，它允许指定缓冲区大小，从而避免了缓冲区溢出的风险。
+     ```c
+     char buffer[100];
+     if (fgets(buffer, sizeof(buffer), stdin) != NULL) {
+         printf("You entered: %s", buffer);
+     }
+     ```
 
-```c
-char *gets(char *s);  // 危险！已弃用
-char *fgets(char *s, int size, FILE *stream);  // 安全替代
-```
-如何安全读取一行：
-```c
-char line[100];
-fgets(line, sizeof(line), stdin);  // 包括换行符
-```
-- fgets()
-- fputs()
+2. **`fputs(const char *str, FILE *stream)`**
+   - **用途**：将字符串写入指定流中。与`puts()`不同的是，它不会自动添加换行符。
+   - **优点**：适用于需要精确控制输出的情况。
+     ```c
+     fputs("Hello, World!\n", stdout);
+     ```
 
-```c
-int puts(const char *s);  // 输出字符串并自动添加换行
-int fputs(const char *s, FILE *stream);  // 不自动添加换行
-```
-**安全性问题**：避免使用`gets()`，因为其可能导致缓冲区溢出。应考虑使用`fgets()`代替。
+3. **`gets(char *str)` 和 `puts(const char *str)`**
+   - **`gets(char *str)`**
+     - **用途**：从标准输入读取一行文本并存储到指定的缓冲区`str`中，直到遇到换行符为止。**不推荐使用**。
+     - **安全问题**：没有提供缓冲区大小限制，容易导致缓冲区溢出攻击，非常不安全。已经被C11标准弃用。
+     - **替代方案**：使用`fgets(str, size, stdin)`代替`gets(str)`。
+   
+   - **`puts(const char *str)`**
+     - **用途**：向标准输出打印一个字符串，并自动追加一个换行符。
+     - **局限性**：不如`fputs()`灵活，因为它总是添加换行符且只能输出到标准输出。
+       ```c
+       puts("Hello, World!");
+       ```
+
+4. **`getline()` 和 `getdelim()`**（POSIX标准）
+   - 这些函数不是ANSI C标准的一部分，但被广泛支持，特别是在Unix/Linux系统中。
+   - **`ssize_t getline(char **lineptr, size_t *n, FILE *stream);`**
+     - 动态分配内存来读取整行输入，适合处理未知长度的输入行。
+   - **`ssize_t getdelim(char **lineptr, size_t *n, int delimiter, FILE *stream);`**
+     - 类似于`getline()`，但是可以指定分隔符而不是默认的换行符。
+
+::: tip 安全注意事项
+- **避免使用`gets()`**：由于缺乏对缓冲区大小的检查，可能导致缓冲区溢出，这是严重的安全隐患。应始终使用`fgets()`作为替代。
+- **注意缓冲区大小**：当使用`fgets()`时，确保传递正确的缓冲区大小参数以防止溢出。例如，如果缓冲区大小为100，则应该调用`fgets(buffer, 100, stdin)`。
+- **错误处理**：无论是使用`fgets()`还是其他I/O函数，都应该检查返回值，以便正确处理可能发生的错误情况。例如，`fgets()`在到达文件末尾或发生错误时会返回`NULL`。
+:::
 
 ---
 
 ### 字符 I/O 函数
 
-单字符输入输出:
+字符I/O函数在C语言中用于处理单个字符的读写操作，它们提供了比格式化输入输出（如`printf()`和`scanf()`）更细粒度的控制。这些函数特别适用于需要逐字符处理文本的应用场景。
 
-```c
-int getchar(void);              // 从stdin读取一个字符
-int putchar(int c);             // 向stdout输出一个字符
-int getc(FILE *stream);         // 从指定流读取
-int putc(int c, FILE *stream);  // 向指定流写入
-```
-示例：
-```c
-int c;
-while ((c = getchar()) != EOF) {  // EOF通常是-1
-    putchar(toupper(c));
-}
-```
+1. **`fgetc(FILE *stream)`**：从指定流中读取一个字符，并返回其值作为`int`类型（以便可以区分EOF）。如果到达文件末尾或发生错误，则返回`EOF`。
+     ```c
+     #include <stdio.h>
+
+     int main() {
+         FILE *file = fopen("example.txt", "r");
+         if (file == NULL) {
+             printf("无法打开文件\n");
+             return 1;
+         }
+
+         int ch;
+         while ((ch = fgetc(file)) != EOF) {
+             putchar(ch); // 输出到标准输出
+         }
+         fclose(file);
+         return 0;
+     }
+     ```
+     在这个例子中，程序逐字符读取文件内容并输出到屏幕。
+
+2. **`fputc(int c, FILE *stream)`**：将一个字符写入指定流中，并返回写入的字符。如果发生错误，则返回`EOF`。
+     ```c
+     #include <stdio.h>
+
+     int main() {
+         FILE *file = fopen("output.txt", "w");
+         if (file == NULL) {
+             printf("无法打开文件\n");
+             return 1;
+         }
+
+         fputc('H', file);
+         fputc('i', file);
+         fputc('\n', file); // 添加换行符
+         fclose(file);
+         return 0;
+     }
+     ```
+     这段代码向文件写入了字符串"Hi\n"。
+
+3. **`getchar(void)`**：从标准输入（通常是键盘）读取一个字符，并返回其值作为`int`类型。等价于`fgetc(stdin)`。
+     ```c
+     #include <stdio.h>
+
+     int main() {
+         printf("请输入一个字符: ");
+         int ch = getchar();
+         printf("你输入的字符是: %c\n", ch);
+         return 0;
+     }
+     ```
+
+4. **`putchar(int c)`**：将一个字符写入到标准输出（通常是屏幕），并返回写入的字符。等价于`fputc(c, stdout)`。
+     ```c
+     #include <stdio.h>
+
+     int main() {
+         char message[] = "Hello, World!";
+         for (int i = 0; message[i] != '\0'; ++i) {
+             putchar(message[i]);
+         }
+         putchar('\n'); // 添加换行符
+         return 0;
+     }
+     ```
+
+5. **`ungetc(int c, FILE *stream)`**：将一个字符推回到流中，使得下一次读取该流时首先读取这个字符。注意，大多数实现只允许一个字符被推回。
+     ```c
+     #include <stdio.h>
+
+     int main() {
+         char ch;
+         printf("请输入一个字符: ");
+         ch = getchar();
+         ungetc(ch, stdin); // 将字符推回到输入流中
+
+         ch = getchar(); // 再次读取相同的字符
+         printf("你输入的字符是: %c\n", ch);
+         return 0;
+     }
+     ```
 
 ---
 
-### 文件输入输出
+### 文件I/O操作
 
-除了标准输入输出之外，C语言还支持文件操作，允许程序直接读写磁盘上的文件。这通常涉及到`fopen()`、`fclose()`、`fread()`、`fwrite()`等函数。
+在C语言中，所有文件操作都是基于流（stream）的概念进行的。流是一个抽象的概念，代表一个数据序列，无论是从文件读取还是向文件写入。每个流都与一个`FILE*`类型的指针相关联，这个指针指向内部的文件控制块，包含了文件的状态和位置等信息。
 
-| 模式 | 描述                     |
-|------|--------------------------|
-| "r"  | 只读(文件必须存在)       |
-| "w"  | 只写(创建/截断文件)      |
-| "a"  | 追加(写入文件末尾)       |
-| "r+" | 读写(文件必须存在)       |
-| "w+" | 读写(创建/截断文件)      |
-| "a+" | 读/追加(写入文件末尾)    |
-| "b"  | 二进制模式(如"rb","w+b") |
+**打开文件**：要对文件进行操作，首先需要打开文件。这可以通过`fopen()`函数完成：
 
-示例：文件读写
+```c
+#include <stdio.h>
+
+// 打开文件
+FILE *fopen(const char *path, const char *mode);
+```
+- `path`: 文件路径。
+- `mode`: 文件打开模式，如"r"（只读）、"w"（写入，文件不存在则创建，存在则清空）等。
+
+    | 模式 | 描述 |
+    |---|---|
+    | `"r"` | 只读模式。打开一个已存在的文本文件用于读取数据，文件指针位于文件开头。如果文件不存在，则函数返回 `NULL` 并设置错误标志。适用于只读操作。 |
+    | `"w"` | 写模式。创建一个新的文本文件或覆盖一个已存在的文件进行写入操作，文件指针位于文件开头。如果文件存在，其内容会被清空。如果文件不存在，则创建新文件。 |
+    | `"a"` | 追加模式。打开一个文本文件用于在文件末尾追加数据，文件指针位于文件末尾。如果文件不存在，则创建新文件。尝试在其他位置写入会导致数据追加到文件末尾。 |
+    | `"r+"` | 读写模式。打开一个已存在的文本文件用于读取和写入数据，文件指针位于文件开头。如果文件不存在，则函数返回 `NULL` 并设置错误标志。适合需要同时读取和修改文件的应用。 |
+    | `"w+"` | 读写模式（覆盖）。创建一个新的文本文件或覆盖一个已存在的文件进行读取和写入操作，文件指针位于文件开头。如果文件存在，其内容会被清空。如果文件不存在，则创建新文件。 |
+    | `"a+"` | 读写模式（追加）。打开一个文本文件用于在文件末尾追加数据并允许读取，文件指针位于文件末尾。即使使用 `fseek()` 移动文件指针，所有写操作仍然会在文件末尾进行。如果文件不存在，则创建新文件。 |
+
+---
+
+**关闭文件**：当不再需要访问文件时，应该关闭文件以释放资源：
+
+```c
+int fclose(FILE *fp);   // 成功时返回0，失败时返回EOF
+```
+---
+
+::: info 常用文件I/O函数
+
+1. **读写文本文件**
+
+   - **`fgetc(FILE *stream)` 和 `fputc(int c, FILE *stream)`**
+     - 分别用于从文件中读取一个字符和向文件中写入一个字符。
+   
+   - **`fgets(char *str, int n, FILE *stream)` 和 `fputs(const char *str, FILE *stream)`**
+     - `fgets()` 用于从文件中读取一行文本，最多读取`n-1`个字符。
+     - `fputs()` 用于向文件写入一个字符串，不自动添加换行符。
+
+2. **读写二进制文件**
+
+   - **`fread(void *ptr, size_t size, size_t nmemb, FILE *stream)`**
+     - 从文件中读取数据到内存块中。`size`指定每个元素的大小，`nmemb`指定要读取的元素数量。
+   
+   - **`fwrite(const void *ptr, size_t size, size_t nmemb, FILE *stream)`**
+     - 将内存块中的数据写入文件。参数含义同`fread()`。
+
+3. **文件定位**
+
+   - **`fseek(FILE *stream, long offset, int whence)`**
+     - 改变文件的位置指示器。`whence`可以是`SEEK_SET`（文件开头）、`SEEK_CUR`（当前位置）、`SEEK_END`（文件末尾）。
+   
+   - **`ftell(FILE *stream)`**
+     - 返回文件位置指示器的当前值，即从文件开头到当前位置的字节数。
+   
+   - **`rewind(FILE *stream)`**
+     - 将文件位置指示器重置到文件开头。
+
+4. **错误检测**
+
+   - **`feof(FILE *stream)`**
+     - 检测是否到达文件末尾。
+   
+   - **`ferror(FILE *stream)`**
+     - 检测是否存在文件错误。
+:::
+
+---
+
+写入文本文件示例：
+
 ```c
 #include <stdio.h>
 
 int main() {
-    FILE *file;
-    file = fopen("example.txt", "w"); // 打开文件以写模式
+    FILE *file = fopen("example.txt", "w");
     if (file == NULL) {
-        printf("Could not open file.\n");
+        printf("无法打开文件\n");
         return 1;
     }
-    fprintf(file, "Hello World!\n"); // 向文件写入数据
-    fclose(file); // 关闭文件
-    
-    file = fopen("example.txt", "r"); // 重新打开文件以读模式
+
+    fprintf(file, "Hello, World!\n");
+    fclose(file);
+    return 0;
+}
+```
+---
+
+读取文本文件示例：
+
+```c
+#include <stdio.h>
+
+int main() {
+    FILE *file = fopen("example.txt", "r");
     if (file == NULL) {
-        printf("Could not open file.\n");
+        printf("无法打开文件\n");
         return 1;
     }
+
     char buffer[100];
-    while (fgets(buffer, 100, file) != NULL) { // 从文件读取数据
+    while (fgets(buffer, sizeof(buffer), file) != NULL) {
         printf("%s", buffer);
     }
-    fclose(file); // 关闭文件
+    fclose(file);
     return 0;
 }
 ```
 
-**错误处理**：对于所有涉及文件的操作，都应该检查返回值是否为NULL，以确保操作成功完成。
+---
+
+读写二进制文件示例：假设我们有一个结构体数组需要保存到文件中，并从文件中读取回来：
+
+```c
+#include <stdio.h>
+
+typedef struct {
+    int id;
+    char name[50];
+} Person;
+
+int main() {
+    // 写入二进制文件
+    FILE *file = fopen("people.dat", "wb");
+    if (file == NULL) {
+        printf("无法打开文件\n");
+        return 1;
+    }
+
+    Person people[] = {{1, "Alice"}, {2, "Bob"}};
+    fwrite(people, sizeof(Person), 2, file);
+    fclose(file);
+
+    // 读取二进制文件
+    file = fopen("people.dat", "rb");
+    if (file == NULL) {
+        printf("无法打开文件\n");
+        return 1;
+    }
+
+    Person person;
+    while (fread(&person, sizeof(Person), 1, file) == 1) {
+        printf("ID: %d, Name: %s\n", person.id, person.name);
+    }
+    fclose(file);
+    return 0;
+}
+```
+
+
 
 
 ---
 
-
-
-
-
-## 控制结构
-
-### 条件语句
-- **if-else**
-  ```c
-  if (condition) {
-      // 执行代码块
-  } else {
-      // 执行其他代码块
-  }
-  ```
-
-### 循环语句
-- **for循环**
-  ```c
-  for (初始化; 条件; 更新) {
-      // 循环体
-  }
-  ```
-- **while循环**
-  ```c
-  while (条件) {
-      // 循环体
-  }
-  ```
-- **do-while循环**
-  ```c
-  do {
-      // 循环体
-  } while (条件);
-  ```
-
-### 跳转语句
-- **continue**: 结束当前循环迭代，开始下一次迭代。
-- **break**: 立即退出最近的循环或switch语句。
-- **goto**: 跳转到指定标签处执行代码。
-
-## 函数定义与调用
-
-### 函数定义
-```c
-int add(int a, int b) {
-    return a + b;
-}
-```
-
-### 函数调用
-```c
-int result = add(5, 3);
-printf("Result: %d\n", result);
-```
