@@ -54,7 +54,12 @@ features:
   icon: k8s
   details: 项目规划，进度管理，缺陷跟踪，自动化测试（JIRA，禅道）
   link: /project/
-  
+
+- title: AI基础及应用实践
+  icon: ai-robot
+  details: AI基础常识，常见工具和大模型
+  link: /posts/AI/
+
 - title: 计算机基础
   icon: computer
   details: 计算机组成原理、网络基础知识，操作系统
@@ -64,6 +69,11 @@ features:
   icon: stream
   details: 常用数据结构及算法
   link: /theory/ds/
+
+- title: Theme-Hope
+  icon: https://theme-hope-assets.vuejs.press/logo.svg
+  details: Theme-Hope主题配置
+  link: /tool/theme.md
 
 copyright: false
 footer: Java Docs | MIT Licensed, Copyright © 2020-present Ventixy

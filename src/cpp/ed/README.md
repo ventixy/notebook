@@ -3,6 +3,6 @@
 dir:
     collapsible: false
 index: false
-title: AI工具应用实践
+title: 单片机和嵌入式开发
 
 ---

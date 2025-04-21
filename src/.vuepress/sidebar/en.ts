@@ -7,6 +7,7 @@ export const enSidebar = sidebar({
   "/posts/java/": [{text: "Blog-Java开发相关博客", icon: "es6", link: "/posts/java/", children: "structure"}],
   "/posts/db/": [{text: "Blog-数据库相关博客", icon: "es6", link: "/posts/db/", children: "structure"}],
   "/posts/om/": [{text: "Blog-系统运维博客", icon: "es6", link: "/posts/om/", children: "structure"}],
+  "/posts/AI/": [{text: "Blog-AI基础及应用实践", icon: "ai-robot", link: "/posts/AI/", children: "structure"}],
   "/posts/blog/": [{text: "Blog-日常博客记录", icon: "es6", link: "/posts/blog/", children: "structure"}],
 
   "/project/base/": [{text: "常用工具及项目环境", icon: "project", link: "/project/base/", children: "structure"}],
@@ -30,8 +31,8 @@ export const enSidebar = sidebar({
   "/python/image/": [{text: "Python图像识别与处理", icon: "python", link: "/python/image/", children: "structure"}],
   "/python/Project/": [{text: "Python相关项目文档", icon: "python", link: "/python/Project/", children: "structure"}],
 
-  "/AI/base/": [{text: "AI理论基础入门", icon: "ai-robot", link: "/AI/base/", children: "structure"}],
-  "/AI/apply/": [{text: "AI常见工具应用实践", icon: "ai-robot", link: "/AI/apply/", children: "structure"}],
+  "/cpp/base/": [{text: "C/CPP基础语法入门", icon: "cpp", link: "/cpp/base/", children: "structure"}],
+  "/cpp/ed/": [{text: "Embedded Development", icon: "ai-robot", link: "/cpp/ed/", children: "structure"}],
 
   "/tool/": [{text: "常用开发工具和环境", icon: "tools", link: "/tool/", children: "structure"}],
   

@@ -5,6 +5,5 @@ dir:
     collapsible: false
 index: false
 title: JavaWeb及常用框架
-icon: net
 
 ---

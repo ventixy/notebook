@@ -5,7 +5,7 @@ dir:
     # collapsible: false
     text: Computer and science
 index: false
-title: Computer and science
+title: 计算机理论基础
 
 
 ---
