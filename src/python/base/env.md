@@ -207,6 +207,157 @@ conda deactivate
 conda remove -n tf2 --all
 ```
 
+---
+
+
+## UV项目管理工具
+
+
+`uv` 是一个快速、现代化的 Python 包和环境管理工具，基于 `pyproject.toml` 实现依赖声明、自动虚拟环境、跨平台锁定和更快的安装体验。
+
+官网文档：https://docs.astral.sh/uv
+中文文档：https://hellowac.github.io/uv-zh-cn/
+Github：https://github.com/astral-sh/uv
+
+
+---
+
+### 📦 初始化项目
+
+✅ 快速创建新项目，参照：https://hellowac.github.io/uv-zh-cn/guides/projects/
+
+```bash
+uv init hello-world
+cd hello-world
+```
+
+或者你可以在已有目录中初始化：
+
+```bash
+mkdir hello-world
+cd hello-world
+uv init
+```
+
+生成结构如下：
+
+```bash
+.
+├── .python-version     # 指定使用的 Python 版本
+├── README.md
+├── hello.py            # 示例代码
+└── pyproject.toml      # 项目配置和依赖声明
+```
+
+> 运行默认示例：
+```bash
+uv run hello.py
+```
+
+---
+
+::: info  📁 项目结构详解
+
+第一次运行 `uv run` / `uv sync` / `uv lock` 会生成如下结构：
+
+```
+.
+├── .venv/              # 虚拟环境：依赖实际安装位置
+├── .python-version     # 项目使用的 Python 版本（自动下载并缓存）
+├── pyproject.toml      # 项目元信息和依赖列表
+├── uv.lock             # 锁文件：记录已解析的依赖版本
+├── hello.py
+└── README.md
+```
+:::
+
+---
+
+### 🧾 依赖项管理
+
+📥 添加依赖
+```bash
+uv add requests
+uv add 'requests==2.31.0'
+uv add git+https://github.com/psf/requests
+```
+
+> 自动更新：
+- `pyproject.toml` 的 `dependencies` 字段
+- `uv.lock` 锁文件
+- `.venv` 中安装依赖
+
+🗑️ 移除依赖
+```bash
+uv remove requests
+```
+
+🔄 升级依赖
+```bash
+uv lock --upgrade-package requests
+```
+
+---
+
+### ⚙️ 运行命令
+
+📂 运行脚本
+```bash
+uv run script.py
+```
+
+📡 运行项目依赖相关命令（如 Flask 服务）
+```bash
+uv add flask
+uv run -- flask run -p 3000
+```
+
+> `uv run` 会确保 `.venv` 与锁文件同步后再运行命令，保持一致性。
+
+👟 手动同步依赖 & 激活环境
+```bash
+uv sync                    # 同步 .venv 环境
+source .venv/bin/activate  # 手动进入虚拟环境
+python script.py
+```
+
+`uv sync` 会读取项目中的依赖配置文件（如 pyproject.toml, requirements.txt 等），确保所有列出的依赖都已安装到项目的虚拟环境中。如果某些依赖未安装或版本不匹配，`uv sync` 会进行相应的调整
+
+---
+
+### 常用命令和重要文件
+
+
+💡 常用命令速查表
+
+| 命令 | 功能 |
+|------|------|
+| `uv init [name]` | 初始化新项目 |
+| `uv add <pkg>` | 添加依赖 |
+| `uv remove <pkg>` | 移除依赖 |
+| `uv lock --upgrade-package <pkg>` | 升级指定依赖 |
+| `uv sync` | 同步虚拟环境（安装所有依赖） |
+| `uv run <file>` | 在隔离环境中运行脚本 |
+| `uv run -- <command>` | 运行带依赖的命令，如 Flask/Django |
+| `uv pip <args>` | 使用 `pip` 子命令操作（如查看路径） |
+
+---
+
+| 文件 | 说明 |
+|------|------|
+| `.python-version` | 指定 Python 版本（uv 会自动下载） |
+| `.venv/` | 自动创建的虚拟环境目录，存放已安装依赖 |
+| `pyproject.toml` | 项目定义 + 依赖列表 |
+| `uv.lock` | 锁定依赖版本，确保跨平台一致性（应提交到版本控制） |
+
+
+
+
+
+
+
+---
+
 
 ## AI环境搭建
 
