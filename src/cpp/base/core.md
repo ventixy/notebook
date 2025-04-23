@@ -521,8 +521,8 @@ int *p = &x; // 定义一个指向整型的指针，并将其初始化为 x 的�
 ```
 :::
 
-
 ---
+
 
 ### 取地址与解引用
 
@@ -538,6 +538,44 @@ int *p = &x; // 定义一个指向整型的指针，并将其初始化为 x 的�
   int *p = &x;
   printf("Value of x: %d\n", *p); // 输出：10
   ```
+
+
+---
+
+
+
+
+### 通用指针 `void *`
+
+通用指针 `void *` 的主要用途:
+
+1. 内存分配函数：内存分配函数（如 `malloc`、`calloc`）返回的是 `void *` 类型的指针，因为它们可以返回任何类型的指针。例如：`void *ptr = malloc(sizeof(int));`
+
+2. 使用 `%p` 打印指针地址与 `void *` 配合使用最为安全
+```c
+int num = 42;
+void* ptr = &num;
+
+printf("指针地址: %p\n", ptr);  // 正确用法
+printf("指针地址: %p\n", (void*)&num);  // 其他类型指针应先转为void*
+```
+
+::: tip 使用通用指针 `void*` 的注意事项
+1. 必须显式类型转换后才能解引用
+```c
+void* ptr = &num;
+// int val = *ptr;          // 错误
+int val = *(int*)ptr;      // 正确
+```
+
+2. 不能进行指针算术运算
+```c
+void* ptr = ...;
+// ptr++;                  // 错误
+char* cptr = (char*)ptr;   // 转为char*后可运算
+cptr++;
+```
+:::
 
 
 ---
