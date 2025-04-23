@@ -24,6 +24,12 @@ C语言中变量、函数、数组名、结构体等要素命名时使用的字�
 
 :::
 
+void，表示"无类型"， 主要用途：
+  - 函数不返回任何值：`void func()`
+  - 函数无参数：`int func(void)`
+  - 通用指针：`void*`
+
+
 ---
 
 ### 整数类型
@@ -83,13 +89,6 @@ double complex z = 1.0 + 2.0 * I;
 
 
 ---
-
-### void类型
-- 表示"无类型"
-- 主要用途：
-  - 函数不返回任何值：`void func()`
-  - 函数无参数：`int func(void)`
-  - 通用指针：`void*`
 
 
 
@@ -209,22 +208,7 @@ typedef enum { false, true } bool;
 
 ---
 
-### typedef别名
 
-typedef：为现有类型创建别名， 提高代码可读性和可移植性
-
-```c
-typedef unsigned char BYTE;
-typedef struct {
-    int x;
-    int y;
-} Point;
-
-BYTE data = 255;
-Point p1 = {10, 20};
-```
-
----
 
 
 ### 常量的定义
@@ -698,7 +682,7 @@ C语言中的程序控制语句用于控制程序的执行流程，包括条件�
 ---
 
 
-## stream和文件I/O
+## C语言标准输入输出
 
 C语言的标准输入输出功能由`stdio.h`头文件提供的一系列函数支持。这些函数提供了与用户进行交互的能力，允许程序读取用户的输入或将信息输出给用户
 
@@ -712,71 +696,6 @@ C语言的I/O设计基于流(stream)的概念，为各种设备提供了统一�
 常见预定义流：`stdin：标准输入流(键盘)`, `stdout：标准输出流(屏幕)`, `stderr：标准错误流(屏幕)`
 :::
 
-常用的流(stream)处理函数：
-
-1. **打开流**
-   - `FILE *fopen(const char *path, const char *mode);`  
-     用来打开一个文件并返回一个指向`FILE`结构体的指针。`mode`参数决定了打开文件的方式（读、写等）。
-
-2. **关闭流**
-   - `int fclose(FILE *fp);`  
-     关闭由`fopen()`打开的文件，释放资源。
-
-3. **读取和写入流**
-   - `int fprintf(FILE *stream, const char *format, ...);`  
-     类似于`printf()`，但允许指定不同的流。
-   - `size_t fread(void *ptr, size_t size, size_t nmemb, FILE *stream);`  
-     从流中读取数据到内存块中。
-   - `size_t fwrite(const void *ptr, size_t size, size_t nmemb, FILE *stream);`  
-     将内存块中的数据写入流。
-
-4. **其他操作**
-   - `int fgetc(FILE *stream);` 和 `int fputc(int c, FILE *stream);`  
-     分别用于从流中读取字符和向流中写入字符。
-   - `char *fgets(char *s, int size, FILE *stream);` 和 `int fputs(const char *s, FILE *stream);`  
-     分别用于从流中读取一行字符串和向流中写入一行字符串。
-   - `int fseek(FILE *stream, long offset, int whence);`  
-     改变流的位置指示器。
-
-
-这里给出一个简单的例子，展示如何使用流来读写文件：
-
-```c
-#include <stdio.h>
-
-int main() {
-    // 打开文件以写模式
-    FILE *file = fopen("example.txt", "w");
-    if (file == NULL) {
-        printf("无法打开文件\n");
-        return 1;
-    }
-
-    // 向文件写入数据
-    fprintf(file, "Hello, World!\n");
-
-    // 关闭文件
-    fclose(file);
-
-    // 重新打开文件以读模式
-    file = fopen("example.txt", "r");
-    if (file == NULL) {
-        printf("无法打开文件\n");
-        return 1;
-    }
-
-    // 创建缓冲区
-    char buffer[100];
-    // 从文件读取数据
-    while (fgets(buffer, sizeof(buffer), file) != NULL) {
-        printf("%s", buffer);
-    }
-
-    // 关闭文件
-    fclose(file);
-    return 0;
-}
-```
 
 ---
 
@@ -861,42 +780,34 @@ if (file != NULL) {
 
 ### 行 I/O 函数
 
-1. **`fgets(char *str, int n, FILE *stream)`**
-   - **用途**：从指定流中读取最多`n-1`个字符（或直到遇到换行符`\n`）到缓冲区`str`，并在末尾添加一个空字符`\0`。
-   - **优点**：相比`gets()`，它允许指定缓冲区大小，从而避免了缓冲区溢出的风险。
+1. **`gets(char *str)` 和 `puts(const char *str)`**
+   - **`gets(char *str)`**: 从标准输入读取一行文本并存储到指定的缓冲区`str`中，直到遇到换行符为止。**不推荐使用**。
+     - **安全问题**：没有提供缓冲区大小限制，容易导致缓冲区溢出攻击，非常不安全。已经被C11标准弃用。
+     - **替代方案**：使用`fgets(str, size, stdin)`代替`gets(str)`。
+   - **`puts(const char *str)`**: 向标准输出打印一个字符串，并自动追加一个换行符。不如`fputs()`灵活，因为它总是添加换行符且只能输出到标准输出。
+       ```c
+       puts("Hello, World!");
+---
+
+2. **`fgets(char *str, int n, FILE *stream)`** 和 **`fputs(const char *str, FILE *stream)`**
+   - `fgets`：从指定流中读取最多`n-1`个字符（或直到遇到换行符`\n`）到缓冲区`str`，并在末尾添加一个空字符`\0`。相比`gets()`，它允许指定缓冲区大小，从而避免了缓冲区溢出的风险。
      ```c
      char buffer[100];
      if (fgets(buffer, sizeof(buffer), stdin) != NULL) {
          printf("You entered: %s", buffer);
      }
      ```
-
-2. **`fputs(const char *str, FILE *stream)`**
-   - **用途**：将字符串写入指定流中。与`puts()`不同的是，它不会自动添加换行符。
-   - **优点**：适用于需要精确控制输出的情况。
+    - `fputs`：将字符串写入指定流中。与`puts()`不同的是，它不会自动添加换行符。适用于需要精确控制输出的情况。
      ```c
      fputs("Hello, World!\n", stdout);
      ```
+---
 
-3. **`gets(char *str)` 和 `puts(const char *str)`**
-   - **`gets(char *str)`**
-     - **用途**：从标准输入读取一行文本并存储到指定的缓冲区`str`中，直到遇到换行符为止。**不推荐使用**。
-     - **安全问题**：没有提供缓冲区大小限制，容易导致缓冲区溢出攻击，非常不安全。已经被C11标准弃用。
-     - **替代方案**：使用`fgets(str, size, stdin)`代替`gets(str)`。
-   
-   - **`puts(const char *str)`**
-     - **用途**：向标准输出打印一个字符串，并自动追加一个换行符。
-     - **局限性**：不如`fputs()`灵活，因为它总是添加换行符且只能输出到标准输出。
-       ```c
-       puts("Hello, World!");
-       ```
-
-4. **`getline()` 和 `getdelim()`**（POSIX标准）
-   - 这些函数不是ANSI C标准的一部分，但被广泛支持，特别是在Unix/Linux系统中。
-   - **`ssize_t getline(char **lineptr, size_t *n, FILE *stream);`**
-     - 动态分配内存来读取整行输入，适合处理未知长度的输入行。
-   - **`ssize_t getdelim(char **lineptr, size_t *n, int delimiter, FILE *stream);`**
-     - 类似于`getline()`，但是可以指定分隔符而不是默认的换行符。
+3. **`getline()` 和 `getdelim()`**（POSIX标准）
+   这些函数不是ANSI C标准的一部分，但被广泛支持，特别是在Unix/Linux系统中。
+   - **`ssize_t getline(char **lineptr, size_t *n, FILE *stream);`**: 动态分配内存来读取整行输入，适合处理未知长度的输入行。
+   - **`ssize_t getdelim(char **lineptr, size_t *n, int delimiter, FILE *stream);`**: 类似于`getline()`，但是可以指定分隔符而不是默认的换行符。
+---
 
 ::: tip 安全注意事项
 - **避免使用`gets()`**：由于缺乏对缓冲区大小的检查，可能导致缓冲区溢出，这是严重的安全隐患。应始终使用`fgets()`作为替代。
@@ -911,45 +822,9 @@ if (file != NULL) {
 字符I/O函数在C语言中用于处理单个字符的读写操作，它们提供了比格式化输入输出（如`printf()`和`scanf()`）更细粒度的控制。这些函数特别适用于需要逐字符处理文本的应用场景。
 
 1. **`fgetc(FILE *stream)`**：从指定流中读取一个字符，并返回其值作为`int`类型（以便可以区分EOF）。如果到达文件末尾或发生错误，则返回`EOF`。
-     ```c
-     #include <stdio.h>
-
-     int main() {
-         FILE *file = fopen("example.txt", "r");
-         if (file == NULL) {
-             printf("无法打开文件\n");
-             return 1;
-         }
-
-         int ch;
-         while ((ch = fgetc(file)) != EOF) {
-             putchar(ch); // 输出到标准输出
-         }
-         fclose(file);
-         return 0;
-     }
-     ```
-     在这个例子中，程序逐字符读取文件内容并输出到屏幕。
 
 2. **`fputc(int c, FILE *stream)`**：将一个字符写入指定流中，并返回写入的字符。如果发生错误，则返回`EOF`。
-     ```c
-     #include <stdio.h>
 
-     int main() {
-         FILE *file = fopen("output.txt", "w");
-         if (file == NULL) {
-             printf("无法打开文件\n");
-             return 1;
-         }
-
-         fputc('H', file);
-         fputc('i', file);
-         fputc('\n', file); // 添加换行符
-         fclose(file);
-         return 0;
-     }
-     ```
-     这段代码向文件写入了字符串"Hi\n"。
 
 3. **`getchar(void)`**：从标准输入（通常是键盘）读取一个字符，并返回其值作为`int`类型。等价于`fgetc(stdin)`。
      ```c
@@ -995,162 +870,4 @@ if (file != NULL) {
 
 ---
 
-### 文件I/O操作
-
-在C语言中，所有文件操作都是基于流（stream）的概念进行的。流是一个抽象的概念，代表一个数据序列，无论是从文件读取还是向文件写入。每个流都与一个`FILE*`类型的指针相关联，这个指针指向内部的文件控制块，包含了文件的状态和位置等信息。
-
-**打开文件**：要对文件进行操作，首先需要打开文件。这可以通过`fopen()`函数完成：
-
-```c
-#include <stdio.h>
-
-// 打开文件
-FILE *fopen(const char *path, const char *mode);
-```
-- `path`: 文件路径。
-- `mode`: 文件打开模式，如"r"（只读）、"w"（写入，文件不存在则创建，存在则清空）等。
-
-    | 模式 | 描述 |
-    |---|---|
-    | `"r"` | 只读模式。打开一个已存在的文本文件用于读取数据，文件指针位于文件开头。如果文件不存在，则函数返回 `NULL` 并设置错误标志。适用于只读操作。 |
-    | `"w"` | 写模式。创建一个新的文本文件或覆盖一个已存在的文件进行写入操作，文件指针位于文件开头。如果文件存在，其内容会被清空。如果文件不存在，则创建新文件。 |
-    | `"a"` | 追加模式。打开一个文本文件用于在文件末尾追加数据，文件指针位于文件末尾。如果文件不存在，则创建新文件。尝试在其他位置写入会导致数据追加到文件末尾。 |
-    | `"r+"` | 读写模式。打开一个已存在的文本文件用于读取和写入数据，文件指针位于文件开头。如果文件不存在，则函数返回 `NULL` 并设置错误标志。适合需要同时读取和修改文件的应用。 |
-    | `"w+"` | 读写模式（覆盖）。创建一个新的文本文件或覆盖一个已存在的文件进行读取和写入操作，文件指针位于文件开头。如果文件存在，其内容会被清空。如果文件不存在，则创建新文件。 |
-    | `"a+"` | 读写模式（追加）。打开一个文本文件用于在文件末尾追加数据并允许读取，文件指针位于文件末尾。即使使用 `fseek()` 移动文件指针，所有写操作仍然会在文件末尾进行。如果文件不存在，则创建新文件。 |
-
----
-
-**关闭文件**：当不再需要访问文件时，应该关闭文件以释放资源：
-
-```c
-int fclose(FILE *fp);   // 成功时返回0，失败时返回EOF
-```
----
-
-::: info 常用文件I/O函数
-
-1. **读写文本文件**
-
-   - **`fgetc(FILE *stream)` 和 `fputc(int c, FILE *stream)`**
-     - 分别用于从文件中读取一个字符和向文件中写入一个字符。
-   
-   - **`fgets(char *str, int n, FILE *stream)` 和 `fputs(const char *str, FILE *stream)`**
-     - `fgets()` 用于从文件中读取一行文本，最多读取`n-1`个字符。
-     - `fputs()` 用于向文件写入一个字符串，不自动添加换行符。
-
-2. **读写二进制文件**
-
-   - **`fread(void *ptr, size_t size, size_t nmemb, FILE *stream)`**
-     - 从文件中读取数据到内存块中。`size`指定每个元素的大小，`nmemb`指定要读取的元素数量。
-   
-   - **`fwrite(const void *ptr, size_t size, size_t nmemb, FILE *stream)`**
-     - 将内存块中的数据写入文件。参数含义同`fread()`。
-
-3. **文件定位**
-
-   - **`fseek(FILE *stream, long offset, int whence)`**
-     - 改变文件的位置指示器。`whence`可以是`SEEK_SET`（文件开头）、`SEEK_CUR`（当前位置）、`SEEK_END`（文件末尾）。
-   
-   - **`ftell(FILE *stream)`**
-     - 返回文件位置指示器的当前值，即从文件开头到当前位置的字节数。
-   
-   - **`rewind(FILE *stream)`**
-     - 将文件位置指示器重置到文件开头。
-
-4. **错误检测**
-
-   - **`feof(FILE *stream)`**
-     - 检测是否到达文件末尾。
-   
-   - **`ferror(FILE *stream)`**
-     - 检测是否存在文件错误。
-:::
-
----
-
-写入文本文件示例：
-
-```c
-#include <stdio.h>
-
-int main() {
-    FILE *file = fopen("example.txt", "w");
-    if (file == NULL) {
-        printf("无法打开文件\n");
-        return 1;
-    }
-
-    fprintf(file, "Hello, World!\n");
-    fclose(file);
-    return 0;
-}
-```
----
-
-读取文本文件示例：
-
-```c
-#include <stdio.h>
-
-int main() {
-    FILE *file = fopen("example.txt", "r");
-    if (file == NULL) {
-        printf("无法打开文件\n");
-        return 1;
-    }
-
-    char buffer[100];
-    while (fgets(buffer, sizeof(buffer), file) != NULL) {
-        printf("%s", buffer);
-    }
-    fclose(file);
-    return 0;
-}
-```
-
----
-
-读写二进制文件示例：假设我们有一个结构体数组需要保存到文件中，并从文件中读取回来：
-
-```c
-#include <stdio.h>
-
-typedef struct {
-    int id;
-    char name[50];
-} Person;
-
-int main() {
-    // 写入二进制文件
-    FILE *file = fopen("people.dat", "wb");
-    if (file == NULL) {
-        printf("无法打开文件\n");
-        return 1;
-    }
-
-    Person people[] = {{1, "Alice"}, {2, "Bob"}};
-    fwrite(people, sizeof(Person), 2, file);
-    fclose(file);
-
-    // 读取二进制文件
-    file = fopen("people.dat", "rb");
-    if (file == NULL) {
-        printf("无法打开文件\n");
-        return 1;
-    }
-
-    Person person;
-    while (fread(&person, sizeof(Person), 1, file) == 1) {
-        printf("ID: %d, Name: %s\n", person.id, person.name);
-    }
-    fclose(file);
-    return 0;
-}
-```
-
-
-
-
----
 
