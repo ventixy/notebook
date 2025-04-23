@@ -53,3 +53,21 @@ Cloudflare
 
 
 ## 服务器
+
+
+
+
+
+## 开发框架选择
+
+- Nextjs + vercel
+- remix
+
+
+
+
+
+## 免费数据库服务
+
+- supadata
+- neon
