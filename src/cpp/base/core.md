@@ -1325,4 +1325,243 @@ int main() {
 
 ## 动态内存管理
 
+动态内存管理 (Dynamic Memory Management)允许程序在运行时根据需要分配和释放内存。这对于处理大小未知或可变的数据结构（如动态数组、链表等）至关重要。
+
+::: info 什么是动态内存？
+- **栈内存（Stack Memory）**：用于存储函数局部变量和函数调用信息。由编译器自动管理，分配和释放速度快，但大小有限。
+- **堆内存（Heap Memory）**：用于存储动态分配的内存。由程序员手动管理（分配和释放），大小通常比栈大得多，但分配/释放速度较慢。
+:::
+
+动态内存管理主要通过 `<stdlib.h>` 头文件中的一组函数来实现。
+
+---
+
+### 主要函数
+
+#### 1. `malloc()` - 内存分配 (Memory Allocation)
+- `malloc(size_t size)` 函数在堆上分配指定 **字节数** 的内存块。
+- 默认不初始化分配的内存，其内容是未定义的（垃圾值）。
+- 如果分配成功，返回指向内存块起始地址的 `void*` 指针；如果失败（如内存不足），返回 `NULL`。
+
+```c
+#include <stdio.h>
+#include <stdlib.h>
+
+int main() {
+    int *arr;
+    int n = 5;
+
+    // 分配可以存储 5 个整数的内存
+    arr = (int *)malloc(n * sizeof(int)); 
+
+    if (arr == NULL) {
+        printf("Memory allocation failed!\n");
+        return 1; // 或者进行其他错误处理
+    }
+
+    printf("Memory allocated successfully.\n");
+
+    // 使用分配的内存...
+    for (int i = 0; i < n; i++) {
+        arr[i] = i * 10;
+        printf("arr[%d] = %d\n", i, arr[i]);
+    }
+
+    // 释放内存
+    free(arr); 
+    arr = NULL; // 避免悬空指针
+
+    return 0;
+}
+```
+::: important 类型转换与 `sizeof`
+- `malloc` 返回 `void*`，通常需要强制类型转换为所需类型的指针（如 `(int *)`）。
+- 使用 `sizeof` 运算符确保分配足够存储指定类型数据的字节数，提高代码的可移植性和可读性。
+:::
+
+#### 2. `calloc()` - 清零分配 (Cleared Allocation)
+- `calloc(size_t num, size_t size)` 函数分配 `num` 个大小为 `size` 字节的连续内存块。
+- 与 `malloc` 不同，`calloc` 会将分配的内存块**初始化为零**。
+- 返回值和错误处理与 `malloc` 类似。
+
+```c
+#include <stdio.h>
+#include <stdlib.h>
+
+int main() {
+    int *arr;
+    int n = 5;
+
+    // 分配 5 个整数的内存，并初始化为 0
+    arr = (int *)calloc(n, sizeof(int));
+
+    if (arr == NULL) {
+        printf("Memory allocation failed!\n");
+        return 1;
+    }
+
+    printf("Memory allocated and initialized to zero.\n");
+
+    // 打印初始值 (应为 0)
+    for (int i = 0; i < n; i++) {
+        printf("arr[%d] = %d\n", i, arr[i]); 
+    }
+
+    free(arr);
+    arr = NULL;
+
+    return 0;
+}
+```
+
+#### 3. `realloc()` - 重新分配内存 (Re-allocation)
+- `realloc(void *ptr, size_t new_size)` 函数用于调整先前通过 `malloc`, `calloc` 或 `realloc` 分配的内存块的大小。
+- `ptr`：指向要调整大小的内存块的指针。如果 `ptr` 为 `NULL`，`realloc` 的行为类似于 `malloc(new_size)`。
+- `new_size`：新的内存块大小（字节数）。
+- **行为**:
+    - **缩小内存**: 如果 `new_size` 小于原大小，内存块末尾部分会被截断，原数据保留。
+    - **扩大内存**:
+        - 如果能在原地扩展，直接扩展。
+        - 如果不能在原地扩展，`realloc` 会分配一个新的、足够大的内存块，将原内存块的内容复制到新块，然后释放原内存块。**此时返回的指针地址可能与原指针不同**。
+        - 新分配的额外空间内容是未定义的。
+- **返回值**:
+    - 成功：返回指向调整大小后内存块的指针（地址可能改变）。
+    - 失败：返回 `NULL`，**原内存块 `ptr` 保持不变且未被释放**。
+
+```c
+#include <stdio.h>
+#include <stdlib.h>
+
+int main() {
+    int *arr;
+    int n = 5;
+
+    // 初始分配
+    arr = (int *)malloc(n * sizeof(int));
+    if (arr == NULL) return 1;
+    for(int i=0; i<n; i++) arr[i] = i;
+    printf("Original array (size %d): ", n);
+    for(int i=0; i<n; i++) printf("%d ", arr[i]);
+    printf("\n");
+
+    // 扩大内存
+    int new_n = 10;
+    int *temp_arr = (int *)realloc(arr, new_n * sizeof(int));
+
+    if (temp_arr == NULL) {
+        printf("Memory reallocation failed! Original block still valid.\n");
+        // 此时 arr 仍然有效，需要手动释放
+        free(arr); 
+        return 1;
+    } else {
+        arr = temp_arr; // 更新指针指向新（或原地扩展后）的内存块
+        printf("Resized array (size %d): ", new_n);
+        // 初始化新分配的部分 (可选)
+        for(int i=n; i<new_n; i++) arr[i] = i * 100; 
+        for(int i=0; i<new_n; i++) printf("%d ", arr[i]);
+        printf("\n");
+    }
+
+    free(arr); // 释放最终的内存块
+    arr = NULL;
+
+    return 0;
+}
+```
+::: important `realloc` 的安全使用
+- **检查返回值**：务必检查 `realloc` 的返回值是否为 `NULL`。
+- **使用临时指针**：将 `realloc` 的返回值赋给一个临时指针。如果分配失败，原指针 `arr` 仍然有效，可以用于后续操作或释放。如果直接 `arr = realloc(arr, ...)` 且失败，将丢失原内存块的地址，导致内存泄漏。
+:::
+
+#### 4. `free()` - 释放内存 (Free Memory)
+- `free(void *ptr)` 函数用于释放先前通过 `malloc`, `calloc`, 或 `realloc` 分配的内存块。
+- `ptr`：必须是指向动态分配内存块起始地址的指针。
+- **重要性**: 必须释放不再需要的动态内存，否则会导致**内存泄漏**。
+
+```c
+int *p = (int *)malloc(sizeof(int));
+if (p != NULL) {
+    *p = 100;
+    // ... 使用 p ...
+    free(p); // 释放内存
+    p = NULL; // 将指针设为 NULL，防止悬空指针
+}
+```
+
+::: tip `free()` 注意事项
+- **只能释放动态分配的内存**：不能 `free` 栈内存、全局/静态内存或指向它们的指针。
+- **不能重复释放**：对同一内存块调用两次 `free` 会导致未定义行为（通常是程序崩溃）。
+- **释放后设为 NULL**：释放指针后，最好将其设置为 `NULL`，以避免**悬空指针**（Dangling Pointer）问题。
+:::
+
+---
+
+### 常见内存问题
+
+#### 1. 内存泄漏 (Memory Leak)
+- 当动态分配的内存不再需要，但没有被 `free` 释放时，就会发生内存泄漏。
+- 泄漏的内存无法被再次使用，持续的内存泄漏最终可能耗尽系统可用内存，导致程序或系统崩溃。
+  ```c
+  void memory_leak_example() {
+      int *p = (int *)malloc(sizeof(int));
+      // ... 使用 p ...
+      // 忘记调用 free(p)
+  } // 函数结束时，p 被销毁，但分配的内存未释放
+  ```
+确保每次 `malloc`/`calloc`/`realloc` 都有对应的 `free` 调用。可以使用工具（如 Valgrind）进一步检测内存泄漏。
+
+#### 2. 悬空指针 (Dangling Pointer)
+- 当指针指向的内存已经被 `free` 释放，但该指针变量本身仍然持有那个（现在无效的）地址时，这个指针就成了悬空指针。
+- 使用悬空指针进行读写操作会导致未定义行为（数据损坏、程序崩溃等）。
+  ```c
+  int *p = (int *)malloc(sizeof(int));
+  if (p == NULL) return;
+  *p = 5;
+  free(p); 
+  // 此时 p 是悬空指针
+  // *p = 10; // 错误！访问已释放的内存
+  // printf("%d\n", *p); // 错误！读取已释放的内存
+  ```
+释放指针后，立即将其设置为 `NULL`。在使用指针前，检查其是否为 `NULL`。
+  ```c
+  free(p);
+  p = NULL; 
+  // ...
+  if (p != NULL) {
+      // 安全地使用 p
+  }
+  ```
+
+#### 3. 重复释放 (Double Free)
+- 对同一块动态分配的内存调用 `free` 两次或多次。
+- 这会破坏内存管理数据结构，导致未定义行为，通常是程序崩溃。
+  ```c
+  int *p = (int *)malloc(sizeof(int));
+  free(p);
+  // ... 其他代码 ...
+  free(p); // 错误！重复释放
+  ```
+释放后将指针设为 `NULL`。`free(NULL)` 是安全且无操作的。
+  ```c
+  free(p);
+  p = NULL;
+  // ...
+  free(p); // 安全，因为 free(NULL) 什么也不做
+  ```
+
+#### 4. 内存越界 (Buffer Overflow/Underflow)
+- 读或写超出了动态分配内存块的边界。
+- 这会破坏相邻内存区域的数据或内存管理信息，导致不可预测的行为。
+  ```c
+  int *arr = (int *)malloc(5 * sizeof(int));
+  if (arr == NULL) return;
+  arr[5] = 10; // 错误！越界写 (有效索引是 0 到 4)
+  int x = arr[-1]; // 错误！越界读
+  free(arr);
+  arr = NULL;
+  ```
+仔细计算所需的内存大小，并在访问时严格检查索引或指针范围。
+
+
+
 
