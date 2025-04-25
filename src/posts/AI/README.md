@@ -183,6 +183,29 @@ $$
   - **LlamaIndex**：文档索引与检索  
   - **FAISS**：高效向量搜索库  
 
+---
+
+
+## 大模型接入方式
+
+- 云服务
+
+- 本地部署（私有部署）
+
+### AI应用平台
+
+- [阿里云百炼](https://bailian.console.aliyun.com/console?tab=model#/model-market)
+
+### AI软件客户端
+
+cherry studio
+
+cursor/trae...
+
+### 程序调用
+
+模型服务灵积（Dashscope）：https://www.aliyun.com/product/dashscope
+
 
 
 ---

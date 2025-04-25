@@ -22,7 +22,7 @@ export const enNavbar = navbar([
         children: [
           { text: "常见工具和环境", link: "/project/base/" },
           { text: "电商项目综合实践", link: "/project/mall/" },
-          { text: "AI应用项目实践", link: "/project/ai/" },
+          { text: "AI应用开发实践", link: "/project/ai/" },
           { text: "项目场景解决方案", link: "/project/solution/" }
         ],
       },

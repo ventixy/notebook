@@ -33,6 +33,8 @@ Trae官网（国际版）：https://www.trae.ai
 
 Trae中文版：https://www.trae.com.cn
 
+Trae v1.3.0 开始支持 `MCP`协议 与 `.rules` 配置，详见：https://traeide.com/zh/news/6
+
 
 ---
 

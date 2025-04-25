@@ -12,7 +12,7 @@ export const enSidebar = sidebar({
 
   "/project/base/": [{text: "常用工具及项目环境", icon: "project", link: "/project/base/", children: "structure"}],
   "/project/mall/": [{text: "电商项目综合实践", icon: "project", link: "/project/mall/", children: "structure"}],
-  "/project/ai/": [{text: "AI综合应用开发实践", icon: "project", link: "/project/ai/", children: "structure"}],
+  "/project/ai/": [{text: "AI大模型应用开发", icon: "project", link: "/project/ai/", children: "structure"}],
   "/project/solution/": [{text: "项目常见场景解决方案", icon: "project", link: "/project/solution/", children: "structure"}],
 
   "/java/base/": [{text: "Java基础语法介绍", icon: "java", link: "/java/base/", children: "structure"}],
