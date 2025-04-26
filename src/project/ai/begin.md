@@ -72,11 +72,23 @@ API-KEY: 可通过Github项目 - [GPT_API_free](https://github.com/chatanywhere/
             </dependency>
         </dependencies>
     </dependencyManagement>
+<!-- 注意：由于 spring-ai 相关依赖包还没有发布到中央仓库，如出现 spring-ai-core 等
+    相关依赖解析问题，请在项目的 pom.xml 依赖中加入如下仓库配置 -->
+    <repositories>
+        <repository>
+            <id>spring-milestones</id>
+            <name>Spring Milestones</name>
+            <url>https://repo.spring.io/milestone</url>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </repository>
+    </repositories>
 ```
 存在父工程的项目中，可以将版本号相关的配置放在父工程的 `pom.xml` 中，子工程只需继承父工程即可。
 :::
 
-导入Spring AI 的依赖时，maven 的 下载源最好设置为默认地址（删除/注释掉 `settings.xml` 中的镜像配置 ），因为阿里云只有Spring AI Alibaba 的包。
+导入Spring AI 的依赖时，maven 的 下载源最好设置为默认地址（删除/注释掉 `settings.xml` 中的其他镜像配置 ）
 
 ---
 
@@ -126,7 +138,7 @@ knife4j:
 **配置说明:**
 
 * `spring.ai.openai.api-key`: **极其重要且必需**。这是你的 OpenAI 凭证。强烈建议不要将其硬编码在配置文件中，而是使用环境变量 (`${OPENAI_API_KEY}`)、Vault、或其他安全的 Secrets Management 方式注入。
-* `spring.ai.openai.chat.options.model`: 指定要使用的聊天模型。OpenAI 不断推出新模型，请根据需求和 OpenAI 文档选择。
+* `spring.ai.openai.chat.options.model`: 指定要使用的聊天模型。
 * `spring.ai.openai.chat.options.temperature`: 控制输出的随机性。较低的值（如 0.2）使输出更确定、更集中；较高的值（如 0.8）使输出更随机、更有创意。
 * `spring.ai.openai.chat.options.top-p`: 一种替代 temperature 的采样方法，称为 nucleus sampling。
 * 其他如 `max-tokens` (最大生成令牌数) 等参数也可以在这里配置。
@@ -377,6 +389,162 @@ public class ChatController {
 
 
 
+---
+
+
+## Spring AI Ollama
+
+有时，我们希望在本地环境中部署(或者企业内部部署)和使用大语言模型（LLM），以便更好地控制数据隐私、降低延迟，并在没有网络连接的情况下使用。
+
+
+### 本地安装大模型
+
+可以使用开源项目 **Ollama** 来快速部署和管理本地大模型。Ollama 极大地简化了安装过程，无需手动执行复杂的脚本和配置环境。它不仅提供了易用的命令行界面，还支持通过 API 进行调用，方便与各种应用程序集成。
+
+**官方网站:** [https://ollama.com/](https://ollama.com/)
+
+**1 下载和安装 Ollama**
+
+访问 Ollama 官方下载页面 ([https://ollama.com/download](https://ollama.com/download))，根据你的操作系统选择合适的版本下载并安装。
+
+---
+
+**2 验证安装和查看帮助**
+
+安装完成后，打开终端（Terminal、Command Prompt 或 PowerShell），执行以下命令来验证 Ollama 是否安装成功并查看可用的命令选项：
+
+```bash
+ollama --help
+```
+
+你会看到 Ollama 的用法说明，包括如何运行模型、拉取模型、列出本地模型等。
+
+---
+
+**3 下载并运行一个模型**
+
+Ollama 支持许多开源模型。你可以使用 `ollama run` 命令来下载（如果本地没有）并运行一个模型。例如，运行一个较小且常用的模型 `qwen2:7b` (通义千问2 7B参数版本)：
+
+```bash
+ollama run qwen2:7b
+```
+
+* 首次运行此命令时，Ollama 会自动从模型库下载 `qwen2:7b` 模型文件。这可能需要一些时间，取决于你的网络速度和模型大小。
+* 下载完成后，Ollama 会启动该模型，并在终端提供一个交互式聊天界面，你可以直接输入提示开始对话。
+* 要退出交互式聊天，通常可以输入 `/bye`。
+
+---
+
+::: tip 常用 Ollama 命令
+
+* `ollama pull <model_name>:<tag>`: 提前下载指定的模型。例如: `ollama pull llama3` (默认下载 latest tag)。
+* `ollama list`: 列出你本地已经下载的所有模型。
+* `ollama rm <model_name>`: 删除本地的一个模型。
+* `ollama run <model_name>`: 运行一个模型（如果未下载则先下载）。
+
+**注意:** 运行 `ollama run` 命令时，如果 Ollama 服务尚未在后台运行，它会自动启动该服务。该服务默认监听在 `http://localhost:11434`，提供 REST API 接口供其他程序调用。
+:::
+
+
+---
+
+### 接入配置及代码
+
+**1 添加 Spring AI Ollama 依赖**
+
+在你的 Spring Boot 项目中，需要添加 Spring AI 对 Ollama 支持的 starter 依赖。
+
+**Maven (`pom.xml`):**
+
+```xml
+<dependency>
+    <groupId>org.springframework.ai</groupId>
+    <artifactId>spring-ai-ollama-spring-boot-starter</artifactId>
+    </dependency>
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-web</artifactId>
+</dependency>
+```
+
+**管理版本:** 推荐使用 Spring AI 的 BOM (Bill of Materials) 来统一管理 Spring AI 相关依赖的版本。
+
+**2 配置 Ollama 连接**
+
+在你的 `application.properties` 或 `application.yml` 文件中配置 Spring AI 连接到本地 Ollama 服务。
+
+```yaml
+spring:
+  ai:
+    ollama:
+      base-url: http://localhost:11434 # 默认值，通常可省略
+      chat:
+        options:
+          model: qwen2:7b # 指定默认模型
+          # temperature: 0.7 # 其他可选参数
+```
+
+确保 `spring.ai.ollama.chat.options.model` 指向的模型已通过 `ollama run` 或 `ollama pull` 下载到本地并部署成功
+
+---
+
+**3 编写调用代码**
+
+现在可以在 Spring 服务或控制器中注入 `ChatClient` 并使用它与 Ollama 模型进行交互。`ChatClient` 是 Spring AI 提供的通用接口。
+
+```java
+import org.springframework.ai.chat.client.ChatClient;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+@RestController
+public class AiController {
+
+    private final ChatClient chatClient;
+
+    // 通过构造函数注入 ChatClient
+    // Spring AI 会根据你的配置 (发现 ollama starter 和配置) 自动创建合适的 ChatClient Bean
+    @Autowired
+    public AiController(ChatClient.Builder chatClientBuilder) {
+        // 你可以使用 Builder 来进一步定制 ChatClient 的行为，
+        // 例如设置默认的系统提示、函数调用等。
+        // 这里我们直接构建默认的 ChatClient。
+        this.chatClient = chatClientBuilder.build();
+    }
+
+    @GetMapping("/ai/generate")
+    public String generate(@RequestParam(value = "prompt", defaultValue = "给我讲个关于程序员的笑话") String prompt) {
+        // 使用 chatClient.call() 发送提示并获取响应
+        // .prompt() 设置用户输入
+        // .call() 发起调用
+        // .content() 获取模型生成的文本内容
+        return chatClient.prompt()
+                .user(prompt) // 设置用户提示
+                .call()       // 发起请求
+                .content();   // 获取返回的文本内容
+    }
+
+    // 也可以直接注入具体的实现类，但不推荐，因为降低了可移植性
+    /*
+    private final OllamaChatClient ollamaChatClient;
+
+    @Autowired
+    public AiController(OllamaChatClient ollamaChatClient) {
+        this.ollamaChatClient = ollamaChatClient;
+    }
+
+    @GetMapping("/ai/generate-specific")
+    public String generateSpecific(@RequestParam(value = "prompt", defaultValue = "Why is the sky blue?") String prompt) {
+        return ollamaChatClient.call(prompt);
+    }
+    */
+}
+```
+
+
+
 
 
 
@@ -392,11 +560,169 @@ public class ChatController {
 
 ## Spring AI Alibaba
 
-Spring AI Alibaba 开源项目基于 Spring AI 构建，是阿里云通义系列模型及服务在 Java AI 应用开发领域的最佳实践，提供高层次的 AI API 抽象与云原生基础设施集成方案，帮助开发者快速构建 AI 应用。
+Spring AI Alibaba 是基于 Spring AI 构建的扩展框架。
+
+- **Spring AI**：主要面向国外主流模型（如 OpenAI、Azure、Amazon Bedrock），提供国际化支持
+
+- **Spring AI Alibaba**：专注于阿里通义系列模型（如Qwen-2.5）及国内开源模型的深度集成
+
+Spring AI Alibaba 文档参照：[Spring AI Alibaba](https://java2ai.com/docs/dev/overview), [DashScope](https://java2ai.com/docs/dev/models/dashScope)
+
+::: tip 阿里云 DashScope 平台
+阿里云 DashScope 平台提供了多种 AI 模型的 API 服务，各个大模型的接入方式参考：
+- DeepSeek: https://java2ai.com/docs/dev/models/deepseek/
+- Ollama: https://java2ai.com/docs/dev/models/ollama
+
+注意：模型服务灵积(DashScope)已升级至大模型服务平台百炼(sfm)
+:::
+
+---
+
+**环境要求和依赖**：
+
+Spring AI Alibaba 的环境要求和 Spring AI 相同, 只需获取相应的API-KEY即可：
 
 - JDK：Spring AI Alibaba 基于 Spring Boot 3.x 开发，因此本地 JDK 版本要求为 17 及以上
 
 
 - API-KEY: 可通过 [阿里云百炼平台](https://bailian.console.aliyun.com/console?tab=model#/api-key) 获取 API-KEY。
 
-Spring AI Alibaba 文档参照：https://java2ai.com/docs/dev/overview
+
+---
+
+依赖与SpringAI基本一致，只需要替换对应的starter即可：
+
+```xml
+    <properties>
+        <java.version>21</java.version>
+        <spring-ai.version>1.0.0-M7</spring-ai.version>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
+        <!-- Spring AI Alibaba  -->
+        <dependency>
+            <groupId>com.alibaba.cloud.ai</groupId>
+            <artifactId>spring-ai-alibaba-starter</artifactId>
+        </dependency>
+    </dependencies>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.springframework.ai</groupId>
+                <artifactId>spring-ai-bom</artifactId>
+                <version>${spring-ai.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+<!-- 注意：由于 spring-ai 相关依赖包还没有发布到中央仓库，如出现 spring-ai-core 等
+    相关依赖解析问题，请在项目的 pom.xml 依赖中加入如下仓库配置 -->
+    <repositories>
+        <repository>
+            <id>spring-milestones</id>
+            <name>Spring Milestones</name>
+            <url>https://repo.spring.io/milestone</url>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </repository>
+    </repositories>
+```
+
+
+
+---
+
+
+
+配置及代码示例:
+
+在 `src/main/resources/application.yml` (或 `.properties`) 文件中配置 API 密钥和其他可选参数：
+
+```yaml
+spring:
+  ai:
+    dashscope:
+      api-key: ${AI_DASHSCOPE_API_KEY}
+```
+
+`${AI_DASHSCOPE_API_KEY}` 是一个环境变量(需要自己配置)，用于存储 DashScope 的 API 密钥。或者也可以将密钥直接配置在 api-key 后面即可。
+
+---
+
+代码示例：
+```java
+package top.ventix.aiagent.controller;
+
+import com.alibaba.cloud.ai.dashscope.api.DashScopeApi;
+import com.alibaba.cloud.ai.dashscope.chat.DashScopeChatOptions;
+import jakarta.servlet.http.HttpServletResponse;
+import reactor.core.publisher.Flux;
+
+import org.springframework.ai.chat.client.ChatClient;
+import org.springframework.ai.chat.client.advisor.SimpleLoggerAdvisor;
+import org.springframework.ai.chat.model.ChatModel;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+@RestController
+@RequestMapping("/client")
+public class DashScopeChatClientController {
+
+    private static final String DEFAULT_PROMPT = "你好，介绍下你自己！";
+
+    private final ChatClient dashScopeChatClient;
+
+    public DashScopeChatClientController(ChatModel chatModel) {
+
+        // 构造时，可以设置 ChatClient 的参数
+        // {@link org.springframework.ai.chat.client.ChatClient};
+        this.dashScopeChatClient = ChatClient.builder(chatModel)
+                // 实现 Logger 的 Advisor
+                .defaultAdvisors(
+                        new SimpleLoggerAdvisor()
+                )
+                // 设置 ChatClient 中 ChatModel 的 Options 参数
+                .defaultOptions(
+                        DashScopeChatOptions.builder()
+                                .withModel(DashScopeApi.ChatModel.QWEN_MAX.getModel())
+                                .withTopP(0.7)
+                                .build()
+                )
+                .build();
+    }
+
+    // 也可以使用如下的方式注入 ChatClient
+    // public DashScopeChatClientController(ChatClient.Builder chatClientBuilder) {
+    //
+    //  	this.dashScopeChatClient = chatClientBuilder.build();
+    // }
+
+    /**
+     * ChatClient 简单调用
+     */
+    @GetMapping("/simple/chat")
+    public String simpleChat() {
+
+        return dashScopeChatClient.prompt(DEFAULT_PROMPT).call().content();
+    }
+
+    /**
+     * ChatClient 流式调用
+     */
+    @GetMapping("/stream/chat")
+    public Flux<String> streamChat(HttpServletResponse response) {
+
+        response.setCharacterEncoding("UTF-8");
+        return dashScopeChatClient.prompt(DEFAULT_PROMPT).stream().content();
+    }
+
+}
+```

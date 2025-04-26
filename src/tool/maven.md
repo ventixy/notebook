@@ -203,6 +203,92 @@ IDEA中无法查看源码及文档，尝试再对应Pom.xml文件所在目录执
 mvn dependency:sources
 ```
 
+---
+
+
+### 6. Spring生态仓库
+
+Spring项目的版本发布遵循严格的**里程碑机制**，通常经历以下阶段：
+
+1. **Mx (Milestone)**：里程碑版本，功能可能不完整但比快照稳定
+2. **RCx (Release Candidate)**：候选发布版本，功能完整且相对稳定
+3. **GA (General Availability)**：正式发布版本，非常稳定且功能齐全
+4. **SRx (Service Release)**：维护版本，修复问题但不新增功能
+
+对应这些版本，Spring维护了不同的Maven仓库：
+
+| 仓库类型 | 托管版本 | 稳定性 | 适用场景 | 示例URL |
+|---------|---------|-------|---------|--------|
+| snapshots | SNAPSHOT | 最低 | 开发测试 | https://repo.spring.io/snapshot |
+| milestones | M/RC | 中等 | 功能预览 | https://repo.spring.io/milestone |
+| releases | GA/SR | 最高 | 生产环境 | https://repo.spring.io/release |
+
+---
+
+除了Spring官方仓库，开发者可能还会遇到：
+
+1. central-portal-snapshots
+- **性质**：通常为企业内部搭建的私有快照仓库
+- **用途**：托管组织内部开发的SNAPSHOT版本
+- **特点**：访问权限控制严格，更新策略更灵活
+
+2. spring-releases
+- **内容**：正式发布版本(GA)
+- **定位**：替代Maven Central的Spring专用发布通道
+- **URL**：https://repo.spring.io/release
+
+3. libs-snapshot-local/lib-milestone-local
+- **变体**：Spring旧版仓库命名方式
+- **现状**：逐渐被统一命名规范替代
+
+---
+
+::: info 多仓库配置策略与最佳实践
+**1. 完整配置示例**
+```xml
+<repositories>
+    <!-- 快照仓库 -->
+    <repository>
+        <id>spring-snapshots</id>
+        <url>https://repo.spring.io/snapshot</url>
+        <snapshots><enabled>true</enabled></snapshots>
+        <releases><enabled>false</enabled></releases>
+    </repository>
+    
+    <!-- 里程碑仓库 -->
+    <repository>
+        <id>spring-milestones</id>
+        <url>https://repo.spring.io/milestone</url>
+        <snapshots><enabled>false</enabled></snapshots>
+    </repository>
+    
+    <!-- 发布仓库 -->
+    <repository>
+        <id>spring-releases</id>
+        <url>https://repo.spring.io/release</url>
+        <snapshots><enabled>false</enabled></snapshots>
+    </repository>
+</repositories>
+```
+
+**2. 镜像配置要点**
+```xml
+<mirror>
+    <id>nexus</id>
+    <url>http://internal-nexus/repo</url>
+    <mirrorOf>*,!spring-snapshots,!spring-milestones</mirrorOf>
+</mirror>
+```
+:::
+
+版本升级建议路径: `SNAPSHOT → M1 → M2 → RC1 → RC2 → GA`
+
+
+
+
+
+
+---
 
 
 
