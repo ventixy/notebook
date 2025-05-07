@@ -1,6 +1,5 @@
 ---
 article: true
-icon: app
 date: 2025-04-20
 category:
   - AI

@@ -10,7 +10,7 @@ tag:
   - Terminal
 shortTitle: windows
 title: Windows命令和工具
-order: 1
+order: 5
 ---
 
 
