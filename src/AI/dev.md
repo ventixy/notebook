@@ -1,11 +1,7 @@
---- 
+---
 
-dir:
-    order: 20
-    collapsible: true
-index: false
-title: AI大模型应用开发实践
-icon: app
+order: 100
+title:  JAVA开发AI应用
 
 ---
 

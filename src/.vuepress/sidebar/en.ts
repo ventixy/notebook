@@ -2,17 +2,16 @@ import { sidebar } from "vuepress-theme-hope";
 
 export const enSidebar = sidebar({
   "/": [ "" ],
+  "/AI/": [{text: "AI基础及应用开发实践", icon: "ai-robot", link: "/AI/", children: "structure"}],
 
   "/posts/cs/": [{text: "Blog-Computer and science", icon: "es6", link: "/posts/cs/", children: "structure"}],
   "/posts/java/": [{text: "Blog-Java开发相关博客", icon: "es6", link: "/posts/java/", children: "structure"}],
   "/posts/db/": [{text: "Blog-数据库相关博客", icon: "es6", link: "/posts/db/", children: "structure"}],
   "/posts/om/": [{text: "Blog-系统运维博客", icon: "es6", link: "/posts/om/", children: "structure"}],
-  "/posts/AI/": [{text: "Blog-AI基础及应用实践", icon: "ai-robot", link: "/posts/AI/", children: "structure"}],
   "/posts/blog/": [{text: "Blog-日常博客记录", icon: "es6", link: "/posts/blog/", children: "structure"}],
 
   "/project/base/": [{text: "常用工具及项目环境", icon: "project", link: "/project/base/", children: "structure"}],
   "/project/mall/": [{text: "电商项目综合实践", icon: "project", link: "/project/mall/", children: "structure"}],
-  "/project/ai/": [{text: "AI大模型应用开发", icon: "project", link: "/project/ai/", children: "structure"}],
   "/project/solution/": [{text: "项目常见场景解决方案", icon: "project", link: "/project/solution/", children: "structure"}],
 
   "/java/base/": [{text: "Java基础语法介绍", icon: "java", link: "/java/base/", children: "structure"}],

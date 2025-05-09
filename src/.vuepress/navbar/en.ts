@@ -1,10 +1,7 @@
 import { navbar } from "vuepress-theme-hope";
 
 export const enNavbar = navbar([
-  {
-    text: "Blog", icon: "blog",
-    children: ["/blog", "/posts/blog/", "/posts/cs/", "/posts/java/", "/posts/db/", "/posts/om/", "/posts/AI/"],
-  },
+  { text: "  AI  ", icon: "ai-robot", link: "/AI/" },
   {
     text: "Java", icon: "java",
     children: [
@@ -40,5 +37,9 @@ export const enNavbar = navbar([
   {
     text: "C++", icon: "cpp",
     children: ["/cpp/base/", "/cpp/ed/"],
-  }
+  },
+  {
+    text: "Blog", icon: "blog",
+    children: ["/blog", "/posts/blog/", "/posts/cs/", "/posts/java/", "/posts/db/", "/posts/om/"],
+  },
 ]);

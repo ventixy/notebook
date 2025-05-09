@@ -64,6 +64,21 @@ VS code： https://code.visualstudio.com/download
 ---
 
 
+### Augment
+
+Augment是一个基于Anthropic的Claude 3.7 Sonnet模型开发的AI代码助手, 通过Vs Code插件的方式提供给用户使用。
+Augment官网：https://augmentcode.com/
+
+
+
+
+
+
+
+
+---
+
+
 
 ### Windsurf
 

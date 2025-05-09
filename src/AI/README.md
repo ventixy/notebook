@@ -1,7 +1,7 @@
 --- 
 
 dir:
-    order: 20
+    order: 1
     # collapsible: false
     text: Artificial Intelligence
 index: false
@@ -87,11 +87,6 @@ $$
 ### **Token**
 
 Token是AI大模型处理文本的基本单位，它代表了模型输入输出的最小语义片段。
-
-- **模型处理的基础**：大模型以Token为单位处理信息
-- **计算资源的衡量**：Token数量直接影响计算量和内存使用
-- **成本的核心因素**：云服务通常按Token计费
-- **性能的关键指标**：Token处理效率影响响应速度
 
 在自然语言处理(NLP)中，Token可以是一个单词、子词(subword)或符号
 
@@ -203,31 +198,6 @@ Token是AI大模型处理文本的基本单位，它代表了模型输入输出�
 
 ---
 
-### **微调(Fine-tuning)**
-
-微调技术分类：
-- **全参数微调（Full Finetuning）**：调优全部模型参数，成本高但适应性强。
-- **参数高效微调（PEFT）**：如LoRA、QLoRA，只调整少量参数，部署灵活。
-- **指令微调（SFT）**：结合人类标注数据，让模型更符合期望指令。
-- **RLHF（基于人类反馈的强化学习）**：OpenAI使用于ChatGPT的重要优化方法。
----
-
-**全参数微调**：更新所有权重，需大量计算资源  
-  ```python
-  model.train()
-  for batch in dataloader:
-      outputs = model(**batch)
-      loss = outputs.loss
-      loss.backward()
-      optimizer.step()
-  ```
-**高效微调方法**：  
-  - **LoRA**：低秩适配（仅训练新增的小矩阵）  
-  - **Adapter**：插入小型网络模块  
-  - **QLoRA**：4bit量化+LoRA，显存需求降低70%  
-
-
----
 
 
 ### **Prompt Engineering**
@@ -280,6 +250,34 @@ Token是AI大模型处理文本的基本单位，它代表了模型输入输出�
 2. **明确度**：用户提示词越具体，输出质量越高
 3. **上下文管理**：合理利用助手提示词引导对话
 4. **复杂度匹配**：根据需求选择适当提示词结构
+
+
+---
+
+
+
+### **微调(Fine-tuning)**
+
+微调技术分类：
+- **全参数微调（Full Finetuning）**：调优全部模型参数，成本高但适应性强。
+- **参数高效微调（PEFT）**：如LoRA、QLoRA，只调整少量参数，部署灵活。
+- **指令微调（SFT）**：结合人类标注数据，让模型更符合期望指令。
+- **RLHF（基于人类反馈的强化学习）**：OpenAI使用于ChatGPT的重要优化方法。
+---
+
+**全参数微调**：更新所有权重，需大量计算资源  
+  ```python
+  model.train()
+  for batch in dataloader:
+      outputs = model(**batch)
+      loss = outputs.loss
+      loss.backward()
+      optimizer.step()
+  ```
+**高效微调方法**：  
+  - **LoRA**：低秩适配（仅训练新增的小矩阵）  
+  - **Adapter**：插入小型网络模块  
+  - **QLoRA**：4bit量化+LoRA，显存需求降低70%  
 
 
 ---
