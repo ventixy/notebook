@@ -9,10 +9,11 @@ tag:
   - cursor
   - trae
 shortTitle: AI编程工具
-title: AI编程工具
+title: AI编程工具及APIKEY
 order: 99
 ---
 
+## AI编程工具
 
 ### Cursor
 
@@ -72,6 +73,16 @@ Augment官网：https://augmentcode.com/
 
 
 
+---
+
+
+### voideditor
+
+voideditor：https://voideditor.com/
+
+github地址：https://github.com/voideditor/void
+
+
 
 
 
@@ -88,8 +99,18 @@ Augment官网：https://augmentcode.com/
 
 
 
+---
 
 
+## 常用APIKEY
+
+### Gemini
+ 
+gemini: https://gemini.google.com/
+获取API key：https://aistudio.google.com/app/apikey
+
+
+模型调用限制：https://ai.google.dev/gemini-api/docs/rate-limits
 
 
 

@@ -145,99 +145,6 @@ knife4j:
 
 ---
 
-### 核心接口和类
-
-* **`ChatClient`**:
-    * **核心交互接口**，用于与 AI 聊天模型进行交互。
-    * 由 Spring AI 自动配置（基于你的依赖和 `application.yml` 配置）。
-    * 你可以直接在你的 Service 或 Controller 中 `@Autowired` 注入它。
-    * 主要方法：
-        * `call(String message)`: 发送单条用户消息，获取单条回复。
-        * `call(Prompt prompt)`: 发送一个包含更复杂信息的 `Prompt` 对象（可以包含系统消息、多轮用户/助手消息），获取回复 `ChatResponse`。
-        * `stream(Prompt prompt)`: 发送 `Prompt` 并以流式方式接收响应（返回 `Flux<ChatResponse>`），适用于需要实时显示或处理长响应的场景。
-
-* **`Prompt`**:
-    * 封装了发送给 AI 模型的输入。
-    * 可以包含：
-        * **一条简单的字符串**: `new Prompt("你的问题")`
-        * **一个或多个 `Message` 对象**: `new Prompt(List.of(systemMessage, userMessage))`
-    * 可以附加 `PromptOptions` 来覆盖全局配置（如临时指定不同的模型、温度等）。
-
-* **`Message`**:
-    * 表示对话中的一条消息。有几种主要类型：
-        * `UserMessage`: 代表用户的输入。 (`new UserMessage("用户的提问")`)
-        * `AssistantMessage`: 代表 AI 助手的回复。 (`new AssistantMessage("AI的回答")`)，通常是从 `ChatResponse` 中获取。
-        * `SystemMessage`: 用于给 AI 提供指令、上下文或设定其角色/行为。 (`new SystemMessage("你是一个乐于助人的天气预报机器人。")`)
-
-* **`ChatResponse`**:
-    * 封装了来自 AI 模型的响应。
-    * 主要方法：
-        * `getResult()`: 获取主要的 AI 回复消息 (`AssistantMessage`)。
-        * `getResults()`: 获取所有回复消息（通常只有一个，但接口设计上支持多个）。
-        * `getMetadata()`: 获取响应的元数据，可能包含 token 使用情况、结束原因等信息 (`ChatResponseMetadata`)。
-
-* **`ChatModel`**:
-    * 这是一个比 `ChatClient` **更低层级**的接口，直接代表了与特定 AI 提供商的聊天 API 的交互。
-    * `ChatClient` 通常内部会使用一个 `ChatModel` 的实现。
-    * 对于大多数应用场景，直接使用 `ChatClient` 已经足够且更方便。只有在需要更精细控制或实现特定高级功能时，才可能直接与 `ChatModel` 交互。
-
----
-
-
-### ChatClient
-
-Spring AI 中的 `ChatClient` 是一个高级接口，用于简化与 AI 聊天模型的交互。
-
-`ChatClient` 采用了 **Builder 模式** 和 **Fluent API** 设计，主要包含以下核心组件：
-
-1. **ChatClient 接口**：定义了创建请求的基本方法
-2. **Builder 接口**：用于配置默认参数和构建 ChatClient 实例
-3. **ChatClientRequestSpec 接口**：定义请求规范
-4. **CallResponseSpec/StreamResponseSpec**：处理同步/异步响应
-
-
-```java
-// 1. 创建基础客户端
-ChatClient client = ChatClient.create(chatModel);
-
-// 2. 使用Builder配置默认值
-ChatClient client = ChatClient.builder(chatModel)
-    .defaultSystem("你是一个有帮助的AI助手")
-    .defaultUser("请用中文回答")
-    .build();
-
-// 3. 发起请求并处理响应
-String response = client.prompt()
-    .user("解释一下量子计算")
-    .call()
-    .content();
-
-// 4. 流式响应
-Flux<String> stream = client.prompt()
-    .user("讲一个故事")
-    .stream()
-    .content();
-```
-
-**扩展点分析**:
-
-1. **Advisor 机制**：
-   - 通过 `Advisor` 接口实现请求/响应拦截
-   - 支持链式调用
-
-2. **结构化输出转换**：
-   - 支持通过 `StructuredOutputConverter` 转换响应
-   - 支持泛型类型引用 (`ParameterizedTypeReference`)
-
-3. **工具上下文**：
-   - 可通过 `defaultToolContext` 设置工具调用的共享上下文
-
-
-
-
-
-
----
 
 ### 接入代码示例
 
@@ -385,6 +292,259 @@ public class ChatController {
     */
 }
 ```
+
+---
+
+## 核心接口和类
+
+**核心交互接口**
+* **`ChatClient`**: 核心交互接口，提供与 AI 聊天模型交互的简化 API。通常包含同步和异步方法。
+
+* **`ChatModel`**: 比 `ChatClient` 更低层级的接口，直接与特定 AI 提供商的聊天 API 交互。
+
+
+**请求/响应相关**
+* **`Prompt`**: 封装发送给 AI 模型的输入，包含一个或多个 `Message` 对象。
+* **`Message`**: 表示对话中的一条消息，主要类型包括：
+  * `SystemMessage` - 系统指令消息
+  * `UserMessage` - 用户输入消息
+  * `AssistantMessage` - AI 助手回复消息
+  * `FunctionMessage` - 函数调用相关消息
+* **`ChatResponse`**: 封装来自 AI 模型的响应，包含返回的 `Message` 和元数据。
+* **`PromptTemplate`**: 用于动态生成 `Prompt` 的模板工具。
+
+**函数调用相关**
+* **`FunctionCallback`**: 定义 AI 模型请求调用函数时的处理逻辑。
+* **`FunctionCallbackRegistry`**: 管理注册的 `FunctionCallback` 实例。
+
+**高级功能**
+* **`Advisor`**: 提供建议和指导的接口，可用于构建 AI 辅助决策系统。
+* **`Retriever`**: 信息检索接口，用于从数据源获取相关信息。
+* **`DocumentReader`**: 文档内容读取和解析接口。
+* **`EmbeddingClient`**: 处理文本嵌入向量的生成和操作。
+* **`VectorStore`**: 向量存储和检索接口。
+
+**配置与上下文**
+* **`AiContext`**: 维护 AI 交互的上下文信息。
+* **`AiClientConfig`**: 配置 AI 客户端的基础设置。
+* **`AiTemplate`**: 提供高级封装的操作模板类。
+
+**异常类**
+* **`AiClientException`**: AI 客户端操作的基础异常。
+* **`AiRateLimitException`**: 速率限制异常。
+* **`AiServiceException`**: 服务调用异常。
+
+
+
+
+---
+
+
+### ChatClient
+
+Spring AI 中的 `ChatClient` 是一个高级接口，用于简化与 AI 聊天模型的交互。
+
+`ChatClient` 采用了 **Builder 模式** 和 **Fluent API** 设计，主要包含以下核心组件：
+
+1. **ChatClient 接口**：定义了创建请求的基本方法
+2. **Builder 接口**：用于配置默认参数和构建 ChatClient 实例
+3. **ChatClientRequestSpec 接口**：定义请求规范
+4. **CallResponseSpec/StreamResponseSpec**：处理同步/异步响应
+
+
+```java
+// 1. 创建基础客户端
+ChatClient client = ChatClient.create(chatModel);
+
+// 2. 使用Builder配置默认值
+ChatClient client = ChatClient.builder(chatModel)
+    .defaultSystem("你是一个有帮助的AI助手")
+    .defaultUser("请用中文回答")
+    .build();
+```
+
+**ChatClient 链式调用示例**：
+
+```java
+// 构建复杂对话
+String analysis = client.prompt("分析当前市场趋势")
+                  .system("你是一个资深市场分析师")
+                  .user("帮我分析2024年的整体市场情况")
+                  .call()
+                  .content();
+```
+
+| 方法名          | 作用描述                                                                                 |
+|-----------------|------------------------------------------------------------------------------------------|
+| `prompt(String)`| 设置聊天请求的提示词（prompt），用于指导模型生成特定内容。                                |
+| `system(String)`| 定义系统角色，指定模型在响应中扮演的角色（如“资深市场分析师”）。                         |
+| `user(String)`  | 设置用户输入的内容，即具体的请求或问题（如“帮我分析2024年的整体市场情况”）。              |
+| <span style="color:red; font-weight:bold">`call()`</span>       | 返回一个 `CallResponseSpec` 对象，用于进一步处理请求（未立即触发模型调用）。              |
+| <span style="color:red; font-weight:bold">`content()`</span>    | 在 `CallResponseSpec` 中实际触发模型调用，发送请求并获取返回的响应内容作为最终结果返回。  |
+
+
+
+
+
+
+
+
+
+---
+
+
+### Advisors
+
+Spring AI 的 [**Advisors API**](https://docs.spring.io/spring-ai/reference/1.0/api/advisors.html) 提供了一种灵活的机制，用于拦截、修改和增强 AI 驱动的交互。
+
+---
+
+::: tip 什么是 Advisors
+Advisors 本质上是一系列可插拔的拦截器，可以在调用 AI 模型之前或之后执行额外的逻辑，常用于：
+1. **请求前处理**：在将请求发送给 AI 模型之前修改提示词（如重新措辞或校验安全性）。
+2. **响应后处理**：对 AI 模型的响应进行处理（如记录日志或提取关键信息）。
+:::
+
+**执行顺序**：Advisors 按照 `getOrder()` 方法的返回值确定执行顺序：值越小，优先级越高。
+
+
+---
+
+Advisors 可以在以下两个阶段创建：
+1. **框架初始化阶段**：在 `ChatClient` 构建器中配置默认 Advisors：
+     ```java
+     var chatClient = ChatClient.builder(chatModel)
+         .defaultAdvisors(
+             new MessageChatMemoryAdvisor(chatMemory), // 维护对话上下文的拦截器
+             new QuestionAnswerAdvisor(vectorStore)    // 实现 RAG 的拦截器
+         )
+         .build();
+     ```
+
+2. **运行时动态添加**：在运行时动态添加或配置 Advisors：
+     ```java
+     String response = chatClient.prompt()
+         .advisors(advisor -> advisor.param("chat_memory_conversation_id", "123"))
+         .call()
+         .content();
+     ```
+
+::: important 自定义 Advisor 
+1. **实现以下接口之一或同时实现两者（更建议同时实现）**：
+- CallAroundAdvisor：用于处理同步请求和响应（非流式）
+- StreamAroundAdvisor：用于处理流式请求和响应
+```java
+public class MyCustomAdvisor implements CallAroundAdvisor, StreamAroundAdvisor {
+    // 实现方法...
+}
+```
+2. **实现核心方法（aroundCall & aroundStream）**
+- 对于非流式处理 (CallAroundAdvisor)，实现 aroundCall 方法
+- 对于流式处理 (StreamAroundAdvisor)，实现 aroundStream 方法
+
+3. **设置执行顺序和唯一名称（标识符）**
+- 通过实现getOrder()方法指定 Advisor 在链中的执行顺序。值越小优先级越高，越先执行
+- 通过getName()方法为每个 Advisor 提供一个唯一标识符
+:::
+
+
+Spring AI 内置了一些Advisor，如： 
+- SimpleLoggerAdvisor 日志拦截器（以 Debug 级别输出日志）
+- Re-Reading Advisor（重读）：通过让模型重新阅读问题来提高推理能力
+
+下面是一个简单的示例，展示如何创建一个自定义的 Advisor：
+
+```java
+public class LoggerAdvisor implements CallAroundAdvisor, StreamAroundAdvisor {
+
+    public static final Function<AdvisedRequest, String> DEFAULT_REQUEST_TO_STRING = Record::toString;
+    public static final Function<ChatResponse, String> DEFAULT_RESPONSE_TO_STRING = ModelOptionsUtils::toJsonString;
+
+    private static final Logger logger = LoggerFactory.getLogger(top.ventix.aiagent.advisors.LoggerAdvisor.class);
+
+    private final Function<AdvisedRequest, String> requestToString;
+
+    private final Function<ChatResponse, String> responseToString;
+
+    private final int order;
+
+    public LoggerAdvisor() {
+        this(DEFAULT_REQUEST_TO_STRING, DEFAULT_RESPONSE_TO_STRING, 0);
+    }
+
+    public LoggerAdvisor(int order) {
+        this(DEFAULT_REQUEST_TO_STRING, DEFAULT_RESPONSE_TO_STRING, order);
+    }
+
+    public LoggerAdvisor(Function<AdvisedRequest, String> requestToString, Function<ChatResponse, String> responseToString, int order) {
+        this.requestToString = requestToString;
+        this.responseToString = responseToString;
+        this.order = order;
+    }
+
+    @Override
+    public String getName() {
+        return this.getClass().getSimpleName();
+    }
+
+    @Override
+    public int getOrder() {
+        return this.order;
+    }
+
+    private AdvisedRequest before(AdvisedRequest request) {
+        logger.info("request: {}", this.requestToString.apply(request));
+        return request;
+    }
+
+    private void observeAfter(AdvisedResponse advisedResponse) {
+        logger.info("response: {}", this.responseToString.apply(advisedResponse.response()));
+    }
+
+    @Override
+    public String toString() {
+        return top.ventix.aiagent.advisors.LoggerAdvisor.class.getSimpleName();
+    }
+
+    @Override
+    public AdvisedResponse aroundCall(AdvisedRequest advisedRequest, CallAroundAdvisorChain chain) {
+
+        advisedRequest = before(advisedRequest);
+
+        AdvisedResponse advisedResponse = chain.nextAroundCall(advisedRequest);
+
+        observeAfter(advisedResponse);
+
+        return advisedResponse;
+    }
+
+    @Override
+    public Flux<AdvisedResponse> aroundStream(AdvisedRequest advisedRequest, StreamAroundAdvisorChain chain) {
+
+        advisedRequest = before(advisedRequest);
+
+        Flux<AdvisedResponse> advisedResponses = chain.nextAroundStream(advisedRequest);
+
+        return new MessageAggregator().aggregateAdvisedResponse(advisedResponses, this::observeAfter);
+    }
+}
+```
+
+
+
+---
+
+
+### ChatMemory
+
+Spring AI 的对话记忆实现非常巧妙，解耦了“存储” 和 “记忆算法”，使得我们可以单独修改 ChatMemory 存储来改变对话记忆的保存位置，而无需修改保存对话记忆的流程。
+
+
+
+
+
+
+
 
 
 
