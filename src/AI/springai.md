@@ -539,15 +539,187 @@ public class LoggerAdvisor implements CallAroundAdvisor, StreamAroundAdvisor {
 
 Spring AI 的对话记忆实现非常巧妙，解耦了“存储” 和 “记忆算法”，使得我们可以单独修改 ChatMemory 存储来改变对话记忆的保存位置，而无需修改保存对话记忆的流程。
 
+::: info ChatMemoryAdvisor
+想要实现对话记忆功能，可以使用 Spring AI 的 ChatMemoryAdvisor，它主要有几种内置的实现方式：
+- MessageChatMemoryAdvisor：将对话历史作为一系列独立的消息添加到提示中，保留原始对话的完整结构
+- PromptChatMemoryAdvisor：将对话历史添加到提示词的系统文本部分，因此可能会失去原始的消息边界
+- VectorStoreChatMemoryAdvisor：可以用向量数据库来存储检索历史对话
+
+一般情况下，更建议使用 MessageChatMemoryAdvisor。更符合大多数现代 LLM 的对话模型设计，能更好地保持上下文连贯性
+:::
+
+ ChatMemoryAdvisor 都依赖 Chat Memory 进行构造，Chat Memory 负责历史对话的存储，定义了保存消息、查询消息、清空消息历史的方法
+
+Spring AI 内置了几种 Chat Memory，可以将对话保存到不同的数据源中，比如：
+- InMemoryChatMemory：内存存储
+- CassandraChatMemory：在 Cassandra 中带有过期时间的持久化存储
+- Neo4jChatMemory：在 Neo4j 中没有过期时间限制的持久化存储
+- JdbcChatMemory：在 JDBC 中没有过期时间限制的持久化存储
+
+下面将自定义一个 Chat Memory，将对话保存到 Redis 中：
+
+```java
+@Component
+public class RedisChatMemory implements ChatMemory {
+
+    @Autowired
+    private RedisTemplate<String, byte[]> byteArrayRedisTemplate;
+    private static final Kryo kryo = new Kryo();
+    
+    static {
+        kryo.setRegistrationRequired(false);
+        // 设置实例化策略
+        kryo.setInstantiatorStrategy(new StdInstantiatorStrategy());
+    }
+
+    @Override
+    public void add(String conversationId, List<Message> messages) {
+        List<Message> conversationMessages = getOrCreateConversation(conversationId);
+        conversationMessages.addAll(messages);
+        saveConversation(conversationId, conversationMessages);
+    }
+
+    @Override
+    public List<Message> get(String conversationId, int lastN) {
+        List<Message> allMessages = getOrCreateConversation(conversationId);
+        return allMessages.stream()
+                .skip(Math.max(0, allMessages.size() - lastN))
+                .toList();
+    }
+
+    @Override
+    public void clear(String conversationId) {
+        byteArrayRedisTemplate.delete(conversationId);
+    }
+
+    private List<Message> getOrCreateConversation(String conversationId) {
+        byte[] rawBytes = byteArrayRedisTemplate.opsForValue().get(conversationId);
+        if (rawBytes != null && rawBytes.length > 0) {
+            try (Input input = new Input(new ByteArrayInputStream(rawBytes))) {
+                return kryo.readObject(input, ArrayList.class);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        return new ArrayList<>();
+    }
+
+    private void saveConversation(String conversationId, List<Message> messages) {
+        try (ByteArrayOutputStream bos = new ByteArrayOutputStream();
+             Output output = new Output(bos)) {
+            kryo.writeObject(output, messages);
+            output.flush();
+            byteArrayRedisTemplate.opsForValue().set(conversationId, bos.toByteArray());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+}
+```
+
+`RedisTemplate<String, byte[]>` 的配置如下：
+
+```java
+@Configuration
+public class RedisConfig {
+
+    @Bean
+    public RedisTemplate<String, byte[]> byteArrayRedisTemplate(RedisConnectionFactory redisConnectionFactory) {
+        RedisTemplate<String, byte[]> template = new RedisTemplate<>();
+        template.setConnectionFactory(redisConnectionFactory);
+        // Key使用String序列化器
+        template.setKeySerializer(new StringRedisSerializer());
+        template.setHashKeySerializer(new StringRedisSerializer());
+        // Value使用ByteArray序列化器
+        template.setValueSerializer(RedisSerializer.byteArray());
+        template.setHashValueSerializer(RedisSerializer.byteArray());
+
+        template.afterPropertiesSet(); // 初始化
+        return template;
+    }
+}
+```
+
+---
 
 
+### 结构化输出
+
+结构化输出转换器（[Structured Output Converter](https://docs.spring.io/spring-ai/reference/api/structured-output-converter.html)）是 Spring AI 提供的一种实用机制，用于将大语言模型返回的文本输出转换为结构化数据格式，如 JSON、XML 或 Java 类
+
+::: info 结构化输出转换器 工作流程
+- 调用前：转换器会在提示词后面附加格式指令，明确告诉模型应该生成何种结构的输出，引导模型生成符合指定格式的响应。
+
+- 调用后：转换器将模型的文本输出转换为结构化类型的实例，比如将原始文本映射为 JSON、XML 或特定的数据结构。
+
+StructuredOutputConverter 接口 集成了 2 个关键接口：
+```java
+public interface StructuredOutputConverter<T> extends Converter<String, T>, 
+                                                      FormatProvider {
+}
+```
+- `FormatProvider` 接口：提供特定的格式指令给 AI 模型
+- Spring 的 `Converter<String, T>` 接口：负责将模型的文本输出转换为指定的目标类型 T
+:::
+
+注意，结构化输出转换器只是 尽最大努力 将模型输出转换为结构化数据，AI 模型不保证一定按照要求返回结构化输出。
+
+有些模型可能无法理解提示词或无法按要求生成结构化输出。建议在程序中实现验证机制或者异常处理机制来确保模型输出符合预期。
+
+**使用示例**：
+```java
+@RestController
+@RequestMapping("/json")
+public class JsonController {
+    private final ChatClient chatClient;
+
+    public JsonController(ChatClient.Builder builder) {
+        this.chatClient = builder.build();
+    }
+
+    @GetMapping("/chat")
+    public String simpleChat(@RequestParam(value = "query", defaultValue = "请以JSON格式介绍你自己") String query) {
+        return chatClient.prompt(query).call().content();
+    }
 
 
+    record ActorsFilms(String actor, List<String> movies) {
+    }
 
+    @GetMapping("/chat-format")
+    public String simpleChatFormat(@RequestParam(value = "actor", defaultValue = "Tom Hanks") String actor) throws JsonProcessingException {
+        ActorsFilms actorsFilms = chatClient.prompt()
+                .user(u -> u.text("Generate the filmography of 5 movies for {actor}.")
+                        .param("actor", actor))
+                .call()
+                .entity(ActorsFilms.class);
+        ObjectMapper mapper = new ObjectMapper();
+        return mapper.writeValueAsString(actorsFilms);
+    }
+}
+```
 
+对于复杂数据结构，考虑使用 `ParameterizedTypeReference` ，例如：[MapOutputConverter](https://docs.spring.io/spring-ai/reference/api/structured-output-converter.html#_map_output_converter)
 
+::: important 结构化输出的实现原理
 
+1. 在调用大模型之前，`FormatProvider` 为 AI 模型提供特定的格式指令，使其能够生成可以通过 Converter 转换为指定目标类型的文本输出
+```java
+    StructuredOutputConverter outputConverter = ...
+    String userInputTemplate = """
+        ... user text input ....
+        {format}
+        """; // user input with a "format" placeholder.
+    Prompt prompt = new Prompt(
+       new PromptTemplate(
+			   this.userInputTemplate,
+          Map.of(..., "format", outputConverter.getFormat()) // replace the "format" placeholder with the converter's format.
+       ).createMessage());
+```
+通常使用 `PromptTemplate` 将格式指令附加到用户输入的末尾
 
+2. `Converter` 负责将模型的输出文本转换为指定类型的实例
+:::
 
 ---
 
