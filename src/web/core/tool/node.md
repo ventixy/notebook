@@ -5,9 +5,8 @@ title: Node和包管理
 
 ---
 
-## Node.js基础
+## Node.js基础简介
 
-### Node.js简介
 Node.js 是一个基于 Chrome V8 JavaScript 引擎构建的开源、跨平台的 JavaScript 运行环境。它允许在服务器端执行 JavaScript，使得开发者可以使用同一种语言编写前后端代码，Node.js 以其非阻塞 I/O 和事件驱动的架构而闻名，特别适合于构建高并发、高性能的实时应用、API 服务器、微服务、工具脚本等。
 
 **特点与优势**：
@@ -18,38 +17,9 @@ Node.js 是一个基于 Chrome V8 JavaScript 引擎构建的开源、跨平台�
 4. **跨平台**：Node.js可在多种操作系统上运行，包括Windows、Linux和macOS。
 5. **轻量级**：相比传统的Java、PHP等服务器端技术，Node.js启动速度快，资源消耗少。
 
+---
 
-### Node环境搭建
-#### 在 Windows 或 macOS 上安装
-
-1. **下载安装程序**：访问 Node.js 官方网站 [https://nodejs.org/](https://nodejs.org/)，根据你的操作系统下载对应的安装包。
-2. **安装**：双击下载的安装程序，跟随向导完成安装过程。通常情况下，安装程序会自动添加 Node.js 到系统的 PATH 环境变量中，使你能在命令行直接使用 `node` 和 `npm` 命令。
-
-除了基本的直接下载安装外，还可以借助 Nvm 管理多个 node 版本，参照：[NVM的安装和使用](/posts/blog/mac.md#node-js多版本管理)
-
-
-#### 在 Linux 上安装
-
-对于 Ubuntu 或 Debian 系统，可以使用 apt 包管理器安装，对于 CentOS 或 RHEL，则使用 yum 或 dnf：
-
-::: tabs#Linux
-
-@tab:active Ubuntu 或 Debian
-```bash
-sudo apt update
-sudo apt install nodejs npm
-```
-
-@tab CentOS 或 RHEL
-```bash
-sudo yum install nodejs npm
-# 或者对于较新的 CentOS/RHEL 使用 dnf
-sudo dnf install nodejs npm
-```
-:::
-
-
-#### 使用 Node.js运行 JavaScript 文件
+### 运行JavaScript文件
 
 1. **创建文件**：用文本编辑器创建一个名为 `app.js` 的文件。
 2. **编写代码**：在 `app.js` 中输入简单的 JavaScript 代码，例如：
@@ -83,7 +53,7 @@ Node.js的REPL使用：
 
 6. **退出REPL**：在Node.js的REPL中，输入`.exit`并回车，或者按下组合键`Ctrl+C`两次（在某些系统中），可以退出REPL环境。
 
-
+---
 
 
 
@@ -115,7 +85,63 @@ Node.js 的核心特性之一是其事件驱动的架构，这一模型主要依
 
 
 
-## Node包管理器
+
+
+
+
+---
+
+## Node及包管理器
+
+Node环境准备：一般而言直接下载安装Node.js即可
+
+- 在 Windows 或 macOS 上安装可访问 Node.js 官方网站 https://nodejs.org/，下载对应的安装包 安装即可。
+
+- Linux中则可以使用 `sudo apt install nodejs npm` 或 `sudo yum install nodejs npm` 安装。
+
+但是实际开发中通常会使用到不同版本的Node.js，因此需要一个包管理器来管理不同版本的Node.js和它们的包。
+
+
+### Node版本管理
+
+1.  **管理不同版本的 Node.js :**
+    *   **`nvm` (Node Version Manager):** 这是最流行和广泛使用的 Node.js 版本管理工具。它允许你在同一台机器上安装和切换多个 Node.js 版本。它是基于 shell 的。
+      ::: tip NVM 
+      nvm-windows的下载地址：https://github.com/coreybutler/nvm-windows/releases
+
+      在 nvm 的安装路径下(使用`nvm root`查看)，找到 `settings.txt`，在后面加上这两行，设置国内淘宝镜像源：
+      ```bash
+      node_mirror: https://npmmirror.com/mirrors/node/
+      npm_mirror: https://npmmirror.com/mirrors/npm/
+      ```
+
+      nvm-windows的相关命令参照：https://nvm.uihtm.com/
+      更详细的安装和使用介绍：https://www.cnblogs.com/rnny/p/17839190.html
+      :::
+    *   **`n`:** 另一个流行的 Node.js 版本管理器，功能上比 `nvm` 简单一些。
+    *   **`fnm` (Fast Node Manager):** 一个用 Rust 编写的更现代、更快速的 Node.js 版本管理器，跨平台支持良好，启动速度快。
+    *   **[`Volta`](https://docs.volta.sh/guide/getting-started):** 也是用 Rust 编写，它不仅仅管理 Node.js 版本，还可以管理项目使用的包管理器版本（如 `npm`, `yarn`, `pnpm`）。Volta 的一个核心特性是项目级的工具链固定（pinning），确保团队成员和 CI/CD 环境使用完全一致的 Node.js 和包管理器版本。
+
+2.  **统一管理依赖缓存:**
+    *   **`pnpm`:**  统一存储 (Content-addressable store),`pnpm` 将所有项目的依赖项下载到一个全局的、内容可寻址的存储区（通常在 `~/.pnpm-store`）。
+        *   **硬链接/符号链接:** 当你在项目中安装依赖时，`pnpm` 不会像 `npm` 或 `yarn` (classic) 那样在每个项目的 `node_modules` 文件夹中复制文件。相反，它会从全局存储区创建到项目 `node_modules` 目录的硬链接（如果文件系统支持且在同一驱动器）或符号链接。
+        *   **磁盘空间节省:** 这意味着不同项目如果依赖相同版本的包，它们会共享磁盘上的同一份文件，极大地节省了磁盘空间。
+        *   **安装速度快:** 由于很多包可能已经存在于全局存储中，后续安装会非常快。
+        *   **确定性的 `node_modules` 结构:** `pnpm` 创建的 `node_modules` 结构是扁平但非提升的（non-hoisted by default），这意味着你的代码只能直接访问 `package.json` 中明确声明的依赖，有助于避免“幽灵依赖”问题。
+    *   **`yarn` (Berry - v2+):** Yarn 的现代版本 (v2 及更高版本) 引入了 Plug'n'Play (PnP) 技术，它完全改变了 `node_modules` 的工作方式，通过 `.pnp.cjs` 文件直接映射依赖，可以实现极快的安装和启动速度，并且也避免了传统 `node_modules` 的许多问题。它的缓存机制也得到了优化。
+
+**`pnpm`** 由于其架构设计，在安装、更新依赖方面通常比 `npm` 和 `yarn` (classic) 更快。
+
+
+::: info 总结
+*   **对于 Node.js 版本管理：** 考虑 `Volta` (因其项目固定特性) 或 `fnm` (推荐，因其速度和简洁性)。
+*   **对于统一依赖缓存和高效包管理：** 强烈推荐 `pnpm`。
+:::
+
+通过 `Volta` + `pnpm` 或 `fnm` + `pnpm` 的组合，你可以在 Node.js 生态中获得与 python中 `uv` 相似的核心优势：高效的版本管理和卓越的依赖缓存/管理体验。
+
+---
+
 ### npm
 npm（Node Package Manager） 是随 Node.js 一起安装的包管理器，它让开发者能够轻松地安装、管理和共享 Node.js 应用程序及其依赖关系。npm 提供了一个巨大的公开注册表，其中包含数百万个开源软件包，这些软件包可以通过简单的命令行操作进行安装和管理。
 
@@ -125,20 +151,6 @@ npm（Node Package Manager） 是随 Node.js 一起安装的包管理器，它�
 3. **脚本执行**：支持定义和执行自定义脚本，便于自动化构建、测试和部署任务。
 4. **版本控制**：支持语义化版本控制，方便管理包的不同版本以及升级。
 5. **全球镜像**：除了官方源，还有众多地区性镜像源可用，比如淘宝 NPM 镜像，可提高下载速度。
-
-
-::: tip NVM 
-nvm-windows的下载地址：https://github.com/coreybutler/nvm-windows/releases
-
-在 nvm 的安装路径下(使用`nvm root`查看)，找到 `settings.txt`，在后面加上这两行，设置国内淘宝镜像源：
-```bash
-node_mirror: https://npmmirror.com/mirrors/node/
-npm_mirror: https://npmmirror.com/mirrors/npm/
-```
-
-nvm-windows的相关命令参照：https://nvm.uihtm.com/
-更详细的安装和使用介绍：https://www.cnblogs.com/rnny/p/17839190.html
-:::
 
 由于 Node.js 安装时会自动包含 npm，所以安装 Node.js 即安装了 npm。不过，有时候你可能需要更新 npm 到最新版本：
 
@@ -211,7 +223,16 @@ npm install -g npm
 
 #### 卸载依赖
 
-- `npm uninstall <package>`: 卸载指定包，并从 `package.json` 中移除记录。
+`npm uninstall <package>`: 卸载或删除一个或多个包。
+  - 从项目的本地 `node_modules` 文件夹中移除指定的包。
+  - 同时从 `package.json` 的 `dependencies` 或 `devDependencies` 中移除指定的包。
+
+如果要移除全局安装的包，可以使用 `npm uninstall -g <package>`
+```bash
+npm rm -g pnpm         # npm uninstall 和 npm rm 作用相同
+```
+加上 `-g` 标志后，这些命令将应用于全局安装的包，即从整个系统范围内的全局位置移除指定的包
+
 
 #### 查看依赖
 
@@ -244,7 +265,7 @@ npm install -g npm
 - `npm search <keyword>`: 搜索 npm 仓库中的包。
 
 
-### npm create
+::: info npm create
 
 `npm create` 是一个便捷的命令，它允许用户快速初始化一个新的项目，基于已存在的模板或包。这个命令是在npm的一个较新版本中引入的，旨在简化项目创建流程，特别是对于那些频繁使用特定模板或框架的开发者。
 
@@ -275,6 +296,9 @@ npm create react-app my-react-app
 ```
 `npm create react-app my-app` 会寻找 `create-react-app` 包 并使用它来创建一个新的 React 应用
 
+:::
+
+---
 
 ### npx
 
@@ -296,15 +320,43 @@ npx 与 npm 的关系紧密，可以视作 npm 的一部分或扩展功能。它
 
 
 ### pnpm
-pnpm 是一种快速且高效的 Node.js 包管理器，它通过利用硬链接和归档文件来显著减少磁盘空间占用和提高安装速度。
 
-**安装**: pnpm 可以通过 npm 安装为全局包：
+pnpm 是一种快速且高效的 Node.js 包管理器，它通过一个全局的、内容可寻址的存储来统一管理所有依赖的实际文件，并在项目中通过硬链接和符号链接来构建 node_modules 目录，从而显著减少磁盘空间占用和提高安装速度
+
+pnpm 的核心机制是 内容可寻址存储 (content-addressable store) 和 符号链接 (symlinks)（以及硬链接）
+
+
+::: info pnpm的安装方式
+
+参照文档：https://pnpm.io/zh/installation
+
+#### 1. 通过独立脚本或系统包管理器安装
+
+通过独立脚本或系统包管理器（Homebrew, Scoop）安装的，通常会安装一个与 Node 版本无关的独立 pnpm。这个 pnpm 可以用于管理任何 Node 版本（由 nvm 切换）的项目。
+
+```bash
+# Windows ，注意安装后需要重启命令行
+Invoke-WebRequest https://get.pnpm.io/install.ps1 -UseBasicParsing | Invoke-Expression
+# 默认安装在：C:\Users\admin\AppData\Local\pnpm
+
+# macOS/Linux
+curl -fsSL https://get.pnpm.io/install.sh | sh -
+```
+
+
+#### 2. 通过 npm 安装为全局包：
+
 ```bash
 npm install -g pnpm
+```
+如果 pnpm 是通过 `npm install -g pnpm` 安装的，那么它会安装到当前 nvm 激活的 Node 版本的全局包路径下。切换 Node 版本后，如果新版本没有全局安装过 pnpm，就需要重新安装。这种情况下，每个 Node 版本可以有其独立的 pnpm。
 
+#### pnpm常见配置
+
+```bash
 # 设置 .pnpm-store 目录的位置
 pnpm config set store-dir "D:\Develop\.pnpm-store"
-setx PNPM_STORE "D:\Develop\.pnpm-store" /M
+setx PNPM_STORE_PATH "D:\Develop\.pnpm-store" /M
 ```
 
 pnpm 使用 npm 配置文件（`.npmrc`）来指定下载源，格式与 npm 相同。
@@ -313,15 +365,23 @@ pnpm 使用 npm 配置文件（`.npmrc`）来指定下载源，格式与 npm 相
 ```bash
 pnpm config list
 ```
+:::
+
+
+- 所有通过 nvm 管理的 Node.js 版本共享一个全局的 `.npmrc` 文件，因此在此文件中设置的下载源适用于所有版本的 pnpm。每个项目可以有自己独立的 `.npmrc` 文件，覆盖全局设置，这种配置是隔离的，不随 Node.js 版本变化。
+- 通过环境变量（如 `NPM_CONFIG_REGISTRY`）设置的下载源也会影响所有 Node.js 版本下的 pnpm。
+
 
 pnpm 除了使用 `.npmrc` 外，还可以使用 `.pnpmfile.cjs` 进行更高级的配置，比如自定义生命周期脚本。
 
 <br/>
 
-**pnpm常见命令的使用**：
+---
+
+::: info pnpm常见命令的使用
 
 - **清理缓存**：`pnpm cache clean` 或 `pnpm cache clear`
-- **查看版本**：`pnpm -v` 或 `pnpm version`
+- **查看版本**：`pnpm -v` 或 `pnpm --version`
 
 #### 初始化项目
 
@@ -329,17 +389,14 @@ pnpm 除了使用 `.npmrc` 外，还可以使用 `.pnpmfile.cjs` 进行更高级
 
 ```bash
 pnpm init
-```
 
-在交互式提示中填写项目信息，或者使用 `-y` 参数跳过提示，接受默认设置：
-
-```bash
+# 在交互式提示中填写项目信息，或者使用 `-y` 参数跳过提示，接受默认设置
 pnpm init -y
 ```
 
 #### 安装依赖
 
-安装项目所需的依赖。`pnpm install` 会安装 `package.json` 文件中列出的所有依赖，同时也会读取 `package-lock.json` 或 `pnpm-lock.yaml` 文件来保证依赖的精确版本安装：
+`pnpm install` (或别名 `pnpm i`) 会安装 `package.json` 文件中列出的所有依赖，并主要依据 `pnpm-lock.yaml` 文件来保证依赖的精确版本安装。如果 `pnpm-lock.yaml` 不存在但项目中有 `package-lock.json` 或 `yarn.lock，pnpm` 会尝试自动导入
 
 ```bash
 pnpm install
@@ -348,28 +405,27 @@ pnpm install
 安装单个依赖包，并将其添加到 `dependencies` 或 `devDependencies`：
 
 ```bash
+# 添加到 dependencies (默认行为，等同于 pnpm add -P <package-name>)
 pnpm add <package-name>
+
+# 添加到 devDependencies
+pnpm add -D <package-name>    # 或 pnpm add --save-dev <package-name>
+
+# 添加到 optionalDependencies
+pnpm add -O <package-name>    # 或 pnpm add --save-optional <package-name>
 ```
 
-安装依赖到开发环境（即添加到 `devDependencies`）：
-
-```bash
-pnpm add --save-dev <package-name>
-```
 
 #### 更新依赖
 
-更新所有依赖到最新兼容版本：
-
 ```bash
+# 更新所有依赖到最新兼容版本
 pnpm update
-```
 
-更新特定包到最新版本：
-
-```bash
+# 更新特定包到最新版本
 pnpm update <package-name>
 ```
+
 
 #### 卸载依赖
 
@@ -385,13 +441,12 @@ pnpm remove <package-name>
 
 ```bash
 pnpm ls
-```
 
-查看具体包的依赖树：
-
-```bash
+# 查看具体包的依赖树
 pnpm ls <package-name>
 ```
+
+
 
 #### 执行脚本
 
@@ -399,19 +454,17 @@ pnpm ls <package-name>
 
 ```bash
 pnpm run <script-name>
+
+# 或者对于大部分脚本，可以直接省略 `run`
+pnpm <script-name>
 ```
+:::
 
 pnpm 使用 `pnpm-lock.yaml` 文件来锁定依赖版本和描述依赖关系图，这与 npm 使用的 `package-lock.json` 类似，但格式和机制有所不同。
 
+---
 
-
-::: tip 在 nvm 多版本 Node.js 环境下的配置设置影响
-- **pnpm依赖于npm**: 在使用nvm切换版本后，如果对应版本下没有安装过pnpm，需要重新安装，每个node版本都对应一个独立的pnpm
-- **共享全局 .npmrc**：所有通过 nvm 管理的 Node.js 版本共享一个全局的 `.npmrc` 文件，因此在此文件中设置的下载源适用于所有版本的 pnpm。
-- **局部 .npmrc**：每个项目可以有自己独立的 `.npmrc` 文件，覆盖全局设置，这种配置是隔离的，不随 Node.js 版本变化。
-- **环境变量**：通过环境变量（如 `NPM_CONFIG_REGISTRY`）设置的下载源也会影响所有 Node.js 版本下的 pnpm。
-:::
-
+pnpm 与 npm 的异同和注意事项：
 
 ::: info npm与pnpm
 **npm与pnpm 的共同点**
@@ -433,10 +486,11 @@ pnpm 使用 `pnpm-lock.yaml` 文件来锁定依赖版本和描述依赖关系图
 3. **脚本和配置差异**：尽管很多 `npm` 的命令在 `pnpm` 中有类似的实现，但两个工具的配置文件和一些高级特性可能有所不同。混合使用可能导致某些配置或脚本行为不符合预期。
 
 4. **社区和维护问题**：当遇到问题时，混用两种包管理器可能使问题定位更加困难，因为社区和文档通常都是围绕单一工具的最佳实践来构建的。
-
-因此，最佳实践是为一个项目选择一个包管理工具并坚持使用它，以避免上述潜在问题。如果决定从 `npm` 迁移到 `pnpm`，应该彻底地进行迁移，并且团队成员应统一使用 `pnpm` 来进行依赖管理。如果项目中已经存在 `pnpm-lock.yaml`，那么应完全使用 `pnpm` 进行依赖安装和管理，避免同时使用 `npm` 安装或更新依赖。如果需要回退到 `npm`，则应清理 `pnpm` 特有的文件（如删除 `pnpm-lock.yaml` 和 `node_modules`），然后使用 `npm` 重新安装依赖。
 :::
 
+最佳实践是为一个项目选择一个包管理工具并坚持使用它，以避免上述潜在问题。如果决定从 `npm` 迁移到 `pnpm`，应该彻底地进行迁移，并且团队成员应统一使用 `pnpm` 来进行依赖管理。如果项目中已经存在 `pnpm-lock.yaml`，那么应完全使用 `pnpm` 进行依赖安装和管理，避免同时使用 `npm` 安装或更新依赖。如果需要回退到 `npm`，则应清理 `pnpm` 特有的文件（如删除 `pnpm-lock.yaml` 和 `node_modules`），然后使用 `npm` 重新安装依赖。
+
+---
 
 ### yarn
 
