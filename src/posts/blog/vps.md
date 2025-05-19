@@ -92,19 +92,30 @@ https://www.duyaoss.com/archives/57/
 
 ### 机场相关内容
 
+机场测速和常识参考 duyaoss： https://www.duyaoss.com
+
+便宜机场：
+
+- https://llgjc1.com/
+
+- https://taishan.pro/#/register?code=MzRdLMve
 
 
-duyaoss： https://www.duyaoss.com
+Github跑路机场项目：https://github.com/limbopro/Paolujichang
 
+
+::: info 免费节点
+clash免费节点：https://github.com/aiboboxx/clashfree
 
 免费节点来源：https://clashbk.github.io/
 
 https://github.com/aiboboxx/v2rayfree
+:::
 
 客户端（v2rayn）详细教程：https://v2rayn100.com/
 
 
-clash免费节点：https://github.com/aiboboxx/clashfree
+
 
 
 

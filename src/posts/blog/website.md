@@ -15,26 +15,31 @@ order: 25
 
 ## 域名
 
-
-获取免费域名参考: [B站教程-2024获取免费域名](https://www.bilibili.com/video/BV1by411B7Ko/?vd_source=34e9d5f274946b22d528c6b651cb13b1)
-
-- https://register.us.kg
-
-- https://www.cloudns.net
-
-身份信息生成：https://www.shenfendaquan.com/
-
-
-::: info 常见低价域名
-
 - Name Silo：https://www.namesilo.com/
+
+
+
+
+
+::: info 其他常见低价域名
+
+
 
 - NameCheap
 
 - Domain.com
 
+免费域名：
+
+- https://dash.domain.digitalplat.org
+
+- https://www.cloudns.net
+
 :::
 
+身份信息生成：https://www.shenfendaquan.com/
+
+---
 
 
 ## 基本信息
@@ -87,5 +92,6 @@ Cloudflare
 
 ## 免费数据库服务
 
-- supadata
-- neon
+- supadata：https://supabase.com
+
+- neon：https://neon.tech/
