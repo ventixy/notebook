@@ -68,6 +68,12 @@ yum install docker-ce-3:20.10.5-3.el7.x86_64 docker-ce-cli-3:20.10.5-3.el7.x86_6
 
 @tab Ubuntu
 参照 docker 官网安装教程：https://docs.docker.com/engine/install/ubuntu/ 
+
+Ubuntu通常不使用root用户，所以很多命令都需要加sudo来执行，为了方便使用docker命令，建议将当前用户加入docker用户组：
+```bash
+sudo usermod -aG docker $USER
+```
+执行命令后需要重启Ubuntu才能生效
 :::
 
 
@@ -84,28 +90,29 @@ sudo vim /etc/systemd/system/docker.service.d/http-proxy.conf
 
 # 添加下面内容（clash）
 [Service]
-Environment="HTTP_PROXY=http://192.168.248.54:7890"
-Environment="HTTPS_PROXY=http://192.168.248.54:7890"
+Environment="HTTP_PROXY=http://192.168.43.62:7897"
+Environment="HTTPS_PROXY=http://192.168.43.62:7897"
 Environment="NO_PROXY=localhost,127.0.0.1,192.168.0.0/16,172.17.16.0/20"
 
 # 重启Docker
-systemctl daemon-reload && systemctl restart docker
+sudo systemctl daemon-reload && sudo systemctl restart docker
 ```
 
 v2ray代理的添加：
 ```bash
-Environment="HTTP_PROXY=http://192.168.120.54:10808"
-Environment="HTTPS_PROXY=http://192.168.120.54:10808"
+Environment="HTTP_PROXY=http://192.168.43.62:10808"
+Environment="HTTPS_PROXY=http://192.168.43.62:10808"
 ```
 
 ---
 
 2. **在线配置镜像加速**（越来越难找到能用的了）:  [阿里云镜像加速说明](https://help.aliyun.com/zh/acr/user-guide/accelerate-the-pulls-of-docker-official-images)
 
-确保存在 `/etc/docker` 目录，若不存在先创建：`mkdir -p /etc/docker `
-
 ```bash
-tee /etc/docker/daemon.json <<-'EOF'
+# 确保存在 `/etc/docker` 目录，若不存在先创建：
+sudo mkdir -p /etc/docker && sudo touch /etc/docker/daemon.json
+
+sudo tee /etc/docker/daemon.json <<-'EOF'
 {
     "registry-mirrors": [
         "https://docker.m.daocloud.io",
@@ -118,7 +125,7 @@ EOF
 
 配置好后，重启Docker即可：
 ```bash
-systemctl daemon-reload && systemctl restart docker
+sudo systemctl daemon-reload && sudo systemctl restart docker
 ```
 
 镜像加速网站：[毫秒镜像](https://www.mliev.com/docs/1ms.run/config-mirror)，[public-image-mirror](https://github.com/DaoCloud/public-image-mirror)
@@ -156,6 +163,9 @@ EOF
 ```shell
 docker version
 docker info
+
+# 查看ocker使用的不同类型的资源所占用的空间
+docker system df
 
 docker xxx  --help     # 命令
 ```

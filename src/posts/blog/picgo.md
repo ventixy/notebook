@@ -10,6 +10,7 @@ tag:
   - Cloudflare
   - PicGo
   - 图床
+order: 15
 shortTitle: 免费图床搭建
 title: 免费图床搭建：Github+Cloudflare+PicGo
 ---

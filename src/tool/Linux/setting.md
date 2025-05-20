@@ -316,25 +316,33 @@ ps -ef | grep ssh
 
 Windows + Linux虚拟机的 代理设置：
 
-- 在Windows上装有`clash` 并开启代理，记住顶部的端口号 `7890`
-- `clash`开启`allow LAN`，注意绑定：`0.0.0.0`
+- 在Windows上装有`clash verge` 并开启代理，记住默认的端口号 `7897`或自己设置的端口号
+- `clash verge`开启`allow LAN` (老版本的clash 注意绑定：`0.0.0.0`，且默认端口号为 `7890`)
 
 若是 v2ray，则需要在参数设置中启用“允许来自局域网的连接”选项，且端口号为 `10808`
 
 ```bash
 可以通过设置以下环境变量来配置 HTTP 和 HTTPS 代理：
-export http_proxy=http://192.168.83.54:7890
-export https_proxy=http://192.168.83.54:7890
-export ftp_proxy=http://192.168.83.54:7890
+export http_proxy=http://192.168.43.62:7897
+export https_proxy=http://192.168.43.62:7897
+export ftp_proxy=http://192.168.43.62:7897
 
-export http_proxy=http://192.168.120.54:10808
-export https_proxy=http://192.168.120.54:10808
+export http_proxy=http://192.168.43.62:10808
+export https_proxy=http://192.168.43.62:10808
 
 # 取消代理设置，只需将这些变量设置为空或者直接删除它们：
 unset http_proxy
 unset https_proxy
 unset ftp_proxy
 ```
+
+若设置后无效，注意检查Windows防火墙设置，可用以下命令保证代理设置生效：
+```bash
+netsh advfirewall firewall add rule name="verge-mihomo" dir=in action=allow protocol=UDP localport=7897
+netsh advfirewall firewall add rule name="verge-mihomo" dir=in action=allow protocol=TCP localport=7897
+```
+
+---
 
 永久代理设置：将代理命令写入配置文件 `~/.profile` 或 `~/.bashrc` 或 `~/.zshrc` 中
 ```bash
