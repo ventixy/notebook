@@ -248,7 +248,11 @@ Github：https://github.com/astral-sh/uv
 使用 curl 下载脚本并通过 sh 执行：
 ```bash
 curl -LsSf https://astral.sh/uv/install.sh | sh
-```bash 
+```
+添加到环境变量：
+```bash
+echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.bashrc
+source ~/.bashrc
 
 @tab:active Windows
 使用 irm 下载脚本并通过 iex 执行：

@@ -342,6 +342,10 @@ Invoke-WebRequest https://get.pnpm.io/install.ps1 -UseBasicParsing | Invoke-Expr
 # macOS/Linux
 curl -fsSL https://get.pnpm.io/install.sh | sh -
 ```
+查看 pnpm 全局缓存位置：
+```bash
+pnpm store path
+```
 
 
 #### 2. 通过 npm 安装为全局包：

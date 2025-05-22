@@ -9,6 +9,7 @@ tag:
   - MySQL
 shortTitle: MySQL数据库
 title: MySQL数据库 | 起源和分支 | 应用架构演变
+order: 1
 ---
 
 

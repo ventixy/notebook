@@ -11,6 +11,7 @@ tag:
   - Locks
 shortTitle: MySQL事务和锁监控
 title: MySQL事务和锁监控 | 锁的范围 | 死锁分析
+order: 20
 ---
 
 ## MySQL事务和锁监控

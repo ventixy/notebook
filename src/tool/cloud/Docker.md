@@ -164,6 +164,10 @@ EOF
 docker version
 docker info
 
+# 列出所有运行中的容器的资源使用情况（CPU,内存）, 
+# 默认情况下，docker stats 会持续更新数据，加上--no-stream选项可以只获取一次数据然后退出
+docker stats --no-stream
+
 # 查看ocker使用的不同类型的资源所占用的空间
 docker system df
 
@@ -267,76 +271,196 @@ Retype new UNIX password:
 ```
 
 
-### Docker数据卷
+---
 
-Docker 数据卷（Volumes）是一种管理容器数据的机制，它允许你在宿主机和容器之间持久化数据、共享数据，并且可以独立于容器生命周期之外进行管理。数据卷提供了比直接在容器文件系统上存储数据更好的灵活性和控制力。
 
-- **持久性**：即使创建它的容器被删除，数据仍然存在。
-- **共享性**：可以在多个容器间共享数据。
-- **性能**：由于数据卷绕过了联合文件系统（UnionFS），因此具有更好的读写性能。
-- **隔离性**：每个数据卷都是相互独立的，一个容器中的操作不会影响到其他容器的数据卷。
+### 数据持久化
+
+Docker 主要提供两种将数据持久化到宿主机的方式：
+
+1.  **命名卷 (Named Volumes)**:
+    *   **特点**: 由 Docker 创建和管理，并赋予一个明确的名称。存储在宿主机文件系统的一个特定区域（通常是 `/var/lib/docker/volumes/` 在 Linux 上），但其具体位置对用户是透明的。
+    *   **核心用途**: **推荐用于持久化由容器内部进程管理和写入的数据，如数据库文件、应用程序生成的日志、用户上传内容等。**
+    *   **优点**: Docker 管理、可移植性高、通常性能更好（尤其在 macOS/Windows）、权限处理相对简单。
+
+2.  **绑定挂载 (Bind Mounts)**:
+    *   **特点**: 将宿主机上的一个现有文件或目录直接映射到容器内的一个路径。用户完全控制宿主机上的路径。
+    *   **核心用途**: **推荐用于将宿主机上的配置文件、源代码（尤其是在开发环境）、或特定的工具/证书等由宿主机直接管理和编辑的内容提供给容器。**
+    *   **缺点**: 强依赖宿主机目录结构、权限问题（UID/GID不匹配）常见且处理复杂、在 macOS/Windows 上性能可能较低。
+
+**选择原则总结:**
+
+| 特性         | 命名卷 (Named Volumes)                               | 绑定挂载 (Bind Mounts)                                 |
+| :----------- | :--------------------------------------------------- | :----------------------------------------------------- |
+| **管理方**   | Docker                                               | 用户/宿主机                                            |
+| **位置**     | Docker 管理的特定区域 (对用户透明)                     | 用户指定的宿主机绝对路径                               |
+| **主要用途** | **应用数据 (数据库, 日志, 上传文件)**                  | **配置文件, 源代码, 宿主机工具/文件**                  |
+| **可移植性** | 高                                                   | 低 (依赖宿主机路径)                                    |
+| **权限处理** | Docker 通常处理较好                                    | **复杂，易出错，需手动匹配 UID/GID**                   |
+
+---
+
+### Docker Volumes
+
+Docker 数据卷（Volumes）是一种管理容器数据的机制，它允许你在宿主机和容器之间持久化数据、共享数据，并且可以独立于容器生命周期之外进行管理。数据卷是 Docker 推荐的持久化数据的方式，提供了比直接在容器文件系统上存储数据或使用绑定挂载（Bind Mounts）更好的灵活性、性能和管理性。
+
+- **持久性**：即使创建它的容器被删除，数据仍然存在。这是数据卷的核心价值。
+- **共享性**：可以在多个运行中或停止的容器间安全地共享数据。
+- **性能**：由于数据卷绕过了容器的可写层（通常是联合文件系统 UnionFS），直接在宿主机文件系统上进行操作，因此具有更好的读写性能，尤其是在写密集型应用中。
+- **隔离性**：每个数据卷都是相互独立的，一个容器中的操作不会影响到其他容器的数据卷（除非明确共享）。
+- **Docker 管理**: 由 Docker CLI 或 API 进行管理，方便创建、列出、检查、删除和备份。
+- **驱动支持**: 数据卷可以使用不同的驱动程序，允许将数据存储在远程主机或云存储上。
 
 ---
 
 **常用命令**
 
 ```bash
-docker volume ls           # 列出所有的数据卷
-docker volume inspect xxx  # 查看数据卷的详细信息（包括所在位置,即挂载点Mountpoint）
+# 列出所有的数据卷
+docker volume ls
 
-docker volume create xxx   # 创建数据卷
+# 查看数据卷的详细信息（包括所在位置,即挂载点Mountpoint）
+docker volume inspect <volume_name>
 
-docker volume prune        # 删除所有的未使用的数据卷
-docker volume rm xxx       # 删除指定的数据卷
+# 创建一个命名数据卷
+docker volume create <volume_name>
+
+# 删除所有未使用（未被任何容器挂载）的数据卷 (谨慎操作!)
+docker volume prune
+
+# 删除一个或多个指定的数据卷 (如果数据卷正被容器使用，则无法删除)
+docker volume rm <volume_name_1> <volume_name_2>
 ```
-默认情况下，Docker 数据卷会被创建在 `/var/lib/docker/volumes/` 目录下。例如，你创建了一个名为 myvolume 的数据卷，那么它通常会被存储在 `/var/lib/docker/volumes/myvolume/_data` 路径中
+默认情况下，Docker 数据卷会被创建在宿主机的特定目录下，例如在 Linux 系统上通常是 `/var/lib/docker/volumes/`。如果你创建了一个名为 `myvolume` 的数据卷，那么其实际数据通常会存储在 `/var/lib/docker/volumes/myvolume/_data` 路径中。
 
-1. **挂载数据卷到容器中**
-   在启动容器时使用 `-v` 或 `--mount` 参数来挂载数据卷。
-   ```bash
-   docker run -d -v myvolume:/app myimage
-   ```
-   或者使用更明确的语法：
-   ```bash
-   docker run -d --mount source=myvolume,target=/app myimage
-   ```
+---
 
-2. **备份数据卷**
-   可以通过运行一个临时容器来备份数据卷。
-   ```bash
-   docker run --rm -v myvolume:/data -v $(pwd):/backup busybox tar cvf /backup/backup.tar /data
-   ```
+**使用方法**
 
-3. **恢复数据卷**
-   同样地，可以通过另一个临时容器来恢复数据卷。
-   ```bash
-   docker run --rm -v myvolume:/data -v $(pwd):/backup busybox sh -c "cd /data && tar xvf /backup/backup.tar --strip 1"
-   ```
+1.  **挂载数据卷到容器中**
+    在启动容器时使用 `-v` 或更推荐的 `--mount` 参数来挂载数据卷。
+
+    *   **使用 `-v` (简写，适用于命名卷和绑定挂载):**
+        ```bash
+        # 挂载命名卷 'myvolume' 到容器的 '/app' 目录
+        docker run -d -v myvolume:/app myimage
+
+        # 绑定挂载宿主机的 '/host/path' 到容器的 '/container/path'
+        docker run -d -v /host/path:/container/path myimage
+        ```
+
+    *   **使用 `--mount` (更明确、更推荐的语法):**
+        ```bash
+        # 挂载命名卷 'myvolume' 到容器的 '/app' 目录
+        docker run -d --mount source=myvolume,target=/app myimage
+
+        # 绑定挂载宿主机的 '/host/path' 到容器的 '/container/path'
+        docker run -d --mount type=bind,source=/host/path,target=/container/path myimage
+
+        # 只读挂载 (适用于配置文件等)
+        docker run -d --mount type=bind,source=/host/config,target=/app/config,readonly myimage
+        # 或者使用 -v 的简写:
+        # docker run -d -v /host/config:/app/config:ro myimage
+        ```
+    `--mount` 语法更冗长但更清晰，特别是当需要指定卷驱动或挂载选项时。
+
+2.  **在 Dockerfile 中定义卷**
+    你可以在 Dockerfile 中使用 `VOLUME` 指令来指定一个或多个路径作为匿名卷或用于接收来自宿主机的挂载点。
+    ```dockerfile
+    FROM ubuntu
+    RUN mkdir /mydata
+    # 当容器启动时，如果 /mydata 没有被其他方式挂载，Docker 会为它创建一个匿名卷
+    # 如果启动时通过 -v 或 --mount 指定了 /mydata 的挂载，则会使用该挂载
+    VOLUME /mydata
+    ```
+    注意：Dockerfile 中的 `VOLUME` 指令创建的是匿名卷（如果运行时未指定命名卷或绑定挂载到该路径），或者它指示 Docker 在此路径挂载数据。对于持久化数据，**推荐在 `docker run` 或 `docker-compose.yml` 中明确使用命名卷**。
+
+3.  **备份数据卷**
+    可以通过运行一个临时容器，将目标数据卷挂载到该容器，并使用另一个卷（通常是绑定挂载到宿主机当前目录）作为备份目标。
+    ```bash
+    # 备份名为 'myvolume' 的数据卷到当前宿主机目录下的 backup.tar
+    docker run --rm \
+      -v myvolume:/data_to_backup \
+      -v $(pwd):/backup_destination \
+      busybox \
+      tar cvf /backup_destination/backup.tar /data_to_backup
+    ```
+    这里 `/data_to_backup` 是容器内数据卷的挂载点，`backup.tar` 是备份文件名，`busybox` 是一个轻量级镜像，包含了 `tar` 工具。
+
+4.  **恢复数据卷**
+    同样地，可以通过另一个临时容器来从备份文件恢复数据到目标数据卷。
+    ```bash
+    # 从当前宿主机目录的 backup.tar 恢复数据到名为 'myvolume_restored' 的数据卷
+    # (可以恢复到原卷，或新建一个卷进行恢复)
+    docker volume create myvolume_restored # 如果需要恢复到新卷
+    docker run --rm \
+      -v myvolume_restored:/data_to_restore \
+      -v $(pwd):/backup_source \
+      busybox \
+      sh -c "cd /data_to_restore && tar xvf /backup_source/backup.tar --strip 1"
+    ```
+    `--strip 1` (或根据你备份时的目录结构调整) 用于去除 `tar` 包中的顶层目录。
+
 ---
 
 **使用场景示例**
 
-1. **数据库持久化**
-   当运行一个数据库服务时，如 MySQL 或 PostgreSQL，你需要确保数据库文件保存在一个数据卷中，这样即使容器被删除或重新创建，数据也不会丢失。
-   ```bash
-   docker run -d --name db -v db_data:/var/lib/mysql mysql:latest
-   ```
+1.  **数据库持久化 (核心场景 - 使用命名卷)**
+    当运行一个数据库服务时，如 MySQL 或 PostgreSQL，你需要确保数据库文件保存在一个**命名数据卷**中，这样即使容器被删除或重新创建，数据也不会丢失。
+    ```bash
+    # 创建命名卷
+    docker volume create mysql_db_data
 
-2. **开发环境与生产环境分离**
-   开发人员可以将代码挂载到容器内的指定目录，这样修改代码后无需重建镜像即可看到效果。
-   ```bash
-   docker run -d -p 80:80 -v $(pwd):/usr/share/nginx/html nginx:latest
-   ```
+    # 运行 MySQL 容器，并将命名卷挂载到 MySQL 存储数据的默认路径
+    docker run -d \
+      --name my_mysql_db \
+      -e MYSQL_ROOT_PASSWORD=mysecretpassword \
+      --mount source=mysql_db_data,target=/var/lib/mysql \
+      mysql:8.0
+    ```
 
-3. **多容器间的共享数据**
-   如果你有多个容器需要访问相同的数据集，比如日志分析工具和应用服务器都需要访问相同的日志文件，可以使用数据卷实现共享。
-   ```bash
-   docker run -d --name app -v shared_logs:/var/log/myapp myapp:latest
-   docker run -d --name log_analyzer -v shared_logs:/var/log/myapp loganalyzer:latest
-   ```
+2.  **开发环境代码同步 (使用绑定挂载)**
+    开发人员可以将宿主机上的项目代码目录**绑定挂载**到容器内的应用工作目录，这样在宿主机修改代码后无需重建镜像即可在容器内看到效果，非常适合热重载或快速迭代。
+    ```bash
+    # 将宿主机当前目录下的 'my_project_src' 绑定挂载到容器的 '/app/src'
+    docker run -d -p 8080:80 \
+      --name dev_web_app \
+      --mount type=bind,source=$(pwd)/my_project_src,target=/app/src \
+      my_dev_image
+    ```
 
-4. **定期备份**
-   定期对重要数据卷进行备份是非常重要的。你可以设置定时任务（cron jobs）来自动执行备份脚本。
+3.  **配置文件管理 (使用绑定挂载，通常只读)**
+    将宿主机上的配置文件**绑定挂载**到容器内，方便修改配置而无需进入容器或重建镜像。
+    ```bash
+    # 将宿主机 '/etc/my_app/config.ini' 绑定挂载到容器 '/app/config/config.ini' (只读)
+    docker run -d \
+      --name configured_app \
+      --mount type=bind,source=/etc/my_app/config.ini,target=/app/config/config.ini,readonly \
+      my_app_image
+    ```
+
+4.  **多容器间的共享数据 (使用命名卷)**
+    如果你有多个容器需要访问并可能修改相同的数据集（例如，一个Web应用和一个后台处理任务都需要读写共享的缓存或文件），可以使用**命名数据卷**实现共享。
+    ```bash
+    docker volume create shared_app_data
+
+    docker run -d --name web_frontend \
+      --mount source=shared_app_data,target=/usr/share/data \
+      frontend_image
+
+    docker run -d --name backend_processor \
+      --mount source=shared_app_data,target=/mnt/shared_processing_data \
+      backend_image
+    ```
+    注意：当多个容器同时写入共享卷时，需要应用程序层面进行并发控制，避免数据损坏。
+
+5.  **定期备份 (结合命名卷和备份策略)**
+    定期对重要的**命名数据卷**进行备份是非常重要的。你可以设置定时任务（cron jobs）来自动执行上面提到的备份脚本。
+
+
+
+
+
 
 
 
