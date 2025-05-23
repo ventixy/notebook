@@ -358,29 +358,56 @@ alter user postgres with password '123456';
 
 ### Redis
 
+1. 下载镜像，准备好配置文件（直接下载Github文档中的对应版本配置文件）
+
 ```shell
-docker pull redis:7.4.1  # 下载镜像
+docker pull redis:8  # 下载镜像
 
-mkdir -p /docker/redis/redis7/{conf,data} 
+sudo mkdir -p /docker_data/redis/redis8
 
-touch /docker/redis/redis7/conf/redis.conf
+# 下载配置文件
+sudo wget https://raw.githubusercontent.com/redis/redis/8.0/redis.conf \
+    -O /docker_data/redis/redis8/redis.conf.backup
 
-# 配置（混合持久化）
-cat > /docker/redis/redis7/conf/redis.conf << EOF
-aof-use-rdb-preamble yes
-EOF
+# 去除掉配置文件中的大量注释
+sudo grep -vE '^[[:space:]]*#|^[[:space:]]*$' \
+    /docker_data/redis/redis8/redis.conf.backup \
+    | sudo tee /docker_data/redis/redis8/redis.conf > /dev/null
 ```
 
-创建实例并启动redis
+2. 创建实例并启动redis, 并使用 `Another Redis Desktop Manager` 连接
 
 ```bash
-docker run -p 6379:6379 --name redis --restart=always \
--v /docker/redis/redis7/conf/redis.conf:/etc/redis/redis.conf \
--v /docker/redis/redis7/data:/data \
--d redis redis-server /etc/redis/redis.conf
+docker run -p 6379:6379 --name redis8 --restart=always \
+-v /docker_data/redis/redis8/redis.conf:/etc/redis/redis.conf \
+-v redis8_data:/data \
+-d redis:8 \
+redis-server /etc/redis/redis.conf
 ```
+- **数据挂载**：`-v redis8_data:/data` 将容器内的`/data`目录映射到宿主机上的`redis8_data`命名卷
+- **配置文件挂载**：`-v /docker/redis/redis8/redis.conf:/etc/redis/redis.conf` 将宿主机上的 `redis.conf` 文件映射到容器内的 `/etc/redis/redis.conf`。
+- **指定配置文件**：`redis-server /etc/redis/redis.conf` 告诉 Redis 容器使用指定的配置文件启动。
 
-测试持久化配置是否生效
+::: tip 远程连接注意事项
+远程连接主要关注如下配置：
+```bash
+# bind 127.0.0.1 -::1
+protected-mode no
+```
+- bing: 指定允许哪些 IP 地址连接到 Redis 服务器, 这里注释掉了，允许所有IP地址连接
+- protected-mode: 保护模式，默认是yes，只允许本地连接，这里设置为no，允许远程连接
+
+当然以上只是本地环境中的配置，如果使用的是公网环境还需要配置密码，使用证书，限制IP地址等：
+```bash
+bind IP_ADDRESS
+protected-mode yes
+```
+并在启动redis时指定密码：`--requirepass yourpassword`
+
+生产环境中更加需要注意安全问题，可能还需要其他的措施
+:::
+
+3. 测试持久化配置是否生效
 
 ```bash
 docker exec -it redis redis-cli

@@ -318,11 +318,10 @@ Windows + Linux虚拟机的 代理设置：
 
 - 在Windows上装有`clash verge` 并开启代理，记住默认的端口号 `7897`或自己设置的端口号
 - `clash verge`开启`allow LAN` (老版本的clash 注意绑定：`0.0.0.0`，且默认端口号为 `7890`)
-
-若是 v2ray，则需要在参数设置中启用“允许来自局域网的连接”选项，且端口号为 `10808`
+- 若是 v2ray，则需要在参数设置中启用“允许来自局域网的连接”选项，且端口号为 `10808`
 
 ```bash
-可以通过设置以下环境变量来配置 HTTP 和 HTTPS 代理：
+# 为当前用户设置 `http_proxy` 和 `https_proxy` 环境变量
 export http_proxy=http://192.168.43.62:7897
 export https_proxy=http://192.168.43.62:7897
 export ftp_proxy=http://192.168.43.62:7897
@@ -335,6 +334,14 @@ unset http_proxy
 unset https_proxy
 unset ftp_proxy
 ```
+
+::: tip `sudo` 的环境变量处理机制
+
+当使用`wget`等命令时，如果在前面加了 `sudo` 命令可能代理不会生效：
+
+- `wget` 依赖环境变量（如 `http_proxy`）指定代理。当用 `sudo wget` 时，默认使用 root 的环境变量。
+- 需用 `sudo -E wget` 保留用户环境，或在 `sudo` 命令内显式声明代理，否则 `wget` 会尝试直接连接。
+:::
 
 若设置后无效，注意检查Windows防火墙设置，可用以下命令保证代理设置生效：
 ```bash
@@ -349,15 +356,16 @@ netsh advfirewall firewall add rule name="verge-mihomo" dir=in action=allow prot
 vim /etc/profile
 
 # 添加下面的内容
-export http_proxy=http://192.168.83.54:7890
-export https_proxy=http://192.168.83.54:7890
+export http_proxy=http://192.168.43.62:7897
+export https_proxy=http://192.168.43.62:7897
+export ftp_proxy=http://192.168.43.62:7897
 export no_proxy=localhost,127.0.0.1,192.168.0.0/16
 
 # source
 source /etc/profile
 ```
 
-注意：ping 使用的是 ICMP 协议，不支持代理。可以执行 `curl -vv https://www.google.com ` 看看有没有走代理。
+注意：ping 使用的是 ICMP 协议，不支持代理。可以执行 `curl -I https://www.google.com ` 看看有没有走代理。
 
 ::: important Kubernetes 和 Docker 代理设置
 Docker 配置代理，编辑代理配置文件：
@@ -367,8 +375,8 @@ sudo vim /etc/systemd/system/docker.service.d/http-proxy.conf
 
 # 添加下面内容
 [Service]
-Environment="HTTP_PROXY=http://192.168.83.54:7890"
-Environment="HTTPS_PROXY=http://192.168.83.54:7890"
+Environment="HTTP_PROXY=http://192.168.43.62:7897"
+Environment="HTTPS_PROXY=http://192.168.43.62:7897"
 Environment="NO_PROXY=localhost,127.0.0.1,192.168.0.0/16,172.17.16.0/20"
 
 # 重启Docker
@@ -379,16 +387,17 @@ systemctl daemon-reload && systemctl restart docker
 
 <br>
 
-Git 设置代理： 
+单独为 Git 设置代理： 
 ```bash
-git config --global http.proxy http://192.168.5.79:7890
-git config --global https.proxy http://192.168.5.79:7890
+git config --global http.proxy http://192.168.43.62:7897
+git config --global https.proxy http://192.168.43.62:7897
 
 # Git 取消代理设置：
 git config --global --unset http.proxy
 git config --global --unset https.proxy
 ```
-
+如果使用的是 SSH 协议的远端（例如 `git clone git@github.com:...`），那么 http_proxy 和 https_proxy 环境变量不会被使用。
+SSH 有其自己的代理机制，通常通过 `~/.ssh/config` 文件中的 ProxyCommand 或 ProxyJump 指令来配置（例如，通过 `nc` 或 `corkscrew` 工具将 SSH 流量隧道化通过 HTTP 代理）
 
 
 <br>
