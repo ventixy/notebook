@@ -15,6 +15,9 @@ shortTitle: 常用镜像安装
 ---
 
 
+## 常用开发环境搭建
+
+
 ### MySQL
 
 下面将演示使用 Docker 部署 MySQL 5.7 和 MySQL 8.4
@@ -670,3 +673,33 @@ portainer/agent
 然后在前面的管理界面添加环境即可
 
 ---
+
+
+
+
+
+
+## Docker常见应用部署
+
+
+### Alist
+
+GitHub: https://github.com/AlistGo/alist
+
+官方文档：https://alistgo.com/guide/install/docker.html
+
+```bash
+docker pull xhofe/alist:v3.45.0
+
+docker run -d --restart=unless-stopped --name="alist" \
+  -v alist_data:/opt/alist/data \
+  -p 5244:5244 -e PUID=0 -e PGID=0 -e UMASK=022 \
+  xhofe/alist:v3.45.0
+```
+
+获取管理员密码/设置密码：
+```bash
+docker exec -it alist ./alist admin set 123456
+```
+
+浏览器访问：http://192.168.43.236:5244
